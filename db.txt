@@ -1,0 +1,330 @@
+Table users {
+  id int [pk]
+  email varchar [unique]
+  password_hash varchar
+  name varchar
+  role int // 1: admin, 2: customer
+  status int // 0: inactive, 1: active, 2: banned
+  avatar varchar
+  phone varchar
+  created_at datetime
+  updated_at datetime
+}
+
+Table user_addresses {
+  id int [pk]
+  user_id int
+  receiver_name varchar
+  phone varchar
+  address text
+  ward varchar
+  district varchar
+  province varchar
+  is_default boolean
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: users.id < user_addresses.user_id
+
+Table categories {
+  id int [pk]
+  name varchar [unique]
+  image text
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table brands {
+  id int [pk]
+  name varchar [unique]
+  image text
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table products {
+  id int [pk]
+  name varchar
+  price decimal
+  oldprice decimal
+  image text
+  description text
+  specification text
+  quantity int // cache total stock from product_batches.remaining_quantity
+  sold_count int
+  status int // 0: hidden, 1: selling, 2: stop selling
+  unit varchar // kg, bunch, bag, box...
+  origin varchar
+  brand_id int
+  category_id int
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: categories.id < products.category_id
+Ref: brands.id < products.brand_id
+
+Table product_batches {
+  id int [pk]
+  product_id int
+  batch_code varchar [unique]
+  initial_quantity int
+  remaining_quantity int
+  harvest_date datetime
+  expiry_date datetime
+  origin varchar
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: products.id < product_batches.product_id
+
+Table product_images {
+  id int [pk]
+  product_id int
+  image text
+  sort_order int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: products.id < product_images.product_id
+
+Table feedback {
+  id int [pk]
+  product_id int
+  user_id int
+  order_detail_id int
+  star int
+  content text
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: products.id < feedback.product_id
+Ref: users.id < feedback.user_id
+Ref: order_details.id < feedback.order_detail_id
+
+Table carts {
+  id int [pk]
+  user_id int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: users.id < carts.user_id
+
+Table cart_items {
+  id int [pk]
+  cart_id int
+  product_id int
+  snapshot_name varchar
+  quantity int
+  price_at_add decimal
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: carts.id < cart_items.cart_id
+Ref: products.id < cart_items.product_id
+
+Table orders {
+  id int [pk]
+  user_id int
+  address_id int
+  status int // 0: pending, 1: confirmed, 2: shipping, 3: completed, 4: cancelled
+  note text
+  subtotal decimal
+  shipping_fee decimal
+  discount decimal
+  total decimal
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: users.id < orders.user_id
+Ref: user_addresses.id < orders.address_id
+
+Table order_details {
+  id int [pk]
+  order_id int
+  product_id int
+  batch_id int
+  product_name varchar
+  price decimal
+  quantity int
+  unit varchar
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: orders.id < order_details.order_id
+Ref: products.id < order_details.product_id
+Ref: product_batches.id < order_details.batch_id
+
+Table order_histories {
+  id int [pk]
+  order_id int
+  from_status int
+  to_status int
+  changed_by_user_id int
+  reason text
+  created_at datetime
+}
+
+Ref: orders.id < order_histories.order_id
+Ref: users.id < order_histories.changed_by_user_id
+
+Table payments {
+  id int [pk]
+  order_id int
+  method varchar // COD, banking, momo, vnpay
+  status int // 0: unpaid, 1: paid, 2: failed, 3: refunded
+  amount decimal
+  transaction_code varchar
+  gateway_response text
+  paid_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: orders.id < payments.order_id
+
+Table shipments {
+  id int [pk]
+  order_id int
+  receiver_name varchar
+  phone varchar
+  address text
+  ward varchar
+  district varchar
+  province varchar
+  shipping_status int // 0: preparing, 1: delivering, 2: delivered, 3: failed
+  shipping_fee decimal
+  delivery_time datetime
+  tracking_code varchar
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: orders.id < shipments.order_id
+
+Table news {
+  id int [pk]
+  title varchar
+  image text
+  content text
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table news_details {
+  id int [pk]
+  product_id int
+  news_id int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: news.id < news_details.news_id
+Ref: products.id < news_details.product_id
+
+Table banner {
+  id int [pk]
+  name varchar
+  image text
+  status int // 0: hidden, 1: visible
+  sort_order int
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table banner_details {
+  id int [pk]
+  product_id int
+  banner_id int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: products.id < banner_details.product_id
+Ref: banner.id < banner_details.banner_id
+
+Table coupons {
+  id int [pk]
+  code varchar [unique]
+  discount_type int // 1: percent, 2: fixed
+  discount_value decimal
+  min_order_value decimal
+  start_date datetime
+  end_date datetime
+  quantity int
+  used_quantity int
+  status int // 0: inactive, 1: active
+  deleted_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table order_coupons {
+  id int [pk]
+  order_id int
+  coupon_id int
+  discount_amount decimal
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: orders.id < order_coupons.order_id
+Ref: coupons.id < order_coupons.coupon_id
+
+Table coupon_users {
+  id int [pk]
+  coupon_id int
+  user_id int
+  used_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: coupons.id < coupon_users.coupon_id
+Ref: users.id < coupon_users.user_id
+
+Table wishlists {
+  id int [pk]
+  user_id int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: users.id < wishlists.user_id
+
+Table wishlist_items {
+  id int [pk]
+  wishlist_id int
+  product_id int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: wishlists.id < wishlist_items.wishlist_id
+Ref: products.id < wishlist_items.product_id
+
+Table inventory_transactions {
+  id int [pk]
+  batch_id int
+  type varchar // IN, OUT, ADJUST
+  quantity int
+  reference_type varchar // order, purchase, adjust
+  reference_id int
+  note text
+  created_at datetime
+}
+
+Ref: product_batches.id < inventory_transactions.batch_id
