@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require("sequelize");
+const bcrypt = require("bcryptjs");
 const env = process.env.NODE_ENV || "development";
 const config = require("../config/config")[env];
 
@@ -17,12 +18,24 @@ const modelOptions = (tableName) => ({
 const User = sequelize.define("User", {
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
   password_hash: { type: DataTypes.STRING, allowNull: false },
+  // Trường ảo chỉ nhận mật khẩu từ form, không tạo thêm cột trong database.
+  password: { type: DataTypes.VIRTUAL, set(value) { this.setDataValue("password", value); } },
   name: DataTypes.STRING,
   role: { type: DataTypes.INTEGER, defaultValue: 2 },
   status: { type: DataTypes.INTEGER, defaultValue: 1 },
   avatar: DataTypes.STRING,
   phone: DataTypes.STRING,
-}, modelOptions("users"));
+}, {
+  ...modelOptions("users"),
+  hooks: {
+    // Tự mã hóa mật khẩu nhập từ AdminJS trước khi lưu người dùng.
+    async beforeValidate(user) {
+      if (user.password) {
+        user.password_hash = await bcrypt.hash(user.password, 10);
+      }
+    },
+  },
+});
 
 const UserAddress = sequelize.define("UserAddress", {
   user_id: DataTypes.INTEGER,

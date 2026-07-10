@@ -2,22 +2,35 @@ const express = require("express");
 const path = require("path");
 const configViewEngine = require("./config/viewEngine");
 const serverConfig = require("./config/server");
+const createAdmin = require("./admin/admin");
 
-const app = express();
+async function startServer() {
+  const app = express();
 
-app.use(express.json());
-// là middleware của Express dùng để đọc dữ liệu được gửi từ HTML Form (application/x-www-form-urlencoded) và
-// chuyển thành đối tượng JavaScript trong req.body.
-app.use(express.urlencoded({ extended: true }));
+  // Khởi tạo trang quản trị tại /admin trước các middleware đọc req.body.
+  const { admin, router: adminRouter } = await createAdmin();
+  // Không dùng dashboard mặc định; vào admin sẽ mở danh sách người dùng ngay.
+  app.get(admin.options.rootPath, (req, res) => {
+    res.redirect(`${admin.options.rootPath}/resources/users`);
+  });
+  app.use(admin.options.rootPath, adminRouter);
 
-configViewEngine(app);
+  app.use(express.json());
+  // Đọc dữ liệu gửi từ HTML Form và chuyển thành req.body.
+  app.use(express.urlencoded({ extended: true }));
+  configViewEngine(app);
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "test.html"));
-});
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "index.html"));
+  });
 
-app.listen(serverConfig.port, serverConfig.hostname, () => {
-  console.log(
-    `Server đang chạy ở http://${serverConfig.hostname}:${serverConfig.port}`
-  );
+  app.listen(serverConfig.port, serverConfig.hostname, () => {
+    console.log(`Server đang chạy tại http://${serverConfig.hostname}:${serverConfig.port}`);
+    console.log(`Trang quản trị: http://${serverConfig.hostname}:${serverConfig.port}${admin.options.rootPath}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Không thể khởi động server:", error);
+  process.exit(1);
 });
