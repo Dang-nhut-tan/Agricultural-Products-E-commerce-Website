@@ -34,6 +34,7 @@ async function startServer() {
   app.get("/nha-cung-cap", (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
   app.get("/nha-cung-cap/:id", (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
   app.get("/khuyen-mai/:id", (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
+  app.get("/tin-tuc/:id", (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
   ["/san-pham", "/san-pham/:id", "/gio-hang", "/thanh-toan", "/dang-nhap", "/dang-ky", "/tai-khoan", "/don-hang", "/gioi-thieu", "/tin-tuc", "/lien-he"].forEach((route) => {
     app.get(route, (req, res) => res.sendFile(path.join(__dirname, "views", "index.html")));
   });

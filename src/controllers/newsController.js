@@ -1,6 +1,7 @@
 const db = require("../models");
 const InsertNewsReq = require("../dtos/request/news/insertNewsReq");
 const UpdateNewsReq = require("../dtos/request/news/updateNewsReq");
+const sanitizeRichText = require("../services/sanitizeHtml");
 
 async function getNews(req, res) {
   const news = await db.News.findAll();
@@ -20,6 +21,9 @@ async function getNewsBYID(req, res) {
       message: "Không tìm thấy tin tức",
     });
   }
+
+  // Bảo vệ cả các bài viết cũ được tạo trước khi model có hook sanitize.
+  news.content = sanitizeRichText(news.content);
 
   res.status(200).json({
     message: "Lấy tin tức dựa trên id thành công",

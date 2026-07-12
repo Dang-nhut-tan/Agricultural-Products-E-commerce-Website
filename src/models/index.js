@@ -113,6 +113,7 @@ const ProductBatch = sequelize.define("ProductBatch", {
   batch_code: { type: DataTypes.STRING, unique: true },
   initial_quantity: { type: DataTypes.INTEGER, defaultValue: 0 },
   remaining_quantity: { type: DataTypes.INTEGER, defaultValue: 0 },
+  import_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
   harvest_date: DataTypes.DATE,
   expiry_date: DataTypes.DATE,
   origin: DataTypes.STRING,
@@ -190,6 +191,7 @@ const OrderDetail = sequelize.define("OrderDetail", {
   batch_id: DataTypes.INTEGER,
   product_name: DataTypes.STRING,
   price: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+  cost_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
   quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
   unit: DataTypes.STRING,
 }, modelOptions("order_details"));

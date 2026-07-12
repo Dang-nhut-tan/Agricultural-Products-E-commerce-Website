@@ -161,6 +161,10 @@ const productBatchProperties = {
   batch_code: {
     isVisible: { list: true, show: true, edit: false, filter: true },
   },
+  import_price: {
+    label: "Giá nhập / đơn vị",
+    type: "number",
+  },
 };
 
 const propertiesByModel = {
@@ -178,6 +182,12 @@ const propertiesByModel = {
       label: "Nội dung",
       type: "richtext",
       isVisible: { list: false, filter: false, show: true, edit: true },
+    },
+  },
+  OrderDetail: {
+    cost_price: {
+      label: "Giá vốn tại thời điểm bán",
+      isVisible: { list: true, filter: false, show: true, edit: false },
     },
   },
 };
