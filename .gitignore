@@ -1,6 +1,7 @@
 
 # Playwright
 node_modules/
+.env
 .adminjs/
 /test-results/
 /playwright-report/

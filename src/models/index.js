@@ -92,6 +92,21 @@ const Product = sequelize.define("Product", {
   deletedAt: "deleted_at",
 });
 
+// Tổng tồn kho sản phẩm luôn bằng tổng remaining_quantity của các lô.
+const syncProductQuantity = async (productId, transaction) => {
+  if (!productId) return;
+
+  const quantity = await ProductBatch.sum("remaining_quantity", {
+    where: { product_id: productId },
+    transaction,
+  });
+
+  await Product.update(
+    { quantity: quantity || 0 },
+    { where: { id: productId }, transaction, hooks: false }
+  );
+};
+
 const ProductBatch = sequelize.define("ProductBatch", {
   product_id: DataTypes.INTEGER,
   batch_code: { type: DataTypes.STRING, unique: true },
@@ -100,7 +115,36 @@ const ProductBatch = sequelize.define("ProductBatch", {
   harvest_date: DataTypes.DATE,
   expiry_date: DataTypes.DATE,
   origin: DataTypes.STRING,
-}, modelOptions("product_batches"));
+}, {
+  ...modelOptions("product_batches"),
+  hooks: {
+    // Sau khi có ID tự tăng, tạo mã lô cố định như LO-000001.
+    async afterCreate(batch, options) {
+      if (!batch.batch_code) {
+        batch.batch_code = `LO-${String(batch.id).padStart(6, "0")}`;
+        await batch.save({
+          fields: ["batch_code"],
+          hooks: false,
+          transaction: options.transaction,
+        });
+      }
+
+      await syncProductQuantity(batch.product_id, options.transaction);
+    },
+    async afterUpdate(batch, options) {
+      const previousProductId = batch.previous("product_id");
+      await syncProductQuantity(batch.product_id, options.transaction);
+
+      // Nếu chuyển lô sang sản phẩm khác, cập nhật cả sản phẩm cũ.
+      if (previousProductId && previousProductId !== batch.product_id) {
+        await syncProductQuantity(previousProductId, options.transaction);
+      }
+    },
+    async afterDestroy(batch, options) {
+      await syncProductQuantity(batch.product_id, options.transaction);
+    },
+  },
+});
 
 const ProductImage = sequelize.define("ProductImage", {
   product_id: DataTypes.INTEGER,

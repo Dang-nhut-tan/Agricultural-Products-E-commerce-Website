@@ -1,0 +1,1 @@
+const router=require("express").Router();const controller=require("../controllers/brandController");router.get("/",controller.getBrands);router.get("/:id",controller.getBrandsBYID);module.exports=router;

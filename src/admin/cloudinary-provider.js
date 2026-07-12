@@ -1,0 +1,60 @@
+const path = require("path");
+const {
+  cloudinary,
+  ensureCloudinaryConfigured,
+} = require("../config/cloudinary");
+
+// Lấy publicId từ URL do chính provider tạo để có thể xóa ảnh cũ.
+const publicIdFromUrl = (url) => {
+  const uploadPath = new URL(url).pathname.split("/upload/")[1] || "";
+  return decodeURIComponent(uploadPath)
+    .replace(/^v\d+\//, "")
+    .replace(/\.[^/.]+$/, "");
+};
+
+// @adminjs/upload nhận custom provider khi object có name = BaseProvider.
+const cloudinaryProvider = {
+  name: "BaseProvider",
+  bucket: process.env.CLOUDINARY_FOLDER || "web-nong-san",
+  opts: {},
+
+  async upload(file, imageUrl) {
+    ensureCloudinaryConfigured();
+    const publicId = publicIdFromUrl(imageUrl);
+
+    await cloudinary.uploader.upload(file.path, {
+      public_id: publicId,
+      overwrite: true,
+      resource_type: "image",
+    });
+  },
+
+  async delete(imageUrl) {
+    if (!imageUrl) return;
+    ensureCloudinaryConfigured();
+    await cloudinary.uploader.destroy(publicIdFromUrl(imageUrl), {
+      invalidate: true,
+      resource_type: "image",
+    });
+  },
+
+  // Database đã lưu URL đầy đủ nên chỉ cần trả lại chính URL đó.
+  path(imageUrl) {
+    return imageUrl;
+  },
+};
+
+// Tạo URL trước khi upload; @adminjs/upload sẽ lưu URL này vào cột image/avatar.
+const createUploadPath = (resourceName) => (record, filename) => {
+  ensureCloudinaryConfigured();
+  const extension = path.extname(filename).slice(1).toLowerCase() || "jpg";
+  const publicId = [
+    cloudinaryProvider.bucket,
+    resourceName,
+    `${record.id()}-${Date.now()}`,
+  ].join("/");
+
+  return cloudinary.url(publicId, { secure: true, format: extension });
+};
+
+module.exports = { cloudinaryProvider, createUploadPath };
