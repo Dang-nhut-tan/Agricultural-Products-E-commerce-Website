@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const bcrypt = require("bcryptjs");
+const sanitizeRichText = require("../services/sanitizeHtml");
 const env = process.env.NODE_ENV || "development";
 const config = require("../config/config")[env];
 
@@ -239,6 +240,13 @@ const News = sequelize.define("News", {
   underscored: true,
   paranoid: true,
   deletedAt: "deleted_at",
+  hooks: {
+    beforeValidate(news) {
+      if (news.changed("content")) {
+        news.content = sanitizeRichText(news.content);
+      }
+    },
+  },
 });
 
 const NewsDetail = sequelize.define("NewsDetail", {

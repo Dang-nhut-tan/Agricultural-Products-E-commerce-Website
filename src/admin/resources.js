@@ -173,6 +173,13 @@ const propertiesByModel = {
   Shipment: shipmentStatus,
   Banner: visibleStatus,
   Coupon: activeStatus,
+  News: {
+    content: {
+      label: "Nội dung",
+      type: "richtext",
+      isVisible: { list: false, filter: false, show: true, edit: true },
+    },
+  },
 };
 
 const buildResources = (
