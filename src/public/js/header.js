@@ -1,5 +1,5 @@
 const oldHeader=document.querySelector('header');
-document.head.insertAdjacentHTML('beforeend','<link rel="stylesheet" href="/css/menu.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/detail.css"><link rel="stylesheet" href="/css/home-products.css"><link rel="stylesheet" href="/css/banner-click.css"><link rel="stylesheet" href="/css/home-extras.css"><link rel="stylesheet" href="/css/promotion.css">');
+document.head.insertAdjacentHTML('beforeend','<link rel="stylesheet" href="/css/menu.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/detail.css"><link rel="stylesheet" href="/css/home-products.css"><link rel="stylesheet" href="/css/banner-click.css"><link rel="stylesheet" href="/css/home-extras.css"><link rel="stylesheet" href="/css/promotion.css"><link rel="stylesheet" href="/css/image-ratios.css">');
 document.body.dataset.page=location.pathname==='/san-pham'?'products':location.pathname.slice(1)||'home';
 const oldTopbar=document.querySelector('.topbar');
 if(oldTopbar)oldTopbar.remove();

@@ -1,0 +1,38 @@
+/* Ảnh sản phẩm trên danh sách: 800x800–1000x1000, tỷ lệ 1:1. */
+.product-image,
+body[data-page="home"] #products .product-image,
+body[data-page="products"] .product-image{
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:1/1;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+
+/* Ảnh chính trang chi tiết: 600x800, tỷ lệ 3:4. */
+.detail-main-image{
+  width:min(100%,600px)!important;
+  height:auto!important;
+  aspect-ratio:3/4;
+  margin-inline:auto;
+  background-size:contain!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+
+/* Thumbnail trang chi tiết: 300x400, tỷ lệ 3:4. */
+.detail-thumbs{justify-content:center;flex-wrap:wrap}
+.detail-thumb{
+  width:75px!important;
+  height:auto!important;
+  aspect-ratio:3/4;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+
+@media(max-width:520px){
+  .detail-main-image{width:min(100%,420px)!important}
+  .detail-thumb{width:62px!important}
+}
