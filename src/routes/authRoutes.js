@@ -1,0 +1,13 @@
+const router = require("express").Router();
+const controller = require("../controllers/authController");
+const asyncRoute = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
+const signedIn = (req, res, next) => req.session.userId ? next() : res.status(401).json({ message: "Bạn chưa đăng nhập." });
+router.post("/register", asyncRoute(controller.register));
+router.post("/login", asyncRoute(controller.login));
+router.post("/logout", controller.logout);
+router.get("/me", asyncRoute(controller.me));
+router.put("/profile", signedIn, asyncRoute(controller.profile));
+router.get("/addresses", signedIn, asyncRoute(controller.addresses));
+router.post("/addresses", signedIn, asyncRoute(controller.addAddress));
+router.delete("/addresses/:id", signedIn, asyncRoute(controller.deleteAddress));
+module.exports = router;

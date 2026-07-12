@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require("express-session");
 const path = require("path");
 const configViewEngine = require("./config/viewEngine");
 const serverConfig = require("./config/server");
@@ -10,6 +11,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const bannerRoutes = require("./routes/bannerRoutes");
 const newsRoutes = require("./routes/newsRoutes");
 const brandRoutes = require("./routes/brandRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 async function startServer() {
   const app = express();
@@ -18,10 +20,18 @@ async function startServer() {
   const { admin, router: adminRouter } = await createAdmin();
   app.use(admin.options.rootPath, adminRouter);
 
-  app.use(express.json());
+  app.use(express.json({ limit: "5mb" }));
   // Đọc dữ liệu gửi từ HTML Form và chuyển thành req.body.
   app.use(express.urlencoded({ extended: true }));
+  app.use(session({
+    name: "nong-san.sid",
+    secret: process.env.SESSION_SECRET || "nong-san-development-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 604800000 },
+  }));
   configViewEngine(app);
+  app.use("/api/auth", authRoutes);
   app.use("/api/products", productRoutes);
   app.use("/api/categories", categoryRoutes);
   app.use("/api/banners", bannerRoutes);
