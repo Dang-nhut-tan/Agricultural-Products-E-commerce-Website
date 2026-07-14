@@ -46,7 +46,7 @@ async function createAdmin() {
       handler: dashboardHandler,
     },
     branding: {
-      companyName: "Quản trị Nông Sản",
+      companyName: "Quản trị Nông Sản Xanh",
       withMadeWithLove: false,
     },
     locale: locale(resourceLabels),
