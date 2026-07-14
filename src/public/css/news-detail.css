@@ -1,1 +1,74 @@
-.news-detail{width:min(850px,calc(100% - 40px));padding:48px 0 80px}.news-back{display:inline-block;margin-bottom:28px;color:#087a55;text-decoration:none;font-size:10px;font-weight:700}.news-detail-header{text-align:center;border:0;position:static;box-shadow:none;background:none}.news-detail-header span{color:#ef7d24;font-size:10px}.news-detail-header h1{margin:10px auto 28px;font-size:36px;line-height:1.35;color:#07563e}.news-detail-image{display:block;width:100%;max-height:520px;object-fit:cover;border-radius:15px;margin-bottom:35px}.news-detail-content{color:#3f4e46;font-size:13px;line-height:1.9}.news-detail-content h1,.news-detail-content h2,.news-detail-content h3{color:#07563e;line-height:1.4;margin:30px 0 12px}.news-detail-content img{max-width:100%;height:auto;border-radius:10px}.news-detail-content a{color:#087a55}.news-detail-content blockquote{margin:25px 0;padding:15px 20px;border-left:4px solid #087a55;background:#f3f8f5}@media(max-width:600px){.news-detail{padding-top:30px}.news-detail-header h1{font-size:28px}.news-detail-content{font-size:12px}}
+.news-detail {
+  width: min(850px, calc(100% - 40px));
+  padding: 48px 0 80px;
+}
+.news-back {
+  display: inline-block;
+  margin-bottom: 28px;
+  color: #087a55;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 700;
+}
+.news-detail-header {
+  text-align: center;
+  border: 0;
+  position: static;
+  box-shadow: none;
+  background: none;
+}
+.news-detail-header span {
+  color: #ef7d24;
+  font-size: 10px;
+}
+.news-detail-header h1 {
+  margin: 10px auto 28px;
+  font-size: 36px;
+  line-height: 1.35;
+  color: #07563e;
+}
+.news-detail-image {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+  border-radius: 15px;
+  margin-bottom: 35px;
+}
+.news-detail-content {
+  color: #3f4e46;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.news-detail-content h1,
+.news-detail-content h2,
+.news-detail-content h3 {
+  color: #07563e;
+  line-height: 1.4;
+  margin: 30px 0 12px;
+}
+.news-detail-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+.news-detail-content a {
+  color: #087a55;
+}
+.news-detail-content blockquote {
+  margin: 25px 0;
+  padding: 15px 20px;
+  border-left: 4px solid #087a55;
+  background: #f3f8f5;
+}
+@media (max-width: 600px) {
+  .news-detail {
+    padding-top: 30px;
+  }
+  .news-detail-header h1 {
+    font-size: 28px;
+  }
+  .news-detail-content {
+    font-size: 12px;
+  }
+}

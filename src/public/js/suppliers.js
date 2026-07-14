@@ -1,2 +1,36 @@
-const supplierMatch=location.pathname.match(/^\/nha-cung-cap(?:\/(\d+))?$/);
-if(supplierMatch){const main=document.querySelector('main'),safe=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),money=v=>Number(v||0).toLocaleString('vi-VN')+' ₫';main.innerHTML='<div class="loading">Đang tải…</div>';fetch('/api/brands'+(supplierMatch[1]?'/'+supplierMatch[1]:'')).then(r=>r.json()).then(({data})=>{if(!supplierMatch[1]){main.innerHTML=`<section class="supplier-page container"><div class="supplier-heading"><span>ĐỐI TÁC CỦA CHÚNG TÔI</span><h1>Nhà cung cấp</h1></div><div class="supplier-grid">${data.map(x=>`<article class="supplier-card"><div class="supplier-image" ${x.image?`style="background-image:url('${x.image}')"`:''}>${x.image?'':'Chưa có ảnh'}</div><div class="supplier-body"><h2>${safe(x.name)}</h2><p>${(x.Products||[]).filter(p=>p.status===1).length} sản phẩm đang bán</p><a href="/nha-cung-cap/${x.id}">Xem sản phẩm →</a></div></article>`).join('')}</div></section>`;return}const products=data.Products||[];main.innerHTML=`<section class="supplier-page container"><div class="supplier-heading"><a href="/nha-cung-cap">← Nhà cung cấp</a><h1>${safe(data.name)}</h1><p>${products.length} sản phẩm đang bán</p></div><div class="product-grid">${products.map(p=>{const image=p.image||p.ProductImages?.[0]?.image||'';return `<article class="product"><div class="product-image ${image?'':'no-image'}" ${image?`style="background-image:url('${image}')"`:''}>${image?'':'Chưa có ảnh'}</div><div class="product-info"><span class="product-cat">${safe(p.Category?.name||'')}</span><h3>${safe(p.name)}</h3><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}">+</button></div></article>`}).join('')||'<div class="clean-empty"><h2>Chưa có sản phẩm đang bán</h2></div>'}</div></section>`})}
+const supplierMatch = location.pathname.match(/^\/nha-cung-cap(?:\/(\d+))?$/);
+if (supplierMatch) {
+  const main = document.querySelector("main"),
+    safe = (v) =>
+      String(v || "").replace(
+        /[&<>"']/g,
+        (c) =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c],
+      ),
+    money = (v) => Number(v || 0).toLocaleString("vi-VN") + " ₫";
+  main.innerHTML = '<div class="loading">Đang tải…</div>';
+  fetch("/api/brands" + (supplierMatch[1] ? "/" + supplierMatch[1] : ""))
+    .then((r) => r.json())
+    .then(({ data }) => {
+      if (!supplierMatch[1]) {
+        main.innerHTML = `<section class="supplier-page container"><div class="supplier-heading"><span>ĐỐI TÁC CỦA CHÚNG TÔI</span><h1>Nhà cung cấp</h1></div><div class="supplier-grid">${data.map((x) => `<article class="supplier-card"><div class="supplier-image" ${x.image ? `style="background-image:url('${x.image}')"` : ""}>${x.image ? "" : "Chưa có ảnh"}</div><div class="supplier-body"><h2>${safe(x.name)}</h2><p>${(x.Products || []).filter((p) => p.status === 1).length} sản phẩm đang bán</p><a href="/nha-cung-cap/${x.id}">Xem sản phẩm →</a></div></article>`).join("")}</div></section>`;
+        return;
+      }
+      const products = data.Products || [];
+      main.innerHTML = `<section class="supplier-page container"><div class="supplier-heading"><a href="/nha-cung-cap">← Nhà cung cấp</a><h1>${safe(data.name)}</h1><p>${products.length} sản phẩm đang bán</p></div><div class="product-grid">${
+        products
+          .map((p) => {
+            const image = p.image || p.ProductImages?.[0]?.image || "";
+            return `<article class="product"><div class="product-image ${image ? "" : "no-image"}" ${image ? `style="background-image:url('${image}')"` : ""}>${image ? "" : "Chưa có ảnh"}</div><div class="product-info"><span class="product-cat">${safe(p.Category?.name || "")}</span><h3>${safe(p.name)}</h3><span class="price">${money(p.price)}</span><button class="add" data-add="${p.id}">+</button></div></article>`;
+          })
+          .join("") ||
+        '<div class="clean-empty"><h2>Chưa có sản phẩm đang bán</h2></div>'
+      }</div></section>`;
+    });
+}
