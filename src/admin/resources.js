@@ -59,7 +59,7 @@ const hiddenModels = [
   "Payment",
   "ProductImage",
 ];
-const readOnlyModels = ["UserAddress", "Feedback"];
+const readOnlyModels = ["UserAddress", "Feedback", "InventoryTransaction"];
 const readOnlyActions = {
   new: { isAccessible: false, isVisible: false }, edit: { isAccessible: false, isVisible: false },
   delete: { isAccessible: false, isVisible: false }, bulkDelete: { isAccessible: false, isVisible: false },
@@ -188,6 +188,22 @@ const propertiesByModel = {
     cost_price: {
       label: "Giá vốn tại thời điểm bán",
       isVisible: { list: true, filter: false, show: true, edit: false },
+    },
+  },
+  InventoryTransaction: {
+    type: {
+      availableValues: [
+        { value: "IN", label: "Nhập kho" },
+        { value: "OUT", label: "Xuất kho" },
+        { value: "ADJUST", label: "Điều chỉnh" },
+      ],
+    },
+    reference_type: {
+      availableValues: [
+        { value: "purchase", label: "Nhập hàng" },
+        { value: "order", label: "Đơn hàng" },
+        { value: "adjust", label: "Điều chỉnh" },
+      ],
     },
   },
 };

@@ -108,18 +108,45 @@ const syncProductQuantity = async (productId, transaction) => {
   );
 };
 
+const recordInventoryTransaction = async (batch, options, defaults) => {
+  if (options.skipInventoryTransaction) return;
+
+  const metadata = options.inventoryTransaction || {};
+  const quantity = metadata.quantity ?? defaults.quantity;
+  if (!quantity) return;
+
+  await InventoryTransaction.create({
+    batch_id: defaults.batchExists === false ? null : batch.id,
+    type: metadata.type || defaults.type,
+    quantity,
+    reference_type: metadata.reference_type || defaults.reference_type,
+    reference_id: metadata.reference_id ?? defaults.reference_id ?? batch.id,
+    note: metadata.note || defaults.note,
+  }, { transaction: options.transaction });
+};
+
 const ProductBatch = sequelize.define("ProductBatch", {
   product_id: DataTypes.INTEGER,
   batch_code: { type: DataTypes.STRING, unique: true },
-  initial_quantity: { type: DataTypes.INTEGER, defaultValue: 0 },
-  remaining_quantity: { type: DataTypes.INTEGER, defaultValue: 0 },
-  import_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
+  initial_quantity: { type: DataTypes.INTEGER, defaultValue: 0, validate: { min: 0 } },
+  remaining_quantity: { type: DataTypes.INTEGER, defaultValue: 0, validate: { min: 0 } },
+  import_price: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: false,
+    defaultValue: 0,
+    validate: { min: 0 },
+  },
   harvest_date: DataTypes.DATE,
   expiry_date: DataTypes.DATE,
   origin: DataTypes.STRING,
 }, {
   ...modelOptions("product_batches"),
   hooks: {
+    beforeValidate(batch) {
+      if (batch.isNewRecord && !batch.changed("remaining_quantity")) {
+        batch.remaining_quantity = batch.initial_quantity;
+      }
+    },
     // Sau khi có ID tự tăng, tạo mã lô cố định như LO-000001.
     async afterCreate(batch, options) {
       if (!batch.batch_code) {
@@ -132,18 +159,40 @@ const ProductBatch = sequelize.define("ProductBatch", {
       }
 
       await syncProductQuantity(batch.product_id, options.transaction);
+      await recordInventoryTransaction(batch, options, {
+        type: "IN",
+        quantity: batch.remaining_quantity,
+        reference_type: "purchase",
+        note: "Nhập kho khi tạo lô sản phẩm",
+      });
     },
     async afterUpdate(batch, options) {
       const previousProductId = batch.previous("product_id");
+      const previousQuantity = Number(batch.previous("remaining_quantity")) || 0;
+      const currentQuantity = Number(batch.remaining_quantity) || 0;
       await syncProductQuantity(batch.product_id, options.transaction);
 
       // Nếu chuyển lô sang sản phẩm khác, cập nhật cả sản phẩm cũ.
       if (previousProductId && previousProductId !== batch.product_id) {
         await syncProductQuantity(previousProductId, options.transaction);
       }
+      await recordInventoryTransaction(batch, options, {
+        type: "ADJUST",
+        quantity: currentQuantity - previousQuantity,
+        reference_type: "adjust",
+        note: "Điều chỉnh số lượng còn lại của lô",
+      });
     },
     async afterDestroy(batch, options) {
       await syncProductQuantity(batch.product_id, options.transaction);
+      await recordInventoryTransaction(batch, options, {
+        type: "OUT",
+        quantity: batch.remaining_quantity,
+        reference_type: "adjust",
+        reference_id: batch.id,
+        note: "Xuất phần tồn còn lại khi xóa lô",
+        batchExists: false,
+      });
     },
   },
 });
@@ -315,8 +364,20 @@ const WishlistItem = sequelize.define("WishlistItem", {
 
 const InventoryTransaction = sequelize.define("InventoryTransaction", {
   batch_id: DataTypes.INTEGER,
-  type: DataTypes.STRING,
-  quantity: DataTypes.INTEGER,
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { isIn: [["IN", "OUT", "ADJUST"]] },
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      notZero(value) {
+        if (value === 0) throw new Error("Số lượng giao dịch phải khác 0.");
+      },
+    },
+  },
   reference_type: DataTypes.STRING,
   reference_id: DataTypes.INTEGER,
   note: DataTypes.TEXT,

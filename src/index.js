@@ -3,14 +3,7 @@ const session = require("express-session");
 const configViewEngine = require("./config/viewEngine");
 const serverConfig = require("./config/server");
 const createAdmin = require("./admin/admin");
-const authRoutes = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
-const bannerRoutes = require("./routes/bannerRoutes");
-const newsRoutes = require("./routes/newsRoutes");
-const brandRoutes = require("./routes/brandRoutes");
-const storefrontRoutes = require("./routes/storefrontRoutes");
-const viewRoutes = require("./routes/viewRoutes");
+const configRoutes = require("./routes");
 
 async function startServer() {
   const app = express();
@@ -28,14 +21,7 @@ async function startServer() {
   }));
 
   configViewEngine(app);
-  app.use("/api/auth", authRoutes);
-  app.use("/api/products", productRoutes);
-  app.use("/api/categories", categoryRoutes);
-  app.use("/api/banners", bannerRoutes);
-  app.use("/api/news", newsRoutes);
-  app.use("/api/brands", brandRoutes);
-  app.use("/api/storefront", storefrontRoutes);
-  app.use(viewRoutes);
+  configRoutes(app);
 
   app.listen(serverConfig.port, serverConfig.hostname, () => {
     console.log(`Server đang chạy tại http://${serverConfig.hostname}:${serverConfig.port}`);
