@@ -4,7 +4,7 @@ const validate = (requestType) => {
 
     if (error) {
       return res.status(400).json({
-        message: "Loi validate",
+        message: "Dữ liệu gửi lên không hợp lệ.",
         error: error.details,
       });
     }

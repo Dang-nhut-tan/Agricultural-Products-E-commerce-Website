@@ -2,12 +2,19 @@ const db = require("../models");
 const InsertUserReq = require("../dtos/request/user/insertUserReq");
 const UpdateUserReq = require("../dtos/request/user/updateUserReq");
 
+const safeUser = (user) => {
+  const data = user.toJSON();
+  delete data.password_hash;
+  delete data.password;
+  return data;
+};
+
 async function getUsers(req, res) {
   const users = await db.User.findAll();
 
   res.status(200).json({
     message: "Lấy danh sách người dùng thành công",
-    data: users,
+    data: users.map(safeUser),
   });
 }
 
@@ -23,7 +30,7 @@ async function getUsersBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy người dùng dựa trên id thành công",
-    data: user,
+    data: safeUser(user),
   });
 }
 
@@ -33,7 +40,7 @@ async function insertUsers(req, res) {
 
   res.status(201).json({
     message: "Thêm người dùng thành công",
-    data: user,
+    data: safeUser(user),
   });
 }
 
@@ -52,7 +59,7 @@ async function updateUsers(req, res) {
 
   res.status(200).json({
     message: "Cập nhật người dùng thành công",
-    data: user,
+    data: safeUser(user),
   });
 }
 

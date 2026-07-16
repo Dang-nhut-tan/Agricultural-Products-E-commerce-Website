@@ -3,7 +3,7 @@ const Joi = require("joi");
 class InsertUserReq {
   constructor(data) {
     this.email = data.email;
-    this.password_hash = data.password_hash;
+    this.password = data.password;
     this.name = data.name;
     this.role = data.role;
     this.status = data.status;
@@ -14,10 +14,10 @@ class InsertUserReq {
   static validate(data) {
     const schema = Joi.object({
       email: Joi.string().email().required(),
-      password_hash: Joi.string().required(),
+      password: Joi.string().min(6).required(),
       name: Joi.string().allow("").optional(),
-      role: Joi.number().integer().optional(),
-      status: Joi.number().integer().optional(),
+      role: Joi.number().integer().valid(1, 2).optional(),
+      status: Joi.number().integer().valid(0, 1, 2).optional(),
       avatar: Joi.string().allow("").optional(),
       phone: Joi.string().allow("").optional(),
     });
