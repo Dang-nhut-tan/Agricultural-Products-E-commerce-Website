@@ -12,7 +12,7 @@ async function getProducts(req, res) {
 }
 
 async function getProductById(req, res) {
-  const product = await db.Product.findOne({ where: { id: req.params.id, status: 1 }, include: [db.Category, db.Brand, db.ProductImage, db.ProductBatch, db.Feedback] });
+  const product = await db.Product.findOne({ where: { id: req.params.id, status: 1 }, include: [db.Category, db.Brand, db.ProductImage, db.ProductBatch] });
   if (!product) return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
   res.json({ data: product });
 }

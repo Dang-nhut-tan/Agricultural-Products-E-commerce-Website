@@ -207,9 +207,11 @@ const Feedback = sequelize.define("Feedback", {
   product_id: DataTypes.INTEGER,
   user_id: DataTypes.INTEGER,
   order_detail_id: DataTypes.INTEGER,
-  star: DataTypes.INTEGER,
-  content: DataTypes.TEXT,
-}, modelOptions("feedback"));
+  star: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 1, max: 5 } },
+  content: { type: DataTypes.TEXT, allowNull: false },
+}, {
+  ...modelOptions("feedback"),
+});
 
 const Cart = sequelize.define("Cart", {
   user_id: DataTypes.INTEGER,
