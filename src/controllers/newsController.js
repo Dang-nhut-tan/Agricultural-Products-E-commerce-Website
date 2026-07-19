@@ -1,6 +1,7 @@
 const db = require("../models");
 const InsertNewsReq = require("../dtos/request/news/insertNewsReq");
 const UpdateNewsReq = require("../dtos/request/news/updateNewsReq");
+const NewsRespone = require("../dtos/respone/news/newsRespone");
 const sanitizeRichText = require("../services/sanitizeHtml");
 
 async function getNews(req, res) {
@@ -8,7 +9,7 @@ async function getNews(req, res) {
 
   res.status(200).json({
     message: "Lấy danh sách tin tức thành công",
-    data: news,
+    data: news.map((item) => new NewsRespone(item)),
   });
 }
 
@@ -27,7 +28,7 @@ async function getNewsBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy tin tức dựa trên id thành công",
-    data: news,
+    data: new NewsRespone(news),
   });
 }
 
@@ -37,7 +38,7 @@ async function insertNews(req, res) {
 
   res.status(201).json({
     message: "Thêm tin tức thành công",
-    data: news,
+    data: new NewsRespone(news),
   });
 }
 
@@ -56,7 +57,7 @@ async function updateNews(req, res) {
 
   res.status(200).json({
     message: "Cập nhật tin tức thành công",
-    data: news,
+    data: new NewsRespone(news),
   });
 }
 

@@ -1,13 +1,14 @@
 const db = require("../models");
 const InsertBannerReq = require("../dtos/request/banner/insertBannerReq");
 const UpdateBannerReq = require("../dtos/request/banner/updateBannerReq");
+const BannerRespone = require("../dtos/respone/banner/bannerRespone");
 
 async function getBanners(req, res) {
   const banners = await db.Banner.findAll({ where: { status: 1 }, include: [{ model: db.BannerDetail, include: [db.Product] }], order: [["sort_order", "ASC"]] });
 
   res.status(200).json({
     message: "Lấy danh sách banner thành công",
-    data: banners,
+    data: banners.map((banner) => new BannerRespone(banner)),
   });
 }
 
@@ -23,7 +24,7 @@ async function getBannersBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy banner dựa trên id thành công",
-    data: banner,
+    data: new BannerRespone(banner),
   });
 }
 
@@ -33,7 +34,7 @@ async function insertBanners(req, res) {
 
   res.status(201).json({
     message: "Thêm banner thành công",
-    data: banner,
+    data: new BannerRespone(banner),
   });
 }
 
@@ -52,7 +53,7 @@ async function updateBanners(req, res) {
 
   res.status(200).json({
     message: "Cập nhật banner thành công",
-    data: banner,
+    data: new BannerRespone(banner),
   });
 }
 

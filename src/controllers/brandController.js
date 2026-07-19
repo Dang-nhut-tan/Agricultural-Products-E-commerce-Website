@@ -1,13 +1,14 @@
 const db = require("../models");
 const InsertBrandReq = require("../dtos/request/brand/insertBrandReq");
 const UpdateBrandReq = require("../dtos/request/brand/updateBrandReq");
+const BrandRespone = require("../dtos/respone/brand/brandRespone");
 
 async function getBrands(req, res) {
   const brands = await db.Brand.findAll({ include: [{ model: db.Product, attributes: ["id", "name", "status"] }], order: [["name", "ASC"]] });
 
   res.status(200).json({
     message: "Lấy danh sách thương hiệu thành công",
-    data: brands,
+    data: brands.map((brand) => new BrandRespone(brand)),
   });
 }
 
@@ -23,7 +24,7 @@ async function getBrandsBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy thương hiệu dựa trên id thành công",
-    data: brand,
+    data: new BrandRespone(brand),
   });
 }
 
@@ -33,7 +34,7 @@ async function insertBrands(req, res) {
 
   res.status(201).json({
     message: "Thêm thương hiệu thành công",
-    data: brand,
+    data: new BrandRespone(brand),
   });
 }
 
@@ -52,7 +53,7 @@ async function updateBrands(req, res) {
 
   res.status(200).json({
     message: "Cập nhật thương hiệu thành công",
-    data: brand,
+    data: new BrandRespone(brand),
   });
 }
 

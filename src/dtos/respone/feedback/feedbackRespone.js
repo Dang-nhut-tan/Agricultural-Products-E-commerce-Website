@@ -10,6 +10,9 @@ class FeedbackRespone {
     this.content = data.content;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    if (data.User !== undefined) {
+      this.User = data.User;
+    }
   }
 }
 

@@ -1,13 +1,14 @@
 const db = require("../models");
 const InsertCouponReq = require("../dtos/request/coupon/insertCouponReq");
 const UpdateCouponReq = require("../dtos/request/coupon/updateCouponReq");
+const CouponRespone = require("../dtos/respone/coupon/couponRespone");
 
 async function getCoupons(req, res) {
   const coupons = await db.Coupon.findAll();
 
   res.status(200).json({
     message: "Lấy danh sách mã giảm giá thành công",
-    data: coupons,
+    data: coupons.map((coupon) => new CouponRespone(coupon)),
   });
 }
 
@@ -23,7 +24,7 @@ async function getCouponsBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy mã giảm giá dựa trên id thành công",
-    data: coupon,
+    data: new CouponRespone(coupon),
   });
 }
 
@@ -33,7 +34,7 @@ async function insertCoupons(req, res) {
 
   res.status(201).json({
     message: "Thêm mã giảm giá thành công",
-    data: coupon,
+    data: new CouponRespone(coupon),
   });
 }
 
@@ -52,7 +53,7 @@ async function updateCoupons(req, res) {
 
   res.status(200).json({
     message: "Cập nhật mã giảm giá thành công",
-    data: coupon,
+    data: new CouponRespone(coupon),
   });
 }
 

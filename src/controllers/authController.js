@@ -1,15 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { sequelize, User, UserAddress } = require("../models");
 const { uploadImage } = require("../services/cloudinaryService");
-
-const publicUser = (user) => ({
-  id: user.id,
-  email: user.email,
-  name: user.name,
-  phone: user.phone,
-  avatar: user.avatar,
-  role: user.role,
-});
+const UserRespone = require("../dtos/respone/user/userRespone");
 
 async function register(req, res) {
   const email = String(req.body.email || "")
@@ -68,7 +60,7 @@ async function register(req, res) {
   req.session.userId = user.id;
   res
     .status(201)
-    .json({ message: "Đăng ký thành công.", data: publicUser(user) });
+    .json({ message: "Đăng ký thành công.", data: new UserRespone(user) });
 }
 
 async function profile(req, res) {
@@ -91,7 +83,10 @@ async function profile(req, res) {
     changes.avatar = uploaded.url;
   }
   await user.update(changes);
-  res.json({ message: "Đã cập nhật thông tin.", data: publicUser(user) });
+  res.json({
+    message: "Đã cập nhật thông tin.",
+    data: new UserRespone(user),
+  });
 }
 
 async function addresses(req, res) {
@@ -175,7 +170,10 @@ async function login(req, res) {
   if (Number(user.status) !== 1)
     return res.status(403).json({ message: "Tài khoản đã bị khóa." });
   req.session.userId = user.id;
-  res.json({ message: "Đăng nhập thành công.", data: publicUser(user) });
+  res.json({
+    message: "Đăng nhập thành công.",
+    data: new UserRespone(user),
+  });
 }
 
 async function me(req, res) {
@@ -186,7 +184,7 @@ async function me(req, res) {
     return req.session.destroy(() =>
       res.status(401).json({ message: "Phiên đăng nhập không còn hợp lệ." }),
     );
-  res.json({ data: publicUser(user) });
+  res.json({ data: new UserRespone(user) });
 }
 
 function logout(req, res, next) {

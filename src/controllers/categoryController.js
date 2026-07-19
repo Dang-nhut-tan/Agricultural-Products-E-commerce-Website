@@ -1,13 +1,14 @@
 const db = require("../models");
 const InsertCategoryReq = require("../dtos/request/category/insertCategoryReq");
 const UpdateCategoryReq = require("../dtos/request/category/updateCategoryReq");
+const CategoryRespone = require("../dtos/respone/category/categoryRespone");
 
 async function getCategories(req, res) {
   const categories = await db.Category.findAll();
 
   res.status(200).json({
     message: "Lấy danh sách danh mục thành công",
-    data: categories,
+    data: categories.map((category) => new CategoryRespone(category)),
   });
 }
 
@@ -23,7 +24,7 @@ async function getCategoriesBYID(req, res) {
 
   res.status(200).json({
     message: "Lấy danh mục dựa trên id thành công",
-    data: category,
+    data: new CategoryRespone(category),
   });
 }
 
@@ -33,7 +34,7 @@ async function insertCategories(req, res) {
 
   res.status(201).json({
     message: "Thêm danh mục thành công",
-    data: category,
+    data: new CategoryRespone(category),
   });
 }
 
@@ -52,7 +53,7 @@ async function updateCategories(req, res) {
 
   res.status(200).json({
     message: "Cập nhật danh mục thành công",
-    data: category,
+    data: new CategoryRespone(category),
   });
 }
 

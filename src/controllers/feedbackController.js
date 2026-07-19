@@ -1,5 +1,6 @@
 const sanitizeHtml = require("sanitize-html");
 const db = require("../models");
+const FeedbackRespone = require("../dtos/respone/feedback/feedbackRespone");
 
 const includeUser = { model: db.User, attributes: ["id", "name", "avatar"] };
 const plainText = (value) => sanitizeHtml(String(value), {
@@ -19,7 +20,7 @@ async function getFeedback(req, res) {
     include: [includeUser],
     order: [["createdAt", "DESC"]],
   });
-  res.json({ data: feedback });
+  res.json({ data: feedback.map((item) => new FeedbackRespone(item)) });
 }
 
 async function createFeedback(req, res) {
@@ -36,7 +37,10 @@ async function createFeedback(req, res) {
     content: plainText(req.body.content),
   });
   await feedback.reload({ include: [includeUser] });
-  res.status(201).json({ message: "Đã thêm bình luận.", data: feedback });
+  res.status(201).json({
+    message: "Đã thêm bình luận.",
+    data: new FeedbackRespone(feedback),
+  });
 }
 
 async function updateFeedback(req, res) {
@@ -53,7 +57,10 @@ async function updateFeedback(req, res) {
   if (changes.content !== undefined) changes.content = plainText(changes.content);
   await feedback.update(changes);
   await feedback.reload({ include: [includeUser] });
-  res.json({ message: "Đã cập nhật bình luận.", data: feedback });
+  res.json({
+    message: "Đã cập nhật bình luận.",
+    data: new FeedbackRespone(feedback),
+  });
 }
 
 async function deleteFeedback(req, res) {
