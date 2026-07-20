@@ -20,6 +20,12 @@ function configRoutes(app) {
   app.use("/api/coupons", couponRoutes);
   app.use("/api/users", userRoutes);
   app.use(viewRoutes);
+
+  app.use((error, req, res, next) => {
+    console.error(error);
+    if (res.headersSent) return next(error);
+    return res.status(500).json({ message: "Đã xảy ra lỗi máy chủ." });
+  });
 }
 
 module.exports = configRoutes;
