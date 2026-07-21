@@ -4,9 +4,16 @@ const configViewEngine = require("./config/viewEngine");
 const serverConfig = require("./config/server");
 const createAdmin = require("./admin/admin");
 const configRoutes = require("./routes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 
 async function startServer() {
   const app = express();
+  app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec),
+);
   const { admin, router: adminRouter } = await createAdmin();
 
   app.use(admin.options.rootPath, adminRouter);
