@@ -5,6 +5,8 @@ Table users {
   name varchar
   role int // 1: admin, 2: customer
   status int // 0: inactive, 1: active, 2: banned
+  failed_login_attempts int // số lần đăng nhập sai liên tiếp
+  locked_until datetime // thời điểm hết hạn khóa đăng nhập tạm thời
   avatar varchar
   phone varchar
   created_at datetime

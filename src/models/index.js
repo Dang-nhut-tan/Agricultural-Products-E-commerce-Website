@@ -24,6 +24,8 @@ const User = sequelize.define("User", {
   name: DataTypes.STRING,
   role: { type: DataTypes.INTEGER, defaultValue: 2 },
   status: { type: DataTypes.INTEGER, defaultValue: 1 },
+  failed_login_attempts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+  locked_until: { type: DataTypes.DATE, allowNull: true },
   avatar: DataTypes.STRING,
   phone: DataTypes.STRING,
 }, {

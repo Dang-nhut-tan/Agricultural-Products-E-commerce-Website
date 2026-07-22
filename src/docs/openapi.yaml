@@ -59,6 +59,12 @@ paths:
               example: nong-san.sid=abc123; Path=/; HttpOnly
         "401": { description: Email hoặc mật khẩu không đúng }
         "403": { $ref: "#/components/responses/Forbidden" }
+        "423":
+          description: Tài khoản tạm khóa một giờ sau 5 lần đăng nhập sai liên tiếp
+          headers:
+            Retry-After:
+              description: Số giây còn lại trước khi có thể đăng nhập lại
+              schema: { type: integer, example: 3600 }
         "500": { $ref: "#/components/responses/ServerError" }
 
   /api/auth/logout:

@@ -3,6 +3,9 @@ const { sequelize, User, UserAddress } = require("../models");
 const { uploadImage } = require("../services/cloudinaryService");
 const UserRespone = require("../dtos/respone/user/userRespone");
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCK_DURATION_MS = 60 * 60 * 1000;
+
 async function register(req, res) {
   const email = String(req.body.email || "")
     .trim()
@@ -161,14 +164,56 @@ async function login(req, res) {
     .trim()
     .toLowerCase();
   const user = await User.findOne({ where: { email } });
-  if (
-    !user ||
-    !(await bcrypt.compare(String(req.body.password || ""), user.password_hash))
-  ) {
+  if (!user) {
     return res.status(401).json({ message: "Email hoặc mật khẩu không đúng." });
   }
+
   if (Number(user.status) !== 1)
     return res.status(403).json({ message: "Tài khoản đã bị khóa." });
+
+  const now = new Date();
+  if (user.locked_until && new Date(user.locked_until) > now) {
+    const retryAfterSeconds = Math.ceil(
+      (new Date(user.locked_until).getTime() - now.getTime()) / 1000,
+    );
+    res.set("Retry-After", String(retryAfterSeconds));
+    return res.status(423).json({
+      message: "Tài khoản tạm khóa do đăng nhập sai 5 lần liên tiếp. Vui lòng thử lại sau.",
+      lockedUntil: user.locked_until,
+    });
+  }
+
+  if (user.locked_until) {
+    await user.update({ failed_login_attempts: 0, locked_until: null });
+  }
+
+  const passwordMatches = await bcrypt.compare(
+    String(req.body.password || ""),
+    user.password_hash,
+  );
+  if (!passwordMatches) {
+    const failedLoginAttempts = Number(user.failed_login_attempts || 0) + 1;
+    if (failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
+      const lockedUntil = new Date(Date.now() + LOGIN_LOCK_DURATION_MS);
+      await user.update({
+        failed_login_attempts: MAX_LOGIN_ATTEMPTS,
+        locked_until: lockedUntil,
+      });
+      res.set("Retry-After", String(LOGIN_LOCK_DURATION_MS / 1000));
+      return res.status(423).json({
+        message: "Tài khoản tạm khóa do đăng nhập sai 5 lần liên tiếp. Vui lòng thử lại sau 1 giờ.",
+        lockedUntil,
+      });
+    }
+
+    await user.update({ failed_login_attempts: failedLoginAttempts });
+    return res.status(401).json({ message: "Email hoặc mật khẩu không đúng." });
+  }
+
+  if (user.failed_login_attempts || user.locked_until) {
+    await user.update({ failed_login_attempts: 0, locked_until: null });
+  }
+
   req.session.userId = user.id;
   res.json({
     message: "Đăng nhập thành công.",
