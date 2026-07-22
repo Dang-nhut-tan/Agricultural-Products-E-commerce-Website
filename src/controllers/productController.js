@@ -1,4 +1,5 @@
 const db = require("../models");
+const ProductRespone = require("../dtos/respone/product/productRespone");
 const { Op } = db.Sequelize;
 
 async function getProducts(req, res) {
@@ -16,7 +17,7 @@ async function getProducts(req, res) {
     offset: (page - 1) * limit,
   });
   res.json({
-    data: rows,
+    data: rows.map((product) => new ProductRespone(product)),
     pagination: {
       page,
       limit,
@@ -29,11 +30,11 @@ async function getProducts(req, res) {
 async function getProductById(req, res) {
   const product = await db.Product.findOne({
     where: { id: req.params.id, status: 1 },
-    include: [db.Category, db.Brand, db.ProductImage, db.ProductBatch],
+    include: [db.Category, db.Brand, db.ProductImage],
   });
   if (!product)
     return res.status(404).json({ message: "Không tìm thấy sản phẩm." });
-  res.status(200).json({ data: product });
+  res.status(200).json({ data: new ProductRespone(product) });
 }
 
 module.exports = { getProducts, getProductById };
