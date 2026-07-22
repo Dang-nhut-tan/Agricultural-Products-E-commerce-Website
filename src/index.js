@@ -5,15 +5,20 @@ const serverConfig = require("./config/server");
 const createAdmin = require("./admin/admin");
 const configRoutes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
-const swaggerSpec = require("./config/swagger");
+const YAML = require("yamljs");
+const path = require("path");
 
 async function startServer() {
   const app = express();
+  const swaggerDocument = YAML.load(
+    path.join(__dirname, "docs", "openapi.yaml"),
+  );
+
   app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec),
-);
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument),
+  );
   const { admin, router: adminRouter } = await createAdmin();
 
   app.use(admin.options.rootPath, adminRouter);
