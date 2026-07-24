@@ -1,0 +1,41 @@
+[
+  {
+    "name": "Nguyễn Văn An",
+    "emailPrefix": "nguyen.van.an",
+    "password": "Test123456",
+    "phone": "0901234567",
+    "address": "123 Nguyễn Trãi",
+    "ward": "Phường Bến Thành",
+    "district": "Quận 1",
+    "province": "TP. Hồ Chí Minh",
+    "page": 1,
+    "search": "",
+    "id": 1
+  },
+  {
+    "name": "Trần Thị Bình",
+    "emailPrefix": "tran.thi.binh",
+    "password": "Test123456",
+    "phone": "0912345678",
+    "address": "45 Lê Lợi",
+    "ward": "Phường Bến Nghé",
+    "district": "Quận 1",
+    "province": "TP. Hồ Chí Minh",
+    "page": 1,
+    "search": "Rau",
+    "id": 1
+  },
+  {
+    "name": "Lê Minh Châu",
+    "emailPrefix": "le.minh.chau",
+    "password": "Test123456",
+    "phone": "0923456789",
+    "address": "18 Trần Phú",
+    "ward": "Phường 4",
+    "district": "Quận 5",
+    "province": "TP. Hồ Chí Minh",
+    "page": 1,
+    "search": "Cần",
+    "id": 1
+  }
+]

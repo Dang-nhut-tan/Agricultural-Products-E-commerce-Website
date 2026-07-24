@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Playwright and API Tests
 
 on:
   push:
@@ -12,25 +12,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      # Tải source code từ repository xuống runner
+      - name: Checkout source code
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v5
+      # Cài đặt Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
           node-version: 24
 
+      # Bật Corepack để sử dụng Yarn
       - name: Enable Yarn
         run: corepack enable
 
+      # Kiểm tra phiên bản Node.js và Yarn
       - name: Check versions
         run: |
           node --version
           yarn --version
 
+      # Cài dependencies trong package.json
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      # Cài Chromium và các thư viện cần thiết
       - name: Install Chromium
         run: yarn playwright install --with-deps chromium
 
+      # Chạy Playwright smoke test
       - name: Run one Playwright smoke test
         run: yarn playwright test tests/smoke.spec.js --project=chromium
+
+      # Chạy Postman Collection bằng Newman
+      - name: Run API tests with Newman
+        run: >
+          npx newman run
+          "./api-testing-project/collections/Web Nông Sản API.postman_collection.json"
