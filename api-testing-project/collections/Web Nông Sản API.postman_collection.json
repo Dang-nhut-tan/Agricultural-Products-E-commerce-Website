@@ -17,10 +17,36 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"status code is 201\",function()\r",
-                  "{\r",
-                  "    pm.response.to.have.status(201)\r",
-                  "})"
+                  "var data=pm.response.json()",
+                  "",
+                  "pm.test(\"status code is 200\",function()",
+                  "{",
+                  "    pm.response.to.have.status(201)",
+                  "})",
+                  "",
+                  "pm.test(\"response time is less than 200ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(2000)",
+                  "})",
+                  "",
+                  "pm.test(\"response message is 'Đăng ký thành công.'\", function () {",
+                  "    pm.expect(pm.response.text()).to.contain(\"Đăng ký thành công\")",
+                  "})",
+                  "",
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+                  "});",
+                  "",
+                  "pm.environment.set(\"userId\", data.data.id)",
+                  "pm.environment.set(\"email\",data.data.email)",
+                  "",
+                  "if(pm.response.code===201)",
+                  "{",
+                  "    pm.execution.setNextRequest(\"Login\")",
+                  "}",
+                  "else",
+                  "{",
+                  "    pm.execution.setNextRequest(null)",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -31,9 +57,7 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "const prefix = pm.iterationData.get(\"emailPrefix\") || \"postman.user\";",
-                  "const unique = `${Date.now()}.${pm.info.iteration}`;",
-                  "pm.variables.set(\"testEmail\", `${prefix}.${unique}@example.com`);"
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -46,7 +70,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"{{name}}\",\r\n    \"email\": \"{{testEmail}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"passwordConfirmation\": \"{{password}}\",\r\n    \"phone\": \"{{phone}}\",\r\n    \"address\": \"{{address}}\",\r\n    \"ward\": \"{{ward}}\",\r\n    \"district\": \"{{district}}\",\r\n    \"province\": \"{{province}}\"\r\n}",
+              "raw": "{\r\n    \"name\": \"{{$randomBankAccountName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"123456\",\r\n    \"passwordConfirmation\": \"123456\",\r\n    \"phone\": \"0901234567\",\r\n    \"address\": \"123 Nguyễn Trãi\",\r\n    \"ward\": \"Phường Bến Thành\",\r\n    \"district\": \"Quận 1\",\r\n    \"province\": \"TP. Hồ Chí Minh\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -62,6 +86,51 @@
                 "api",
                 "auth",
                 "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () \r",
+                  "{\r",
+                  "    pm.response.to.have.status(200)\r",
+                  "})\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
               ]
             }
           },
@@ -110,9 +179,9 @@
                   "    pm.expect(json.pagination).to.have.property(\"totalPages\");",
                   "});",
                   "",
-                  "pm.test(\"pagination.page matches iteration data\", function () {",
+                  "pm.test(\"pagination.page equals 1 (matches query param page=1)\", function () {",
                   "    const json = pm.response.json();",
-                  "    pm.expect(json.pagination.page).to.eql(Number(pm.iterationData.get(\"page\") || 1));",
+                  "    pm.expect(json.pagination.page).to.eql(1);",
                   "});",
                   "",
                   "pm.test(\"Each product's Category object (if present) has id and name\", function () {",
@@ -128,7 +197,120 @@
                   "pm.test(\"Response time is less than 3000ms\", function () {",
                   "    pm.expect(pm.response.responseTime).to.be.below(3000);",
                   "});",
-                  ""
+                  "",
+                  "const products = pm.response.json().data;",
+                  "if (products.length > 0) {",
+                  "    pm.environment.set(\"productId\", products[0].id);",
+                  "} else {",
+                  "    pm.environment.unset(\"productId\");",
+                  "}",
+                  "",
+                  "pm.globals.set(\"name\", \"Tan\")",
+                  "",
+                  "",
+                  "// Visualization Script",
+                  "// Visualization Script",
+                  "const template = `",
+                  "<style>",
+                  "  * { box-sizing: border-box; }",
+                  "  body { font-family: sans-serif; padding: 12px; margin: 0; }",
+                  "  h2 { font-size: 15px; margin: 0 0 10px; }",
+                  "  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }",
+                  "  .card { padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 6px; }",
+                  "  .card .v { font-size: 22px; font-weight: 700; }",
+                  "  .card .l { font-size: 11px; color: #888; text-transform: uppercase; margin-top: 2px; }",
+                  "  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }",
+                  "  th { background: #f5f5f5; text-align: left; padding: 6px 8px; border-bottom: 2px solid #ddd; }",
+                  "  td { padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }",
+                  "  .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }",
+                  "  .in-stock { background: #d1fae5; color: #065f46; }",
+                  "  .out-stock { background: #fee2e2; color: #991b1b; }",
+                  "  .chart-wrap { max-width: 560px; }",
+                  "</style>",
+                  "<h2>Product Overview</h2>",
+                  "<div class=\"grid\">",
+                  "  <div class=\"card\"><div class=\"v\">{{summary.total}}</div><div class=\"l\">Total Products</div></div>",
+                  "  <div class=\"card\"><div class=\"v\">{{summary.inStock}}</div><div class=\"l\">In Stock</div></div>",
+                  "  <div class=\"card\"><div class=\"v\">{{summary.totalSold}}</div><div class=\"l\">Total Sold</div></div>",
+                  "  <div class=\"card\"><div class=\"v\">{{summary.page}} / {{summary.totalPages}}</div><div class=\"l\">Page</div></div>",
+                  "</div>",
+                  "<table>",
+                  "  <tr><th>#</th><th>Name</th><th>Category</th><th>Price (VND)</th><th>Qty</th><th>Sold</th><th>Status</th></tr>",
+                  "  {{#each rows}}",
+                  "  <tr>",
+                  "    <td>{{id}}</td>",
+                  "    <td>{{name}}</td>",
+                  "    <td>{{category}}</td>",
+                  "    <td>{{price}}</td>",
+                  "    <td>{{quantity}}</td>",
+                  "    <td>{{sold}}</td>",
+                  "    <td><span class=\"badge {{stockClass}}\">{{stockLabel}}</span></td>",
+                  "  </tr>",
+                  "  {{/each}}",
+                  "</table>",
+                  "<div class=\"chart-wrap\">",
+                  "  <canvas id=\"chart\" height=\"120\"></canvas>",
+                  "</div>",
+                  "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4\"></script>",
+                  "<script>",
+                  "  pm.getData(function (err, value) {",
+                  "    new Chart(document.getElementById('chart'), {",
+                  "      type: 'bar',",
+                  "      data: {",
+                  "        labels: value.rows.map(function (r) { return r.name; }),",
+                  "        datasets: [",
+                  "          {",
+                  "            label: 'Price (x1000 VND)',",
+                  "            data: value.rows.map(function (r) { return r.priceRaw / 1000; }),",
+                  "            backgroundColor: 'rgba(99,102,241,0.7)'",
+                  "          },",
+                  "          {",
+                  "            label: 'Sold Count',",
+                  "            data: value.rows.map(function (r) { return r.sold; }),",
+                  "            backgroundColor: 'rgba(16,185,129,0.7)'",
+                  "          }",
+                  "        ]",
+                  "      },",
+                  "      options: {",
+                  "        plugins: { legend: { display: true } },",
+                  "        scales: { y: { beginAtZero: true } }",
+                  "      }",
+                  "    });",
+                  "  });",
+                  "</script>`;",
+                  "",
+                  "function createPayload() {",
+                  "  var body = pm.response.json();",
+                  "  var pagination = body.pagination || {};",
+                  "  var inStock = body.data.filter(function (p) { return p.quantity > 0; }).length;",
+                  "  var totalSold = body.data.reduce(function (acc, p) { return acc + (p.sold_count || 0); }, 0);",
+                  "  var rows = body.data.map(function (p) {",
+                  "    var priceRaw = parseFloat(p.price) || 0;",
+                  "    return {",
+                  "      id: p.id,",
+                  "      name: p.name,",
+                  "      category: p.Category ? p.Category.name : 'N/A',",
+                  "      price: priceRaw.toLocaleString('vi-VN'),",
+                  "      priceRaw: priceRaw,",
+                  "      quantity: p.quantity,",
+                  "      sold: p.sold_count || 0,",
+                  "      stockClass: p.quantity > 0 ? 'in-stock' : 'out-stock',",
+                  "      stockLabel: p.quantity > 0 ? 'In Stock' : 'Out of Stock'",
+                  "    };",
+                  "  });",
+                  "  return {",
+                  "    summary: {",
+                  "      total: pagination.total || body.data.length,",
+                  "      inStock: inStock,",
+                  "      totalSold: totalSold,",
+                  "      page: pagination.page || 1,",
+                  "      totalPages: pagination.totalPages || 1",
+                  "    },",
+                  "    rows: rows",
+                  "  };",
+                  "}",
+                  "",
+                  "pm.visualizer.set(template, createPayload());"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -140,7 +322,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products?page={{page}}&search={{search}}",
+              "raw": "{{baseUrl}}/api/products?page=1",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -151,11 +333,7 @@
               "query": [
                 {
                   "key": "page",
-                  "value": "{{page}}"
-                },
-                {
-                  "key": "search",
-                  "value": "{{search}}"
+                  "value": "1"
                 }
               ]
             }
@@ -169,22 +347,21 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"status code is 200\",function()\r",
-                  "{\r",
-                  "    pm.response.to.have.status(200)\r",
-                  "})\r",
-                  "\r",
-                  "pm.test(\"Response time is below 2000\",function()\r",
-                  "{\r",
-                  "    pm.expect(pm.response.responseTime).to.below(2000)\r",
-                  "})\r",
-                  "\r",
-                  "pm.test(\"Conten-type is json\",function()\r",
-                  "{\r",
-                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\")\r",
-                  "})\r",
-                  "\r",
-                  ""
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is below 2000 ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is JSON\", function () {",
+                  "    const contentType = pm.response.headers.get(\"Content-Type\");",
+                  "",
+                  "    pm.expect(contentType).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "console.log(\"Product ID:\", pm.environment.get(\"productId\"));"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -196,32 +373,72 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{id}}",
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "products",
-                "{{id}}"
+                "{{productId}}"
               ]
             }
           },
           "response": []
         }
       ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://127.0.0.1:3000",
-      "type": "string"
     },
     {
-      "key": "id",
-      "value": "1",
-      "type": "string"
+      "name": "My Account",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update me",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Nguyễn Văn A\",\r\n  \"phone\": \"0901234567\",\r\n  \"avatarData\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
