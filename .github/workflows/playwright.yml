@@ -10,6 +10,29 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: 123456
+      DB_DATABASE: web_nong_san
+      DB_DIALECT: mysql
+      HOST: 127.0.0.1
+      PORT: 3000
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_DATABASE: web_nong_san
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p123456"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       # Tải source code từ repository xuống runner
@@ -20,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 22
 
       # Bật Corepack để sử dụng Yarn
       - name: Enable Yarn
@@ -36,6 +59,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Prepare test database
+        run: |
+          yarn sequelize-cli db:migrate
+          yarn sequelize-cli db:seed:all
+
       # Cài Chromium và các thư viện cần thiết
       - name: Install Chromium
         run: yarn playwright install --with-deps chromium
@@ -44,8 +72,22 @@ jobs:
       - name: Run one Playwright smoke test
         run: yarn playwright test tests/smoke.spec.js --project=chromium
 
-      # Chạy Postman Collection bằng Newman
+      - name: Start backend for API tests
+        run: |
+          yarn start > backend.log 2>&1 &
+          echo $! > backend.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat backend.log
+          exit 1
+
       - name: Run API tests with Newman
-        run: >
-          npx newman run
-          "./api-testing-project/collections/Web Nông Sản API.postman_collection.json"
+        run: yarn api:test
+
+      - name: Show backend log on failure
+        if: failure()
+        run: cat backend.log || true
