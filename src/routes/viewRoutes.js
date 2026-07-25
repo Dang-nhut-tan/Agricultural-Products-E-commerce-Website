@@ -5,7 +5,6 @@ const pages = [
   "/",
   "/nha-cung-cap",
   "/nha-cung-cap/:id",
-  "/khuyen-mai",
   "/khuyen-mai/:id",
   "/tin-tuc",
   "/tin-tuc/:id",
