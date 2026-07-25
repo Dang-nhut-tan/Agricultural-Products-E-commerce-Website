@@ -36,7 +36,7 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
                   "});",
                   "",
-                  "pm.environment.set(\"userId\", data.data.id)",
+                  "pm.environment.set(\"ID\",data.data.id)",
                   "pm.environment.set(\"email\",data.data.email)",
                   "",
                   "if(pm.response.code===201)",
@@ -198,13 +198,6 @@
                   "    pm.expect(pm.response.responseTime).to.be.below(3000);",
                   "});",
                   "",
-                  "const products = pm.response.json().data;",
-                  "if (products.length > 0) {",
-                  "    pm.environment.set(\"productId\", products[0].id);",
-                  "} else {",
-                  "    pm.environment.unset(\"productId\");",
-                  "}",
-                  "",
                   "pm.globals.set(\"name\", \"Tan\")",
                   "",
                   "",
@@ -361,7 +354,25 @@
                   "    pm.expect(contentType).to.include(\"application/json\");",
                   "});",
                   "",
-                  "console.log(\"Product ID:\", pm.environment.get(\"productId\"));"
+                  "// Lấy ID hiện tại từ Environment",
+                  "const currentId = Number(pm.environment.get(\"ID\") || 1);",
+                  "",
+                  "console.log(\"ID hiện tại:\", currentId);",
+                  "",
+                  "if (currentId < 20) {",
+                  "    const nextId = currentId + 1;",
+                  "",
+                  "    pm.environment.set(\"ID\", nextId);",
+                  "    pm.execution.setNextRequest(\"get product by id\");",
+                  "} else {",
+                  "    console.log(\"Đã chạy xong ID = 20\");",
+                  "",
+                  "    // Chuẩn bị cho lần chạy Collection tiếp theo",
+                  "    pm.environment.set(\"ID\", 1);",
+                  "",
+                  "    // Dừng Collection",
+                  "    pm.execution.setNextRequest(null);",
+                  "}"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -373,14 +384,148 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "raw": "{{baseUrl}}/api/products/{{ID}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "products",
-                "{{productId}}"
+                "{{ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "get product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 2000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"Response message is correct\", function () {",
+                  "",
+                  "    pm.expect(responseJson.message)",
+                  "        .to.include(\"Lấy danh sách danh mục thành công\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response data is an array\", function () {",
+                  "    pm.expect(responseJson.data).to.be.an(\"array\")",
+                  "    pm.expect(responseJson.data).to.not.empty",
+                  "})",
+                  "",
+                  "pm.test(\"headers\",function(){",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.eql(\"application/json; charset=utf-8\")",
+                  "})",
+                  "pm.test(\"Response data contains correct fields\", function () {",
+                  "    responseJson.data.forEach(function (item) ",
+                  "    {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item).to.have.property(\"name\")",
+                  "        pm.expect(item.image).to.satisfy(function(value){",
+                  "            return value.startsWith(\"https://res.cloudinary.com\")||value==null",
+                  "        })",
+                  "        pm.expect(item).to.have.property(\"createdAt\")",
+                  "        pm.expect(item).to.have.property(\"updatedAt\")",
+                  "    })",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get product by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is below 2000 ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});",
+                  "",
+                  "pm.test(\"Content-Type is JSON\", function () {",
+                  "    const contentType = pm.response.headers.get(\"Content-Type\");",
+                  "",
+                  "    pm.expect(contentType).to.include(\"application/json\");",
+                  "});",
+                  "",
+                  "// Lấy ID hiện tại từ Environment",
+                  "const currentId = Number(pm.environment.get(\"ID\") || 1);",
+                  "",
+                  "console.log(\"ID hiện tại:\", currentId);",
+                  "",
+                  "if (currentId < 20) {",
+                  "    const nextId = currentId + 1;",
+                  "",
+                  "    pm.environment.set(\"ID\", nextId);",
+                  "    pm.execution.setNextRequest(\"get product by id\");",
+                  "} else {",
+                  "    console.log(\"Đã chạy xong ID = 20\");",
+                  "",
+                  "    // Chuẩn bị cho lần chạy Collection tiếp theo",
+                  "    pm.environment.set(\"ID\", 1);",
+                  "",
+                  "    // Dừng Collection",
+                  "    pm.execution.setNextRequest(null);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{ID}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "{{ID}}"
               ]
             }
           },

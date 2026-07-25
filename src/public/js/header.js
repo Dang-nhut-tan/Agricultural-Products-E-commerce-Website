@@ -37,5 +37,11 @@ if (oldHeader) {
     );
   }
   const saleLink = document.querySelector(".modern-nav .sale");
-  if (saleLink) saleLink.href = "/#products";
+  if (saleLink) {
+    saleLink.href = "/khuyen-mai";
+    saleLink.classList.toggle("active", location.pathname.startsWith("/khuyen-mai"));
+    if (location.pathname.startsWith("/khuyen-mai")) {
+      saleLink.setAttribute("aria-current", "page");
+    }
+  }
 }

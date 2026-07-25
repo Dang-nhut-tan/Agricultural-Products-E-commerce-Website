@@ -43,4 +43,27 @@ async function getStorefront(req, res) {
   }
 }
 
-module.exports = { getStorefront };
+async function getPromotions(req, res) {
+  try {
+    const products = await db.Product.findAll({
+      where: {
+        status: 1,
+        oldprice: {
+          [Op.gt]: db.sequelize.col("Product.price"),
+        },
+      },
+      include: [db.Category, db.Brand, { model: db.ProductImage, required: false }],
+      order: [
+        [db.sequelize.literal("oldprice - price"), "DESC"],
+        ["createdAt", "DESC"],
+      ],
+    });
+
+    res.json({ products });
+  } catch (error) {
+    console.error("Không thể tải sản phẩm khuyến mãi:", error);
+    res.status(500).json({ message: "Không thể tải sản phẩm khuyến mãi." });
+  }
+}
+
+module.exports = { getStorefront, getPromotions };

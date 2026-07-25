@@ -5,8 +5,6 @@ const bannerRoutes = require("./bannerRoutes");
 const newsRoutes = require("./newsRoutes");
 const brandRoutes = require("./brandRoutes");
 const storefrontRoutes = require("./storefrontRoutes");
-const couponRoutes = require("./couponRoutes");
-const userRoutes = require("./userRoutes");
 const viewRoutes = require("./viewRoutes");
 
 function configRoutes(app) {
@@ -17,8 +15,6 @@ function configRoutes(app) {
   app.use("/api/news", newsRoutes);
   app.use("/api/brands", brandRoutes);
   app.use("/api/storefront", storefrontRoutes);
-  app.use("/api/coupons", couponRoutes);
-  app.use("/api/users", userRoutes);
   app.use(viewRoutes);
 
   app.use((error, req, res, next) => {
