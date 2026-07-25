@@ -1,7 +1,7 @@
 const oldHeader = document.querySelector("header");
 document.head.insertAdjacentHTML(
   "beforeend",
-  '<link rel="stylesheet" href="/css/menu.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/home-products.css"><link rel="stylesheet" href="/css/banner-click.css"><link rel="stylesheet" href="/css/home-extras.css"><link rel="stylesheet" href="/css/promotion.css"><link rel="stylesheet" href="/css/image-ratios.css"><link rel="stylesheet" href="/css/news-detail.css"><link rel="stylesheet" href="/css/commerce-detail.css"><link rel="stylesheet" href="/css/comments.css"><link rel="stylesheet" href="/css/home-polish.css"><link rel="stylesheet" href="/css/storefront-v2.css">',
+  '<link rel="stylesheet" href="/css/menu.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/home-products.css"><link rel="stylesheet" href="/css/banner-click.css"><link rel="stylesheet" href="/css/home-extras.css"><link rel="stylesheet" href="/css/promotion.css"><link rel="stylesheet" href="/css/image-ratios.css"><link rel="stylesheet" href="/css/home-polish.css"><link rel="stylesheet" href="/css/storefront-v2.css">',
 );
 document.body.dataset.page =
   location.pathname === "/san-pham"
@@ -24,7 +24,10 @@ if (oldHeader) {
     const nav = document.querySelector(".modern-nav");
     const open = nav.classList.toggle("open");
     event.currentTarget.setAttribute("aria-expanded", String(open));
-    event.currentTarget.setAttribute("aria-label", open ? "Đóng menu" : "Mở menu");
+    event.currentTarget.setAttribute(
+      "aria-label",
+      open ? "Đóng menu" : "Mở menu",
+    );
   };
   const productLink = [...document.querySelectorAll(".modern-nav a")].find(
     (link) => link.textContent.trim() === "Sản phẩm",
@@ -34,6 +37,10 @@ if (oldHeader) {
     productLink.insertAdjacentHTML(
       "afterend",
       `<a href="/nha-cung-cap" class="${location.pathname === "/nha-cung-cap" ? "active" : ""}">Nhà cung cấp</a>`,
+    );
+    productLink.parentElement.insertAdjacentHTML(
+      "beforeend",
+      `<a href="/lien-he" class="${location.pathname === "/lien-he" ? "active" : ""}" ${location.pathname === "/lien-he" ? 'aria-current="page"' : ""}>Liên hệ</a>`,
     );
   }
   const saleLink = document.querySelector(".modern-nav .sale");

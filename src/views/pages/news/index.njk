@@ -1,0 +1,33 @@
+{% extends "base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/css/news-detail.css">
+{% endblock %}
+
+{% block content %}
+  <section class="page-title">
+    <div class="container">
+      <span class="breadcrumbs"><a href="/">Trang chủ</a> / Tin tức</span>
+      <h1>Tin tức</h1>
+      <p>Kiến thức hữu ích về nông sản và bữa ăn gia đình.</p>
+    </div>
+  </section>
+  <section class="news-page container">
+    {% if news.length %}
+      <div class="news-list">
+        {% for item in news %}
+          <article class="news-card">
+            <a href="/tin-tuc/{{ item.id }}" class="news-card-image" {% if item.image %}style="background-image: url('{{ item.image }}')"{% endif %}></a>
+            <div>
+              <time>{{ item.publishedDate }}</time>
+              <h2><a href="/tin-tuc/{{ item.id }}">{{ item.title }}</a></h2>
+              <a href="/tin-tuc/{{ item.id }}">Đọc bài viết →</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="clean-empty"><span>📰</span><h2>Chưa có bài viết</h2><p>Bài viết mới sẽ xuất hiện tại đây.</p></div>
+    {% endif %}
+  </section>
+{% endblock %}

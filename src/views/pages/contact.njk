@@ -1,0 +1,116 @@
+{# Trang liên hệ #}
+{% extends "base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/css/contact.css">
+{% endblock %}
+
+{% block content %}
+  <section class="contact-hero">
+    <div class="container contact-hero-inner">
+      <span class="contact-eyebrow">LUÔN SẴN SÀNG LẮNG NGHE</span>
+      <h1>Chúng tôi có thể giúp gì cho bạn?</h1>
+      <p>Gửi câu hỏi về sản phẩm, đơn hàng hoặc hợp tác. Đội ngũ Nông Sản Xanh sẽ phản hồi trong thời gian sớm nhất.</p>
+    </div>
+  </section>
+
+  <section class="contact-page container">
+    <div class="contact-layout">
+      <div class="contact-info">
+        <div class="contact-info-heading">
+          <span>THÔNG TIN LIÊN HỆ</span>
+          <h2>Kết nối với Nông Sản Xanh</h2>
+          <p>Bạn có thể chọn cách liên hệ thuận tiện nhất. Chúng tôi phục vụ từ thứ Hai đến thứ Bảy.</p>
+        </div>
+
+        <div class="contact-methods">
+          {% for method in contactMethods %}
+            {% if method.href %}<a href="{{ method.href }}" class="contact-method">{% else %}<div class="contact-method">{% endif %}
+              <b aria-hidden="true">{{ method.icon }}</b>
+              <span>
+                <small>{{ method.label }}</small>
+                <strong>{{ method.value }}</strong>
+                <em>{{ method.note }}</em>
+              </span>
+            {% if method.href %}</a>{% else %}</div>{% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="contact-note">
+          <strong>Cần hỗ trợ gấp về đơn hàng?</strong>
+          <p>Vui lòng gọi hotline và chuẩn bị mã đơn hàng để được hỗ trợ nhanh hơn.</p>
+        </div>
+      </div>
+
+      <div class="contact-form-card">
+        <span class="contact-form-kicker">GỬI LỜI NHẮN</span>
+        <h2>Để lại thông tin cho chúng tôi</h2>
+        <p>Điền các thông tin bên dưới, chúng tôi sẽ chủ động liên hệ lại.</p>
+
+        <form id="contactForm" novalidate>
+          <div class="contact-form-grid">
+            <label>
+              <span>Họ và tên <i>*</i></span>
+              <input name="name" autocomplete="name" placeholder="Nguyễn Văn An" required>
+              <small class="field-error"></small>
+            </label>
+            <label>
+              <span>Số điện thoại <i>*</i></span>
+              <input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="0901 234 567" required>
+              <small class="field-error"></small>
+            </label>
+            <label>
+              <span>Email</span>
+              <input name="email" type="email" autocomplete="email" placeholder="ban@example.com">
+              <small class="field-error"></small>
+            </label>
+            <label>
+              <span>Chủ đề <i>*</i></span>
+              <select name="subject" required>
+                <option value="">Chọn chủ đề</option>
+                {% for subject in contactSubjects %}
+                  <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+              </select>
+              <small class="field-error"></small>
+            </label>
+            <label class="contact-message">
+              <span>Nội dung <i>*</i></span>
+              <textarea name="message" rows="5" placeholder="Bạn cần Nông Sản Xanh hỗ trợ điều gì?" required></textarea>
+              <small class="field-error"></small>
+            </label>
+          </div>
+
+          <label class="contact-consent">
+            <input type="checkbox" name="consent" required>
+            <span>Tôi đồng ý để Nông Sản Xanh liên hệ lại theo thông tin đã cung cấp.</span>
+          </label>
+          <small class="consent-error"></small>
+          <button type="submit" class="contact-submit">
+            <span class="contact-submit-label">Gửi lời nhắn</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <div id="contactStatus" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="contact-map" aria-label="Khu vực phục vụ">
+      <div>
+        <span>VÙNG PHỤC VỤ</span>
+        <h2>Giao nông sản tươi đến tận nhà</h2>
+        <p>Phục vụ tại TP. Hồ Chí Minh và giao hàng toàn quốc với quy trình đóng gói phù hợp từng loại nông sản.</p>
+        <a href="/san-pham">Khám phá sản phẩm →</a>
+      </div>
+      <div class="contact-map-art" aria-hidden="true">
+        <i></i>
+        <b>TP.HCM</b>
+        <small>Giao nhanh trong ngày</small>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="/js/contact.js" defer></script>
+{% endblock %}

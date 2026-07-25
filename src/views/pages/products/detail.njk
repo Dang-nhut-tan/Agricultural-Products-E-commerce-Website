@@ -1,0 +1,74 @@
+{% extends "base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/css/commerce-detail.css">
+{% endblock %}
+
+{% block content %}
+  <section class="commerce-detail container">
+    <div class="commerce-breadcrumb">
+      <a href="/">Trang chủ</a> › <a href="/san-pham">Sản phẩm</a> › {{ product.Category.name or "" }} › {{ product.name }}
+    </div>
+
+    <div class="commerce-top">
+      <div class="commerce-gallery">
+        <div id="commerceMain" class="commerce-main" {% if product.images[0] %}style="background-image: url('{{ product.images[0] }}')"{% endif %}>
+          {% if not product.images.length %}Chưa có ảnh{% endif %}
+        </div>
+        <div class="commerce-thumbs">
+          {% for image in product.images %}
+            <button type="button" class="{{ 'active' if loop.first }}" data-gallery-image="{{ image }}" style="background-image: url('{{ image }}')" aria-label="Xem ảnh {{ loop.index }}"></button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="commerce-info">
+        <h1>{{ product.name }}</h1>
+        <div class="commerce-stats">
+          <span><b>{{ product.sold_count or 0 }}</b> đã bán</span>
+          <span>{{ product.Category.name or "Nông sản" }}</span>
+          <span>{{ product.Brand.name or "Đang cập nhật" }}</span>
+        </div>
+        <div class="commerce-price">{{ product.displayPrice }}{% if product.displayOldPrice %}<del>{{ product.displayOldPrice }}</del>{% endif %}</div>
+        <div class="commerce-row"><label>Vận chuyển</label><div><b>🚚 Giao hàng tận nơi</b><small>Phí vận chuyển được xác nhận khi đặt hàng.</small></div></div>
+        <div class="commerce-row"><label>Nguồn gốc</label><div>{{ product.origin or "Đang cập nhật" }}</div></div>
+        <div class="commerce-row"><label>Tình trạng</label><div class="{{ 'in-stock' if product.quantity > 0 else 'out-stock' }}">{{ "Còn " + product.quantity|string + " sản phẩm" if product.quantity > 0 else "Tạm hết hàng" }}</div></div>
+        <div class="commerce-row">
+          <label>Số lượng</label>
+          <div class="commerce-buy">
+            <input id="commerceQty" type="number" min="1" max="{{ product.quantity }}" value="1">
+            <button
+              type="button"
+              data-cart-add
+              data-quantity-input="commerceQty"
+              data-product-id="{{ product.id }}"
+              data-product-name="{{ product.name }}"
+              data-product-price="{{ product.price }}"
+              data-product-image="{{ product.images[0] or '' }}"
+              {% if product.quantity <= 0 %}disabled{% endif %}
+            >{{ "Thêm vào giỏ hàng" if product.quantity > 0 else "Tạm hết hàng" }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commerce-spec">
+      <h2>CHI TIẾT SẢN PHẨM</h2>
+      <dl>
+        <dt>Danh mục</dt><dd>{{ product.Category.name or "Đang cập nhật" }}</dd>
+        <dt>Đơn vị đóng gói</dt><dd>{{ product.unit or "Đang cập nhật" }}</dd>
+        <dt>Nhà cung cấp</dt><dd>{{ product.Brand.name or "Đang cập nhật" }}</dd>
+        <dt>Xuất xứ</dt><dd>{{ product.origin or "Đang cập nhật" }}</dd>
+      </dl>
+    </div>
+    <div class="commerce-description">
+      <h2>MÔ TẢ SẢN PHẨM</h2>
+      <div>{{ product.description or "Nội dung đang được cập nhật." }}</div>
+    </div>
+  </section>
+  <div class="toast" id="pageToast" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="/js/cart-actions.js" defer></script>
+{% endblock %}

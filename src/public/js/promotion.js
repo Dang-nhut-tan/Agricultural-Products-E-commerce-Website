@@ -30,7 +30,7 @@ if (promotionMatch) {
           .map((product) => {
             const image =
               product.image || product.ProductImages?.[0]?.image || "";
-            return `<article class="product"><div class="product-image ${image ? "" : "no-image"}" ${image ? `style="background-image:url('${image.replace(/'/g, "%27")}')"` : ""}>${image ? "" : "Chưa có ảnh"}</div><div class="product-info"><span class="product-cat">${safe(product.Category?.name || "")}</span><h3>${safe(product.name)}</h3><span class="price">${money(product.price)}</span>${Number(product.oldprice) > Number(product.price) ? `<span class="old">${money(product.oldprice)}</span>` : ""}<button class="add" data-add="${product.id}">+</button><span class="stock">${product.quantity > 0 ? `Còn ${product.quantity} ${safe(product.unit || "")}` : "Tạm hết hàng"}</span></div></article>`;
+            return `<article class="product"><div class="product-image ${image ? "" : "no-image"}" ${image ? `style="background-image:url('${image.replace(/'/g, "%27")}')"` : ""}>${image ? "" : "Chưa có ảnh"}</div><div class="product-info"><span class="product-cat">${safe(product.Category?.name || "")}</span><h3>${safe(product.name)}</h3><span class="price">${money(product.price)}</span>${Number(product.oldprice) > Number(product.price) ? `<span class="old">${money(product.oldprice)}</span>` : ""}<button type="button" class="add" data-add="${product.id}">+</button><span class="stock">${product.quantity > 0 ? `Còn ${product.quantity} ${safe(product.unit || "")}` : "Tạm hết hàng"}</span></div></article>`;
           })
           .join("") ||
         '<div class="clean-empty"><h2>Chương trình chưa có sản phẩm đang bán</h2></div>'

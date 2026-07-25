@@ -1,15 +1,17 @@
 const router = require("express").Router();
 const controller = require("../controllers/viewController");
 
+router.get("/lien-he", controller.getContactPage);
+router.get("/san-pham", controller.getProductsPage);
+router.get("/san-pham/:id", controller.getProductDetailPage);
+router.get("/tin-tuc", controller.getNewsPage);
+router.get("/tin-tuc/:id", controller.getNewsDetailPage);
+
 const pages = [
   "/",
   "/nha-cung-cap",
   "/nha-cung-cap/:id",
   "/khuyen-mai/:id",
-  "/tin-tuc",
-  "/tin-tuc/:id",
-  "/san-pham",
-  "/san-pham/:id",
   "/gio-hang",
   "/thanh-toan",
   "/dang-nhap",
@@ -17,7 +19,6 @@ const pages = [
   "/tai-khoan",
   "/don-hang",
   "/gioi-thieu",
-  "/lien-he",
 ];
 
 pages.forEach((route) => router.get(route, controller.getIndexPage));

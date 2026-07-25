@@ -1,0 +1,56 @@
+{% extends "base.njk" %}
+
+{% block content %}
+  <section class="page-title">
+    <div class="container">
+      <span class="breadcrumbs"><a href="/">Trang chủ</a> / Sản phẩm</span>
+      <h1>Sản phẩm</h1>
+      <p>Nông sản đang có tại cửa hàng</p>
+    </div>
+  </section>
+
+  <section class="page-shell products-bg">
+    <div class="container">
+      <form class="products-search" action="/san-pham" method="get">
+        <label class="sr-only" for="productSearch">Tìm sản phẩm</label>
+        <input id="productSearch" name="search" value="{{ search }}" placeholder="Tìm theo tên sản phẩm">
+        {% if selectedCategory %}<input type="hidden" name="category" value="{{ selectedCategory }}">{% endif %}
+        <button type="submit">Tìm kiếm</button>
+      </form>
+
+      <nav class="filters" aria-label="Lọc theo danh mục">
+        <a href="/san-pham{% if search %}?search={{ search | urlencode }}{% endif %}" class="{{ 'active' if not selectedCategory }}">Tất cả</a>
+        {% for category in categories %}
+          <a href="/san-pham?category={{ category.id }}{% if search %}&search={{ search | urlencode }}{% endif %}" class="{{ 'active' if selectedCategory == category.id }}">{{ category.name }}</a>
+        {% endfor %}
+      </nav>
+
+      <div class="product-grid">
+        {% for product in products %}
+          {% include "pages/products/card.njk" %}
+        {% else %}
+          <div class="empty-state">
+            <span aria-hidden="true">⌕</span>
+            <h3>Chưa tìm thấy sản phẩm</h3>
+            <p>Thử chọn danh mục khác hoặc xóa từ khóa tìm kiếm.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if pagination.totalPages > 1 %}
+        <nav class="pagination" aria-label="Phân trang sản phẩm">
+          {% if pagination.previous %}<a href="?page={{ pagination.previous }}{% if selectedCategory %}&category={{ selectedCategory }}{% endif %}{% if search %}&search={{ search | urlencode }}{% endif %}">‹</a>{% endif %}
+          {% for number in pagination.pages %}
+            <a href="?page={{ number }}{% if selectedCategory %}&category={{ selectedCategory }}{% endif %}{% if search %}&search={{ search | urlencode }}{% endif %}" class="{{ 'active' if number == pagination.page }}" {% if number == pagination.page %}aria-current="page"{% endif %}>{{ number }}</a>
+          {% endfor %}
+          {% if pagination.next %}<a href="?page={{ pagination.next }}{% if selectedCategory %}&category={{ selectedCategory }}{% endif %}{% if search %}&search={{ search | urlencode }}{% endif %}">›</a>{% endif %}
+        </nav>
+      {% endif %}
+    </div>
+  </section>
+  <div class="toast" id="pageToast" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="/js/cart-actions.js" defer></script>
+{% endblock %}

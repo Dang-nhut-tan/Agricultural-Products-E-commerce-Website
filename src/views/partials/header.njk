@@ -1,0 +1,33 @@
+<header>
+  <div class="container modern-header">
+    <a class="modern-logo" href="/" aria-label="Nông Sản Xanh - Trang chủ">
+      <span class="modern-logo-mark" aria-hidden="true">🌱</span>
+      <span>
+        <b>NÔNG SẢN XANH</b>
+        <small>TƯƠI LÀNH MỖI NGÀY</small>
+      </span>
+    </a>
+
+    <form class="modern-search" action="/san-pham" method="get" role="search">
+      <label class="sr-only" for="siteSearch">Tìm kiếm sản phẩm</label>
+      <input id="siteSearch" name="search" type="search" placeholder="Tìm rau, trái cây, nông sản...">
+      <button type="submit" aria-label="Tìm kiếm">⌕</button>
+    </form>
+
+    <nav class="modern-nav" id="primaryNav" aria-label="Điều hướng chính">
+      <a href="/" class="{{ 'active' if currentPath == '/' }}" {% if currentPath == '/' %}aria-current="page"{% endif %}>Trang chủ</a>
+      <a href="/san-pham" class="{{ 'active' if currentPath == '/san-pham' }}" {% if currentPath == '/san-pham' %}aria-current="page"{% endif %}>Sản phẩm</a>
+      <a href="/nha-cung-cap" class="{{ 'active' if currentPath == '/nha-cung-cap' }}" {% if currentPath == '/nha-cung-cap' %}aria-current="page"{% endif %}>Nhà cung cấp</a>
+      <a href="/tin-tuc" class="{{ 'active' if currentPath == '/tin-tuc' }}" {% if currentPath == '/tin-tuc' %}aria-current="page"{% endif %}>Tin tức</a>
+      <a href="/khuyen-mai" class="sale {{ 'active' if currentPath == '/khuyen-mai' }}" {% if currentPath == '/khuyen-mai' %}aria-current="page"{% endif %}>Khuyến mãi</a>
+      <a href="/lien-he" class="{{ 'active' if currentPath == '/lien-he' }}" {% if currentPath == '/lien-he' %}aria-current="page"{% endif %}>Liên hệ</a>
+    </nav>
+
+    <a class="modern-cart" href="/gio-hang" aria-label="Mở giỏ hàng">🛒</a>
+    <a class="modern-account" href="/dang-nhap" aria-label="Tài khoản">
+      <span aria-hidden="true">N</span>
+      <b>Tài khoản</b>
+    </a>
+    <button type="button" class="mobile-menu" id="mobileMenu" aria-label="Mở menu" aria-controls="primaryNav" aria-expanded="false">☰</button>
+  </div>
+</header>

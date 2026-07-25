@@ -1,0 +1,36 @@
+<article class="product">
+  <a
+    class="product-image {{ '' if product.primaryImage else 'no-image' }}"
+    href="/san-pham/{{ product.id }}"
+    aria-label="Xem {{ product.name }}"
+    {% if product.primaryImage %}style="background-image: url('{{ product.primaryImage }}')"{% endif %}
+  >
+    {% if not product.primaryImage %}<span aria-hidden="true">▧</span>{% endif %}
+  </a>
+  <div class="product-info">
+    <span class="product-cat">{{ product.Category.name or "Nông sản" }}</span>
+    <h3><a href="/san-pham/{{ product.id }}">{{ product.name }}</a></h3>
+    <div class="product-price-row">
+      <div>
+        <span class="price">{{ product.displayPrice }}</span>
+        {% if product.displayOldPrice %}<span class="old">{{ product.displayOldPrice }}</span>{% endif %}
+      </div>
+      <button
+        type="button"
+        class="add"
+        data-cart-add
+        data-product-id="{{ product.id }}"
+        data-product-name="{{ product.name }}"
+        data-product-price="{{ product.price }}"
+        data-product-image="{{ product.primaryImage }}"
+        aria-label="Thêm {{ product.name }} vào giỏ hàng"
+        {% if product.quantity <= 0 %}disabled{% endif %}
+      >{{ "+" if product.quantity > 0 else "Hết" }}</button>
+    </div>
+    {% if product.quantity > 0 %}
+      <span class="stock in-stock">Còn {{ product.quantity }} {{ product.unit or "sản phẩm" }}</span>
+    {% else %}
+      <span class="stock out-stock">Tạm hết hàng</span>
+    {% endif %}
+  </div>
+</article>

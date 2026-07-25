@@ -1,0 +1,17 @@
+{% extends "base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/css/news-detail.css">
+{% endblock %}
+
+{% block content %}
+  <article class="news-detail container">
+    <a class="news-back" href="/tin-tuc">← Quay lại tin tức</a>
+    <header class="news-detail-header">
+      <span>{{ item.publishedDate }}</span>
+      <h1>{{ item.title }}</h1>
+    </header>
+    {% if item.image %}<img class="news-detail-image" src="{{ item.image }}" alt="{{ item.title }}">{% endif %}
+    <div class="news-detail-content">{{ item.content | safe }}</div>
+  </article>
+{% endblock %}
