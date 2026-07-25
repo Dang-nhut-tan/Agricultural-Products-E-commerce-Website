@@ -1,0 +1,54 @@
+/* Trang chủ chỉ hiển thị sản phẩm và phân trang, không hiển thị danh mục ảnh. */
+body[data-page="home"] .section.container:has(#categories) {
+  display: none !important;
+}
+body[data-page="home"] #products {
+  padding-top: 62px;
+}
+body[data-page="home"] #products .filters {
+  display: none !important;
+}
+body[data-page="home"] #products .section-head {
+  margin-bottom: 28px;
+}
+body[data-page="home"] #products .section-head:after {
+  display: none;
+  content: none;
+}
+body[data-page="home"] #products > .container {
+  max-width: 1080px;
+}
+body[data-page="home"] #products .section-head {
+  justify-content: flex-start;
+}
+body[data-page="home"] #products .product-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+body[data-page="home"] #products .product-image {
+  height: 225px;
+}
+@media (max-width: 850px) {
+  body[data-page="home"] #products .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  body[data-page="home"] #products .product-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  body[data-page="home"] #products .product-image {
+    height: 155px;
+  }
+}
+/* Trang sản phẩm có danh mục chữ để lọc và tìm kiếm, không dùng thẻ danh mục ảnh. */
+body[data-page="products"] #categories {
+  display: none !important;
+}
+body[data-page="products"] #filters {
+  display: flex !important;
+}
+body[data-page="products"] .pagination {
+  margin-top: 32px;
+}
