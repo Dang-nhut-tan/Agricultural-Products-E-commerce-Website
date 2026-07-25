@@ -1,8 +1,4 @@
 const oldHeader = document.querySelector("header");
-document.head.insertAdjacentHTML(
-  "beforeend",
-  '<link rel="stylesheet" href="/css/menu.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/home-products.css"><link rel="stylesheet" href="/css/banner-click.css"><link rel="stylesheet" href="/css/home-extras.css"><link rel="stylesheet" href="/css/promotion.css"><link rel="stylesheet" href="/css/image-ratios.css"><link rel="stylesheet" href="/css/home-polish.css"><link rel="stylesheet" href="/css/storefront-v2.css">',
-);
 document.body.dataset.page =
   location.pathname === "/san-pham"
     ? "products"
