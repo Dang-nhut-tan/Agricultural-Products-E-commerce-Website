@@ -4,6 +4,10 @@ const db = require("../models");
 const { Op } = db.Sequelize;
 const formatMoney = (value) =>
   `${Number(value || 0).toLocaleString("vi-VN")} ₫`;
+const formatUnit = (value) => {
+  const unit = String(value || "sản phẩm").trim();
+  return unit.replace(/^1\s+(?=\S)/, "") || "sản phẩm";
+};
 const decorateProduct = (instance) => {
   const product = instance.get({ plain: true });
   product.displayPrice = formatMoney(product.price);
@@ -17,6 +21,7 @@ const decorateProduct = (instance) => {
       (a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0),
     )[0]?.image ||
     "";
+  product.displayUnit = formatUnit(product.unit);
   return product;
 };
 

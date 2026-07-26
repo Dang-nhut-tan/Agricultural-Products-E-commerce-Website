@@ -32,7 +32,7 @@
         <div class="commerce-price">{{ product.displayPrice }}{% if product.displayOldPrice %}<del>{{ product.displayOldPrice }}</del>{% endif %}</div>
         <div class="commerce-row"><label>Vận chuyển</label><div><b>🚚 Giao hàng tận nơi</b><small>Phí vận chuyển được xác nhận khi đặt hàng.</small></div></div>
         <div class="commerce-row"><label>Nguồn gốc</label><div>{{ product.origin or "Đang cập nhật" }}</div></div>
-        <div class="commerce-row"><label>Tình trạng</label><div class="{{ 'in-stock' if product.quantity > 0 else 'out-stock' }}">{{ "Còn " + product.quantity|string + " sản phẩm" if product.quantity > 0 else "Tạm hết hàng" }}</div></div>
+        <div class="commerce-row"><label>Tình trạng</label><div class="{{ 'in-stock' if product.quantity > 0 else 'out-stock' }}">{{ "Số lượng còn lại: " + product.quantity|string + " " + product.displayUnit if product.quantity > 0 else "Tạm hết hàng" }}</div></div>
         <div class="commerce-row">
           <label>Số lượng</label>
           <div class="commerce-buy">
@@ -56,7 +56,7 @@
       <h2>CHI TIẾT SẢN PHẨM</h2>
       <dl>
         <dt>Danh mục</dt><dd>{{ product.Category.name or "Đang cập nhật" }}</dd>
-        <dt>Đơn vị đóng gói</dt><dd>{{ product.unit or "Đang cập nhật" }}</dd>
+        <dt>Đơn vị</dt><dd>{{ product.displayUnit or "Đang cập nhật" }}</dd>
         <dt>Nhà cung cấp</dt><dd>{{ product.Brand.name or "Đang cập nhật" }}</dd>
         <dt>Xuất xứ</dt><dd>{{ product.origin or "Đang cập nhật" }}</dd>
       </dl>

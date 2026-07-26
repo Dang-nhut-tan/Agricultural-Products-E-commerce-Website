@@ -26,6 +26,8 @@ const productImage = (p) =>
   p.image ||
   p.ProductImages?.sort((a, b) => a.sort_order - b.sort_order)[0]?.image ||
   "";
+const productUnit = (value) =>
+  String(value || "sản phẩm").trim().replace(/^1\s+(?=\S)/, "") || "sản phẩm";
 function applyCategoryImages() {
   document.querySelectorAll(".category[data-cat]").forEach((card) => {
     const category = state.categories.find(
@@ -77,38 +79,19 @@ function renderRoute() {
           <div id="checkoutItems"></div>
           <div class="checkout-total"><span>Tổng cộng</span><strong id="checkoutTotal">0 ₫</strong></div>
           <div class="payment-title"><b>Phương thức thanh toán</b><small>Giao dịch được xử lý an toàn</small></div>
-          <div class="payment-methods" role="radiogroup" aria-label="Phương thức thanh toán">
-            <button type="button" class="payment-method active" data-payment-method="paypal">
+          <div class="payment-methods paypal-only" aria-label="Phương thức thanh toán">
+            <div class="payment-method active">
               <span class="payment-radio"></span><span class="payment-logo paypal-word">PayPal</span>
               <small>Thẻ quốc tế hoặc tài khoản PayPal</small>
-            </button>
-            <button type="button" class="payment-method" data-payment-method="momo">
-              <span class="payment-radio"></span><span class="payment-logo momo-word">MoMo</span>
-              <small>Ví điện tử MoMo</small>
-            </button>
+            </div>
           </div>
           <div id="paypalPaymentPanel" class="payment-panel active">
             <p class="checkout-rate-note">Số tiền được quy đổi sang USD theo tỷ giá của cửa hàng.</p>
             <div id="paypalButtons"></div>
           </div>
-          <div id="momoPaymentPanel" class="payment-panel">
-            <p>Thanh toán trực tiếp bằng VND qua ứng dụng MoMo.</p>
-            <button type="button" class="momo-checkout-button" id="momoCheckoutButton">Thanh toán bằng MoMo</button>
-          </div>
           <p id="checkoutMessage" class="checkout-message" role="status"></p>
         </div>
       </div></section>`;
-    document.querySelectorAll("[data-payment-method]").forEach((button) => {
-      button.addEventListener("click", () => {
-        document.querySelectorAll("[data-payment-method]").forEach((item) => item.classList.toggle("active", item === button));
-        document.querySelector("#paypalPaymentPanel")?.classList.toggle("active", button.dataset.paymentMethod === "paypal");
-        document.querySelector("#momoPaymentPanel")?.classList.toggle("active", button.dataset.paymentMethod === "momo");
-      });
-    });
-    document.querySelector("#momoCheckoutButton")?.addEventListener("click", () => {
-      const box = document.querySelector("#checkoutMessage");
-      if (box) box.textContent = "MoMo đang chờ cấu hình Partner Code, Access Key và Secret Key.";
-    });
     setupPaypalCheckout();
     return "checkout";
   }
@@ -126,7 +109,7 @@ function renderRoute() {
     ],
     "/thanh-toan": [
       "Thanh toán",
-      "Vui lòng đăng nhập để nhập địa chỉ nhận hàng và chọn COD, VNPay hoặc PayPal.",
+      "Vui lòng đăng nhập để nhập địa chỉ nhận hàng và thanh toán qua PayPal.",
     ],
     "/tai-khoan": [
       "Tài khoản của tôi",
@@ -152,7 +135,7 @@ function renderRoute() {
   return "static";
 }
 
-const orderStatuses={0:["Chờ thanh toán","pending"],1:["Đã thanh toán","paid"],2:["Đang xử lý","processing"],3:["Đang giao","shipping"],4:["Hoàn thành","completed"],5:["Đã hủy","cancelled"]};
+const orderStatuses={0:["Đã nhận đơn","pending"],1:["Đang chuẩn bị đơn","paid"],2:["Đã giao cho đơn vị vận chuyển","processing"],3:["Đang giao","shipping"],4:["Hoàn thành","completed"],5:["Đã hủy","cancelled"]};
 const orderStatus=(value)=>orderStatuses[Number(value)]||["Không xác định","pending"];
 const orderDate=(value)=>new Date(value).toLocaleString("vi-VN");
 async function loadOrders(orderId){
@@ -277,7 +260,7 @@ function renderProducts() {
     .map((p) => {
       const img = productImage(p);
       const available = Number(p.quantity) > 0;
-      return `<article class="product"><a class="product-image ${img ? "" : "no-image"}" href="/san-pham/${p.id}" aria-label="Xem ${safe(p.name)}"${img ? ` style="background-image:url('${safe(img)}')" role="img"` : ' role="img" aria-label="Sản phẩm chưa có ảnh"'}>${img ? "" : '<span aria-hidden="true">▧</span>'}</a><div class="product-info"><span class="product-cat">${safe(p.Category?.name || "Nông sản")}</span><h3><a href="/san-pham/${p.id}">${safe(p.name)}</a></h3><div class="product-price-row"><div><span class="price">${money(p.price)}</span>${Number(p.oldprice) > Number(p.price) ? `<span class="old">${money(p.oldprice)}</span>` : ""}</div><button type="button" class="add" data-add="${p.id}" aria-label="${available ? `Thêm ${safe(p.name)} vào giỏ hàng` : `${safe(p.name)} đã hết hàng`}" ${available ? "" : "disabled"}>${available ? "+" : "Hết hàng"}</button></div>${available ? `<span class="stock in-stock">Còn ${Number(p.quantity).toLocaleString("vi-VN")} ${safe(p.unit || "sản phẩm")}</span>` : ""}</div></article>`;
+      return `<article class="product"><a class="product-image ${img ? "" : "no-image"}" href="/san-pham/${p.id}" aria-label="Xem ${safe(p.name)}"${img ? ` style="background-image:url('${safe(img)}')" role="img"` : ' role="img" aria-label="Sản phẩm chưa có ảnh"'}>${img ? "" : '<span aria-hidden="true">▧</span>'}</a><div class="product-info"><span class="product-cat">${safe(p.Category?.name || "Nông sản")}</span><h3><a href="/san-pham/${p.id}">${safe(p.name)}</a></h3><div class="product-price-row"><div><span class="price">${money(p.price)}</span>${Number(p.oldprice) > Number(p.price) ? `<span class="old">${money(p.oldprice)}</span>` : ""}</div><button type="button" class="add" data-add="${p.id}" aria-label="${available ? `Thêm ${safe(p.name)} vào giỏ hàng` : `${safe(p.name)} đã hết hàng`}" ${available ? "" : "disabled"}>${available ? "+" : "Hết hàng"}</button></div>${available ? `<span class="stock in-stock"><b>Số lượng còn lại:</b> ${Number(p.quantity).toLocaleString("vi-VN")} ${safe(productUnit(p.unit))}</span>` : ""}</div></article>`;
     })
     .join("");
 }

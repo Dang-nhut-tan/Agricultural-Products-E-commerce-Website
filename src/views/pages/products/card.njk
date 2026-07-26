@@ -28,7 +28,7 @@
       >{{ "+" if product.quantity > 0 else "Hết" }}</button>
     </div>
     {% if product.quantity > 0 %}
-      <span class="stock in-stock">Còn {{ product.quantity }} {{ product.unit or "sản phẩm" }}</span>
+      <span class="stock in-stock"><b>Số lượng còn lại:</b> {{ product.quantity }} {{ product.displayUnit or "sản phẩm" }}</span>
     {% else %}
       <span class="stock out-stock">Tạm hết hàng</span>
     {% endif %}

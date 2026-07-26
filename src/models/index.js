@@ -239,17 +239,9 @@ const Order = sequelize.define("Order", {
 }, {
   ...modelOptions("orders"),
   hooks: {
-    beforeUpdate(order) {
-      if (!order.changed("status")) return;
-      const from = Number(order.previous("status"));
-      const to = Number(order.status);
-      const allowed = { 0: [1, 5], 1: [2, 5], 2: [3, 5], 3: [2, 4], 4: [], 5: [] };
-      if (!(allowed[from] || []).includes(to)) {
-        throw new Error(`Không thể chuyển trạng thái đơn hàng từ ${from} sang ${to}.`);
-      }
-    },
     async afterUpdate(order, options) {
       if (!order.changed("status")) return;
+      if (Number(order.previous("status")) === Number(order.status)) return;
       const metadata = options.statusHistory || {};
       await OrderHistory.create({
         order_id: order.id,
@@ -258,7 +250,7 @@ const Order = sequelize.define("Order", {
         changed_by_user_id: metadata.userId || null,
         reason: metadata.reason || "Cập nhật trạng thái đơn hàng",
       }, { transaction: options.transaction });
-      const shipmentStatusByOrder = { 2: 0, 3: 2, 4: 3, 5: 5 };
+      const shipmentStatusByOrder = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 5 };
       const shippingStatus = shipmentStatusByOrder[Number(order.status)];
       if (shippingStatus !== undefined) {
         await Shipment.update(
@@ -325,17 +317,9 @@ const Shipment = sequelize.define("Shipment", {
 }, {
   ...modelOptions("shipments"),
   hooks: {
-    beforeUpdate(shipment) {
-      if (!shipment.changed("shipping_status")) return;
-      const from = Number(shipment.previous("shipping_status"));
-      const to = Number(shipment.shipping_status);
-      const allowed = { 0: [1, 4], 1: [2, 4], 2: [3, 4], 3: [], 4: [2, 5], 5: [] };
-      if (!(allowed[from] || []).includes(to)) {
-        throw new Error(`Không thể chuyển trạng thái vận chuyển từ ${from} sang ${to}.`);
-      }
-    },
     async afterUpdate(shipment, options) {
       if (!shipment.changed("shipping_status")) return;
+      if (Number(shipment.previous("shipping_status")) === Number(shipment.shipping_status)) return;
       const orderStatusByShipment = { 2: 3, 3: 4 };
       const orderStatus = orderStatusByShipment[Number(shipment.shipping_status)];
       if (orderStatus === undefined) return;

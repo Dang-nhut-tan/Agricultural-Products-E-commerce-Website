@@ -416,9 +416,11 @@ nav {
 .stock {
   display: block;
   color: var(--muted);
-  font-size: 9px;
-  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 12px;
 }
+.stock b{font-weight:700}
 .story {
   background: var(--green);
   color: white;
@@ -1109,8 +1111,8 @@ footer {
 .checkout-item,.checkout-total{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid #e7ece9}
 .checkout-total{font-size:20px;margin:8px 0 22px;border-bottom:0}.checkout-total strong{color:#0f6b47;font-size:24px}
 .payment-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:12px}.payment-title small{color:#6c7871}
-.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px}.payment-method{display:grid;grid-template-columns:18px 1fr;column-gap:10px;text-align:left;padding:16px;border:1px solid #dce4df;border-radius:13px;background:#fff;cursor:pointer}.payment-method.active{border-color:#147353;background:#f4faf7;box-shadow:0 0 0 2px rgba(20,115,83,.1)}.payment-radio{width:16px;height:16px;border:2px solid #9caaa2;border-radius:50%;margin-top:3px}.payment-method.active .payment-radio{border:5px solid #147353}.payment-method small{grid-column:2;color:#6d7872;margin-top:3px}.payment-logo{font-size:19px;font-weight:800}.paypal-word{color:#073b89;font-style:italic}.momo-word{color:#a50064}
-.payment-panel{display:none;margin-top:16px}.payment-panel.active{display:block}.momo-checkout-button{width:100%;border:0;border-radius:8px;padding:16px;background:#a50064;color:#fff;font-size:17px;font-weight:700;cursor:pointer}.momo-checkout-button:hover{background:#8d0056}
+.payment-methods{display:grid;grid-template-columns:1fr;gap:12px}.payment-method{display:grid;grid-template-columns:18px 1fr;column-gap:10px;text-align:left;padding:16px;border:1px solid #147353;border-radius:13px;background:#f4faf7;box-shadow:0 0 0 2px rgba(20,115,83,.1)}.payment-radio{width:16px;height:16px;border:5px solid #147353;border-radius:50%;margin-top:3px}.payment-method small{grid-column:2;color:#6d7872;margin-top:3px}.payment-logo{font-size:19px;font-weight:800}.paypal-word{color:#073b89;font-style:italic}
+.payment-panel{display:block;margin-top:16px}
 .checkout-rate-note{font-size:13px;color:#65736b}.checkout-message{margin-top:14px;color:#b42318}.checkout-message.success{padding:14px;border-radius:10px;background:#ecfdf3;color:#067647}
 @media(max-width:900px){.checkout-grid{grid-template-columns:1fr}}@media(max-width:560px){.checkout-panel{padding:20px}.payment-methods{grid-template-columns:1fr}.payment-title small{display:none}}
 /* Order history */
