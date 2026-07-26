@@ -27,6 +27,16 @@ if (location.pathname === "/tai-khoan")
     }
     const { data: user } = await response.json();
     profileMain.innerHTML = `<section class="account-page container"><div class="panel"><h1>Thông tin cá nhân</h1><div id="profileView"><div class="avatar-editor">${user.avatar ? `<img src="${clean(user.avatar)}" alt="Ảnh đại diện">` : '<div class="avatar-placeholder">Ảnh đại diện</div>'}</div><p><b>Họ và tên:</b> ${clean(user.name) || "Chưa cập nhật"}</p><p><b>Email:</b> ${clean(user.email)}</p><p><b>Số điện thoại:</b> ${clean(user.phone) || "Chưa cập nhật"}</p><button id="editProfileButton" class="primary">Sửa thông tin</button></div><form id="profileForm" hidden><div class="avatar-editor">${user.avatar ? `<img id="avatarPreview" src="${clean(user.avatar)}" alt="Ảnh đại diện">` : '<div id="avatarPreview" class="avatar-placeholder">Ảnh đại diện</div>'}<input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="field"><label>Họ và tên</label><input name="name" required value="${clean(user.name)}"></div><div class="field"><label>Số điện thoại</label><input name="phone" value="${clean(user.phone)}"></div><p id="profileMessage" class="auth-error"></p><button class="primary">Lưu thông tin</button><button id="cancelProfileButton" class="outline" type="button">Hủy</button></form></div><div class="panel"><h2>Địa chỉ giao hàng</h2><div id="addressList"></div><button id="showAddressForm" class="primary">Thêm địa chỉ</button><form id="addressForm" hidden><div class="field"><label>Người nhận</label><input name="receiver_name" required></div><div class="field"><label>Địa chỉ</label><input name="address" required></div><div class="field"><label>Phường/Xã</label><input name="ward"></div><div class="field"><label>Quận/Huyện</label><input name="district"></div><div class="field"><label>Tỉnh/Thành phố</label><input name="province" required></div><label><input name="is_default" type="checkbox"> Đặt làm mặc định</label><p id="addressMessage" class="auth-error"></p><button class="primary">Lưu địa chỉ</button><button id="cancelAddressButton" class="outline" type="button">Hủy</button></form></div><button id="profileLogout" class="outline">Đăng xuất</button></section>`;
+    profileMain
+      .querySelector(".account-page .panel")
+      ?.insertAdjacentHTML(
+        "afterend",
+        `<a class="panel account-orders-link" href="/don-hang">
+          <span class="account-orders-icon" aria-hidden="true">▤</span>
+          <span><b>Lịch sử mua hàng</b><small>Xem đơn hàng và theo dõi trạng thái giao hàng</small></span>
+          <span class="account-orders-arrow" aria-hidden="true">→</span>
+        </a>`,
+      );
     await refreshAddresses();
     const toggleProfile = (editing) => {
       document.querySelector("#profileView").hidden = editing;

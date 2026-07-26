@@ -236,7 +236,46 @@ const Order = sequelize.define("Order", {
   shipping_fee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   discount: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   total: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
-}, modelOptions("orders"));
+}, {
+  ...modelOptions("orders"),
+  hooks: {
+    beforeUpdate(order) {
+      if (!order.changed("status")) return;
+      const from = Number(order.previous("status"));
+      const to = Number(order.status);
+      const allowed = { 0: [1, 5], 1: [2, 5], 2: [3, 5], 3: [2, 4], 4: [], 5: [] };
+      if (!(allowed[from] || []).includes(to)) {
+        throw new Error(`Không thể chuyển trạng thái đơn hàng từ ${from} sang ${to}.`);
+      }
+    },
+    async afterUpdate(order, options) {
+      if (!order.changed("status")) return;
+      const metadata = options.statusHistory || {};
+      await OrderHistory.create({
+        order_id: order.id,
+        from_status: Number(order.previous("status")),
+        to_status: Number(order.status),
+        changed_by_user_id: metadata.userId || null,
+        reason: metadata.reason || "Cập nhật trạng thái đơn hàng",
+      }, { transaction: options.transaction });
+      const shipmentStatusByOrder = { 2: 0, 3: 2, 4: 3, 5: 5 };
+      const shippingStatus = shipmentStatusByOrder[Number(order.status)];
+      if (shippingStatus !== undefined) {
+        await Shipment.update(
+          {
+            shipping_status: shippingStatus,
+            ...(shippingStatus === 3 ? { delivery_time: new Date() } : {}),
+          },
+          {
+            where: { order_id: order.id },
+            transaction: options.transaction,
+            hooks: false,
+          },
+        );
+      }
+    },
+  },
+});
 
 const OrderDetail = sequelize.define("OrderDetail", {
   order_id: DataTypes.INTEGER,
@@ -283,7 +322,38 @@ const Shipment = sequelize.define("Shipment", {
   shipping_fee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   delivery_time: DataTypes.DATE,
   tracking_code: DataTypes.STRING,
-}, modelOptions("shipments"));
+}, {
+  ...modelOptions("shipments"),
+  hooks: {
+    beforeUpdate(shipment) {
+      if (!shipment.changed("shipping_status")) return;
+      const from = Number(shipment.previous("shipping_status"));
+      const to = Number(shipment.shipping_status);
+      const allowed = { 0: [1, 4], 1: [2, 4], 2: [3, 4], 3: [], 4: [2, 5], 5: [] };
+      if (!(allowed[from] || []).includes(to)) {
+        throw new Error(`Không thể chuyển trạng thái vận chuyển từ ${from} sang ${to}.`);
+      }
+    },
+    async afterUpdate(shipment, options) {
+      if (!shipment.changed("shipping_status")) return;
+      const orderStatusByShipment = { 2: 3, 3: 4 };
+      const orderStatus = orderStatusByShipment[Number(shipment.shipping_status)];
+      if (orderStatus === undefined) return;
+      const order = await Order.findByPk(shipment.order_id, {
+        transaction: options.transaction,
+      });
+      if (!order || Number(order.status) === orderStatus) return;
+      await order.update({ status: orderStatus }, {
+        transaction: options.transaction,
+        statusHistory: {
+          reason: orderStatus === 4
+            ? "Đơn vị vận chuyển xác nhận đã giao hàng"
+            : "Đơn hàng đã bàn giao cho đơn vị vận chuyển",
+        },
+      });
+    },
+  },
+});
 
 const News = sequelize.define("News", {
   title: { type: DataTypes.STRING, allowNull: false },

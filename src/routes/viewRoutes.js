@@ -18,6 +18,7 @@ const pages = [
   "/dang-ky",
   "/tai-khoan",
   "/don-hang",
+  "/don-hang/:id",
   "/gioi-thieu",
 ];
 

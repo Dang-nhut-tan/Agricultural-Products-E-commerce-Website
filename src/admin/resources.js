@@ -128,11 +128,12 @@ productStatus.quantity = {
   isVisible: { list: true, show: true, edit: false, filter: true },
 };
 const orderStatusValues = [
-  { value: 0, label: "Chờ xác nhận" },
-  { value: 1, label: "Đã xác nhận" },
-  { value: 2, label: "Đang giao" },
-  { value: 3, label: "Đã hoàn thành" },
-  { value: 4, label: "Đã hủy" },
+  { value: 0, label: "Chờ thanh toán" },
+  { value: 1, label: "Đã thanh toán" },
+  { value: 2, label: "Đang xử lý" },
+  { value: 3, label: "Đang giao" },
+  { value: 4, label: "Đã hoàn thành" },
+  { value: 5, label: "Đã hủy" },
 ];
 const orderStatus = statusProperty(orderStatusValues);
 const orderHistoryStatus = {
@@ -150,9 +151,11 @@ const shipmentStatus = {
     label: "Trạng thái vận chuyển",
     availableValues: [
       { value: 0, label: "Đang chuẩn bị" },
-      { value: 1, label: "Đang giao" },
-      { value: 2, label: "Đã giao" },
-      { value: 3, label: "Giao thất bại" },
+      { value: 1, label: "Đã lấy hàng" },
+      { value: 2, label: "Đang giao" },
+      { value: 3, label: "Đã giao" },
+      { value: 4, label: "Giao thất bại" },
+      { value: 5, label: "Hoàn hàng" },
     ],
   },
 };

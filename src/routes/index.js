@@ -8,6 +8,8 @@ const storefrontRoutes = require("./storefrontRoutes");
 const couponRoutes = require("./couponRoutes");
 const userRoutes = require("./userRoutes");
 const viewRoutes = require("./viewRoutes");
+const paymentRoutes = require("./paymentRoutes");
+const orderRoutes = require("./orderRoutes");
 
 function configRoutes(app) {
   app.use("/api/auth", authRoutes);
@@ -19,12 +21,19 @@ function configRoutes(app) {
   app.use("/api/storefront", storefrontRoutes);
   app.use("/api/coupons", couponRoutes);
   app.use("/api/users", userRoutes);
+  app.use("/api/payments", paymentRoutes);
+  app.use("/api/orders", orderRoutes);
   app.use(viewRoutes);
 
   app.use((error, req, res, next) => {
     console.error(error);
     if (res.headersSent) return next(error);
-    return res.status(500).json({ message: "Đã xảy ra lỗi máy chủ." });
+    const status = Number(error.status);
+    return res.status(status >= 400 && status < 600 ? status : 500).json({
+      message: status >= 400 && status < 600
+        ? error.message
+        : "Đã xảy ra lỗi máy chủ.",
+    });
   });
 }
 
