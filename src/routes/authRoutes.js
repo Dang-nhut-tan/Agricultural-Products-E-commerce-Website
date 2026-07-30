@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const controller = require("../controllers/authController");
-const asyncRoute = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
-const signedIn = (req, res, next) => req.session.userId ? next() : res.status(401).json({ message: "Bạn chưa đăng nhập." });
+const asyncRoute = require("../middlewares/asyncRoute");
+const signedIn = require("../middlewares/signedIn");
 /**
  * @openapi
  * /api/auth/register:

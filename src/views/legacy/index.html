@@ -1,27 +1,232 @@
 <!-- Giao diện SPA cũ, giữ tạm trong quá trình chuyển sang Nunjucks. -->
-<!doctype html><html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Nông Sản Xanh - Nông sản sạch, rõ nguồn gốc, giao tận nhà.">
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nông Sản Xanh - Nông sản sạch, rõ nguồn gốc, giao tận nhà."
+    />
     <title>Nông Sản Xanh | Tươi lành mỗi ngày</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/fix.css">
-</head>
-<body>
-  <div class="topbar"><div class="container topbar-in"><span>🚚 Giao hàng tận nơi trên toàn quốc</span><span>☎ Hotline: 1900 6868</span></div></div>
-  <header><div class="container header-in"><a class="logo" href="#"><span class="logo-mark">🌿</span><span>NÔNG SẢN <b>XANH</b><small>Tươi lành từ nông trại</small></span></a><form class="search" id="searchForm"><input id="searchInput" placeholder="Bạn muốn tìm nông sản gì?"><button>⌕</button></form><div class="actions"><button id="accountBtn">👤 <span>Tài khoản</span></button><button id="cartBtn">🛒 <span>Giỏ hàng</span><i id="cartCount">0</i></button></div></div>
-  <nav><div class="container nav-in"><a class="catalog" href="/san-pham">☰ DANH MỤC SẢN PHẨM</a><a href="/">Trang chủ</a><a href="/san-pham">Sản phẩm</a><a href="/gioi-thieu">Về chúng tôi</a><a href="/tin-tuc">Tin tức</a><a href="/lien-he">Liên hệ</a></div></nav></header>
-  <main id="home"><section class="hero"><div class="container hero-grid"><div class="hero-copy"><span class="eyebrow">TỪ NÔNG TRẠI ĐẾN BÀN ĂN</span><h1>Nông sản sạch,<br><em>trọn vị thiên nhiên</em></h1><p>Tuyển chọn kỹ lưỡng từ những vùng trồng uy tín, trao đến gia đình bạn sự tươi ngon và an tâm mỗi ngày.</p><a href="#products" class="primary">Khám phá sản phẩm →</a><div class="hero-stats"><b>100%<small>Nguồn gốc rõ ràng</small></b><b>24h<small>Giao hàng nhanh</small></b><b>4.9/5<small>Khách hàng hài lòng</small></b></div></div><div class="hero-art"><div class="produce">🥬</div><div class="produce p2">🍊</div><div class="produce p3">🥕</div><div class="seal">TƯƠI<br>MỖI NGÀY</div></div></div></section>
-  <section class="benefits" aria-label="Cam kết dịch vụ"><div class="container benefit-grid"><article><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.9 8.8 7 10 4.1-1.2 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span><b>Chất lượng tuyển chọn</b><small>Kiểm soát kỹ từng sản phẩm</small></span></article><article><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span><span><b>Giao hàng nhanh chóng</b><small>Đóng gói cẩn thận, tươi ngon</small></span></article><article><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8h11a5 5 0 0 1 0 10H9"/><path d="m8 4-4 4 4 4"/></svg></span><span><b>Đổi trả dễ dàng</b><small>Hỗ trợ tận tâm trong 24 giờ</small></span></article><article><span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H6l-3 2 1-5a9 9 0 1 1 17-5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg></span><span><b>Tư vấn tận tình</b><small>Luôn sẵn sàng hỗ trợ bạn</small></span></article></div></section>
-  <section class="section container"><div class="section-head"><div><span class="eyebrow">DANH MỤC</span><h2>Chọn món tươi ngon</h2></div></div><div id="categories" class="category-grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></section>
-  <section id="products" class="section products-bg"><div class="container"><div class="section-head"><div><span class="eyebrow">CỬA HÀNG</span><h2>Tất cả sản phẩm</h2></div><div id="filters" class="filters"><button class="active" data-category="all">Tất cả</button></div></div><div id="productGrid" class="product-grid"><div class="loading">Đang tải sản phẩm…</div></div><nav id="pagination" class="pagination" aria-label="Phân trang sản phẩm"></nav></div></section>
-  </main><footer id="footer"><div class="container footer-grid"><div class="footer-brand"><div class="logo light"><span class="logo-mark">🌿</span><span>NÔNG SẢN <b>XANH</b></span></div><p>Nông sản tươi sạch, nguồn gốc rõ ràng cho bữa cơm gia đình Việt.</p></div><div><b>Khám phá</b><a href="/san-pham">Sản phẩm</a><a href="/gioi-thieu">Về chúng tôi</a><a href="/tin-tuc">Tin tức</a></div><div><b>Hỗ trợ</b><a href="/lien-he">Liên hệ</a><a href="/gio-hang">Giỏ hàng</a><a href="/tai-khoan">Tài khoản</a></div><div><b>Thông tin</b><p>Hotline: <a href="tel:19006868">1900 6868</a></p><p>Email: <a href="mailto:hello@nongsanxanh.vn">hello@nongsanxanh.vn</a></p></div></div><div class="container copyright">© 2026 Nông Sản Xanh. Giao diện dành cho dự án học tập.</div></footer>
-  <button class="chat-fab" id="chatFab">💬</button><aside class="chat" id="chat"><div class="chat-head"><span>🌿</span><div><b>Trợ lý Nông Sản Xanh</b><small>● Đang trực tuyến</small></div><button id="chatClose">×</button></div><div class="chat-body"><div class="bot">Xin chào! Tôi có thể giúp bạn tìm nông sản tươi hoặc tư vấn cách đặt hàng.</div><div class="quick"><button>Tìm sản phẩm</button><button>Phí giao hàng</button><button>Cách đặt hàng</button></div></div><form class="chat-input" id="chatForm"><input placeholder="Nhập tin nhắn…"><button>➤</button></form></aside>
-  <div class="drawer-backdrop" id="backdrop"></div><aside class="drawer" id="cartDrawer"><div class="drawer-head"><h3>Giỏ hàng của bạn</h3><button class="close">×</button></div><div id="cartItems" class="cart-items"></div><div class="cart-foot"><div><span>Tạm tính</span><b id="cartTotal">0 ₫</b></div><button class="checkout">Tiến hành thanh toán</button><small>Thanh toán an toàn qua PayPal</small></div></aside>
-  <div class="modal" id="accountModal"><div class="modal-card"><button class="modal-close">×</button><span class="modal-icon">🌿</span><h2>Chào mừng trở lại</h2><p>Đăng nhập để mua hàng và theo dõi đơn của bạn.</p><label>Email<input type="email" placeholder="ban@example.com"></label><label>Mật khẩu<input type="password" placeholder="••••••••"></label><button class="primary full">Đăng nhập</button><div class="or">hoặc</div><button class="outline full">Tạo tài khoản mới</button></div></div>
-  <div class="toast" id="toast"></div><script src="/js/app.js"></script>
-</body>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fix.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="container topbar-in">
+        <span>🚚 Giao hàng tận nơi trên toàn quốc</span
+        ><span>☎ Hotline: 1900 6868</span>
+      </div>
+    </div>
+    <header>
+      <div class="container header-in">
+        <a class="logo" href="#"
+          ><span class="logo-mark">🌿</span
+          ><span
+            >NÔNG SẢN <b>XANH</b><small>Tươi lành từ nông trại</small></span
+          ></a
+        >
+        <form class="search" id="searchForm">
+          <input
+            id="searchInput"
+            placeholder="Bạn muốn tìm nông sản gì?"
+          /><button>⌕</button>
+        </form>
+        <div class="actions">
+          <button id="cartBtn">
+            🛒 <span>Giỏ hàng</span><i id="cartCount">0</i>
+          </button>
+        </div>
+      </div>
+      <nav>
+        <div class="container nav-in">
+          <a class="catalog" href="/san-pham">☰ DANH MỤC SẢN PHẨM</a
+          ><a href="/">Trang chủ</a><a href="/san-pham">Sản phẩm</a
+          ><a href="/gioi-thieu">Về chúng tôi</a><a href="/tin-tuc">Tin tức</a
+          ><a href="/lien-he">Liên hệ</a>
+        </div>
+      </nav>
+    </header>
+    <main id="home">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">TỪ NÔNG TRẠI ĐẾN BÀN ĂN</span>
+            <h1>Nông sản sạch,<br /><em>trọn vị thiên nhiên</em></h1>
+            <p>
+              Tuyển chọn kỹ lưỡng từ những vùng trồng uy tín, trao đến gia đình
+              bạn sự tươi ngon và an tâm mỗi ngày.
+            </p>
+            <a href="#products" class="primary">Khám phá sản phẩm →</a>
+            <div class="hero-stats">
+              <b>100%<small>Nguồn gốc rõ ràng</small></b
+              ><b>24h<small>Giao hàng nhanh</small></b
+              ><b>4.9/5<small>Khách hàng hài lòng</small></b>
+            </div>
+          </div>
+          <div class="hero-art">
+            <div class="produce">🥬</div>
+            <div class="produce p2">🍊</div>
+            <div class="produce p3">🥕</div>
+            <div class="seal">TƯƠI<br />MỖI NGÀY</div>
+          </div>
+        </div>
+      </section>
+      <section class="benefits" aria-label="Cam kết dịch vụ">
+        <div class="container benefit-grid">
+          <article>
+            <span class="benefit-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M12 3 5 6v5c0 4.6 2.9 8.8 7 10 4.1-1.2 7-5.4 7-10V6l-7-3Z"
+                />
+                <path d="m9 12 2 2 4-4" /></svg></span
+            ><span
+              ><b>Chất lượng tuyển chọn</b
+              ><small>Kiểm soát kỹ từng sản phẩm</small></span
+            >
+          </article>
+          <article>
+            <span class="benefit-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z" />
+                <circle cx="7" cy="18" r="2" />
+                <circle cx="18" cy="18" r="2" /></svg></span
+            ><span
+              ><b>Giao hàng nhanh chóng</b
+              ><small>Đóng gói cẩn thận, tươi ngon</small></span
+            >
+          </article>
+          <article>
+            <span class="benefit-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path d="M4 8h11a5 5 0 0 1 0 10H9" />
+                <path d="m8 4-4 4 4 4" /></svg></span
+            ><span
+              ><b>Đổi trả dễ dàng</b
+              ><small>Hỗ trợ tận tâm trong 24 giờ</small></span
+            >
+          </article>
+          <article>
+            <span class="benefit-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24">
+                <path d="M21 12a8 8 0 0 1-8 8H6l-3 2 1-5a9 9 0 1 1 17-5Z" />
+                <path d="M8 12h.01M12 12h.01M16 12h.01" /></svg></span
+            ><span
+              ><b>Tư vấn tận tình</b
+              ><small>Luôn sẵn sàng hỗ trợ bạn</small></span
+            >
+          </article>
+        </div>
+      </section>
+      <section class="section container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">DANH MỤC</span>
+            <h2>Chọn món tươi ngon</h2>
+          </div>
+        </div>
+        <div id="categories" class="category-grid">
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+          <div class="skeleton"></div>
+        </div>
+      </section>
+      <section id="products" class="section products-bg">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">CỬA HÀNG</span>
+              <h2>Tất cả sản phẩm</h2>
+            </div>
+            <div id="filters" class="filters">
+              <button class="active" data-category="all">Tất cả</button>
+            </div>
+          </div>
+          <div id="productGrid" class="product-grid">
+            <div class="loading">Đang tải sản phẩm…</div>
+          </div>
+          <nav
+            id="pagination"
+            class="pagination"
+            aria-label="Phân trang sản phẩm"
+          ></nav>
+        </div>
+      </section>
+    </main>
+    <footer id="footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <div class="logo light">
+            <span class="logo-mark">🌿</span><span>NÔNG SẢN <b>XANH</b></span>
+          </div>
+          <p>
+            Nông sản tươi sạch, nguồn gốc rõ ràng cho bữa cơm gia đình Việt.
+          </p>
+        </div>
+        <div>
+          <b>Khám phá</b><a href="/san-pham">Sản phẩm</a
+          ><a href="/gioi-thieu">Về chúng tôi</a><a href="/tin-tuc">Tin tức</a>
+        </div>
+        <div>
+          <b>Hỗ trợ</b><a href="/lien-he">Liên hệ</a
+          ><a href="/gio-hang">Giỏ hàng</a><a href="/tai-khoan">Tài khoản</a>
+        </div>
+        <div>
+          <b>Thông tin</b>
+          <p>Hotline: <a href="tel:19006868">1900 6868</a></p>
+          <p>
+            Email:
+            <a href="mailto:hello@nongsanxanh.vn">hello@nongsanxanh.vn</a>
+          </p>
+        </div>
+      </div>
+      <div class="container copyright">
+        © 2026 Nông Sản Xanh. Giao diện dành cho dự án học tập.
+      </div>
+    </footer>
+    <button class="chat-fab" id="chatFab">💬</button>
+    <aside class="chat" id="chat">
+      <div class="chat-head">
+        <span>🌿</span>
+        <div><b>Trợ lý Nông Sản Xanh</b><small>● Đang trực tuyến</small></div>
+        <button id="chatClose">×</button>
+      </div>
+      <div class="chat-body">
+        <div class="bot">
+          Xin chào! Tôi có thể giúp bạn tìm nông sản tươi hoặc tư vấn cách đặt
+          hàng.
+        </div>
+        <div class="quick">
+          <button>Tìm sản phẩm</button><button>Phí giao hàng</button
+          ><button>Cách đặt hàng</button>
+        </div>
+      </div>
+      <form class="chat-input" id="chatForm">
+        <input placeholder="Nhập tin nhắn…" /><button>➤</button>
+      </form>
+    </aside>
+    <div class="drawer-backdrop" id="backdrop"></div>
+    <aside class="drawer" id="cartDrawer">
+      <div class="drawer-head">
+        <h3>Giỏ hàng của bạn</h3>
+        <button class="close">×</button>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="cart-foot">
+        <div><span>Tạm tính</span><b id="cartTotal">0 ₫</b></div>
+        <button class="checkout">Tiến hành thanh toán</button
+        ><small>Thanh toán an toàn qua PayPal</small>
+      </div>
+    </aside>
+    <div class="toast" id="toast"></div>
+    <script src="/js/app.js"></script>
+  </body>
 </html>

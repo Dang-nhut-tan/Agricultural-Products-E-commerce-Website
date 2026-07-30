@@ -223,13 +223,13 @@ async function login(req, res) {
 
 async function me(req, res) {
   if (!req.session.userId)
-    return res.status(401).json({ message: "Bạn chưa đăng nhập." });
+    return res.json({ authenticated: false, data: null });
   const user = await User.findByPk(req.session.userId);
   if (!user || Number(user.status) !== 1)
     return req.session.destroy(() =>
-      res.status(401).json({ message: "Phiên đăng nhập không còn hợp lệ." }),
+      res.json({ authenticated: false, data: null }),
     );
-  res.json({ data: new UserRespone(user) });
+  res.json({ authenticated: true, data: new UserRespone(user) });
 }
 
 function logout(req, res, next) {

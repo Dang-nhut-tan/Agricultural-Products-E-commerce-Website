@@ -62,9 +62,7 @@ function renderRoute() {
   const title = (name) =>
     `<section class="page-title"><div class="container"><span class="breadcrumbs"><a href="/">Trang chủ</a> / ${name}</span><h1>${name}</h1></div></section>`;
   if (path === "/dang-nhap" || path === "/dang-ky") {
-    const login = path === "/dang-nhap";
-    main.innerHTML = `<div class="auth-wrap"><div class="panel"><h1>${login ? "Đăng nhập" : "Tạo tài khoản"}</h1>${login ? "" : '<div class="field"><label>Họ và tên</label><input placeholder="Nguyễn Văn An"></div>'}<div class="field"><label>Email</label><input type="email" placeholder="ban@example.com"></div><div class="field"><label>Mật khẩu</label><input type="password" placeholder="••••••••"></div><button class="primary full">${login ? "Đăng nhập" : "Đăng ký"}</button><div class="auth-links">${login ? 'Chưa có tài khoản? <a href="/dang-ky">Đăng ký ngay</a>' : 'Đã có tài khoản? <a href="/dang-nhap">Đăng nhập</a>'}</div></div></div>`;
-    return "static";
+    return "auth";
   }
   if (path === "/thanh-toan") {
     main.innerHTML =
@@ -107,22 +105,13 @@ function renderRoute() {
       "Giỏ hàng",
       "Giỏ hàng của bạn được lưu trên trình duyệt. Mở biểu tượng giỏ hàng phía trên để xem và chỉnh sửa sản phẩm.",
     ],
-    "/thanh-toan": [
-      "Thanh toán",
-      "Vui lòng đăng nhập để nhập địa chỉ nhận hàng và thanh toán qua PayPal.",
-    ],
     "/tai-khoan": [
       "Tài khoản của tôi",
       "Quản lý thông tin cá nhân, địa chỉ nhận hàng và mật khẩu.",
     ],
-    "/don-hang": ["Đơn hàng của tôi", "Bạn chưa có đơn hàng nào."],
     "/gioi-thieu": [
       "Về Nông Sản Xanh",
       "Chúng tôi kết nối nông sản có nguồn gốc rõ ràng với gia đình Việt.",
-    ],
-    "/tin-tuc": [
-      "Tin tức",
-      "Các bài viết từ database sẽ được cập nhật tại đây.",
     ],
   };
   const page = pages[path] || [
@@ -431,11 +420,6 @@ const drawer = (v) => {
 $("#cartBtn").onclick = () => drawer(true);
 $("#backdrop").onclick = () => drawer(false);
 $(".drawer .close").onclick = () => drawer(false);
-$("#accountBtn").onclick = () => $("#accountModal").classList.add("open");
-$(".modal-close").onclick = () => $("#accountModal").classList.remove("open");
-$("#accountModal").onclick = (e) => {
-  if (e.target.id === "accountModal") e.currentTarget.classList.remove("open");
-};
 $("#chatFab").onclick = () => $("#chat").classList.toggle("open");
 $("#chatClose").onclick = () => $("#chat").classList.remove("open");
 $("#chatForm").onsubmit = (e) => {

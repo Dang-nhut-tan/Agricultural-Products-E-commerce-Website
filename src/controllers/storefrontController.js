@@ -13,7 +13,7 @@ async function getStorefront(req, res) {
     if (categoryId) where.category_id = categoryId;
     if (search) where.name = { [Op.like]: `%${search}%` };
 
-    const [{ rows: products, count: total }, categories, brands] = await Promise.all([
+    const [{ rows: products, count: total }, categories] = await Promise.all([
       db.Product.findAndCountAll({
         where,
         distinct: true,
@@ -23,13 +23,11 @@ async function getStorefront(req, res) {
         offset: (page - 1) * limit,
       }),
       db.Category.findAll({ order: [["name", "ASC"]] }),
-      db.Brand.findAll({ order: [["name", "ASC"]] }),
     ]);
 
     res.json({
       products,
       categories,
-      brands,
       pagination: {
         page,
         limit,

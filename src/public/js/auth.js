@@ -43,7 +43,7 @@ if (authPath === "/dang-nhap" || authPath === "/dang-ky") {
 fetch("/api/auth/me")
   .then((response) => (response.ok ? response.json() : null))
   .then((result) => {
-    if (!result) return;
+    if (!result?.authenticated || !result.data) return;
     if (authPath === "/tai-khoan") return;
     document.querySelectorAll(".modern-account").forEach((link) => {
       link.href = "/tai-khoan";

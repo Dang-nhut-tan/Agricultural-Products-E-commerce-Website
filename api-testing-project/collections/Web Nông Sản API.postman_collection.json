@@ -8,309 +8,465 @@
   },
   "item": [
     {
-      "name": "Authentication",
+      "name": "Người dùng",
       "item": [
         {
-          "name": "register",
-          "event": [
+          "name": "Authentication",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var data=pm.response.json()",
-                  "",
-                  "pm.test(\"status code is 200\",function()",
-                  "{",
-                  "    pm.response.to.have.status(201)",
-                  "})",
-                  "",
-                  "pm.test(\"response time is less than 200ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).below(2000)",
-                  "})",
-                  "",
-                  "pm.test(\"response message is 'Đăng ký thành công.'\", function () {",
-                  "    pm.expect(pm.response.text()).to.contain(\"Đăng ký thành công\")",
-                  "})",
-                  "",
-                  "pm.test(\"Successful POST request\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
-                  "});",
-                  "",
-                  "pm.environment.set(\"userId\", data.data.id)",
-                  "pm.environment.set(\"email\",data.data.email)",
-                  "",
-                  "if(pm.response.code===201)",
-                  "{",
-                  "    pm.execution.setNextRequest(\"Login\")",
-                  "}",
-                  "else",
-                  "{",
-                  "    pm.execution.setNextRequest(null)",
-                  "}"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"name\": \"{{$randomBankAccountName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"123456\",\r\n    \"passwordConfirmation\": \"123456\",\r\n    \"phone\": \"0901234567\",\r\n    \"address\": \"123 Nguyễn Trãi\",\r\n    \"ward\": \"Phường Bến Thành\",\r\n    \"district\": \"Quận 1\",\r\n    \"province\": \"TP. Hồ Chí Minh\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "name": "register",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var data=pm.response.json()",
+                      "",
+                      "pm.test(\"status code is 200\",function()",
+                      "{",
+                      "    pm.response.to.have.status(201)",
+                      "})",
+                      "",
+                      "pm.test(\"response time is less than 200ms\", function () {",
+                      "    pm.expect(pm.response.responseTime).below(2000)",
+                      "})",
+                      "",
+                      "pm.test(\"response message is 'Đăng ký thành công.'\", function () {",
+                      "    pm.expect(pm.response.text()).to.contain(\"Đăng ký thành công\")",
+                      "})",
+                      "",
+                      "pm.test(\"Successful POST request\", function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+                      "});",
+                      "",
+                      "pm.environment.set(\"userId\", data.data.id)",
+                      "pm.environment.set(\"email\",data.data.email)",
+                      "",
+                      "if(pm.response.code===201)",
+                      "{",
+                      "    pm.execution.setNextRequest(\"Login\")",
+                      "}",
+                      "else",
+                      "{",
+                      "    pm.execution.setNextRequest(null)",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
                 }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/register",
-              "host": [
-                "{{baseUrl}}"
               ],
-              "path": [
-                "api",
-                "auth",
-                "register"
-              ]
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"{{$randomBankAccountName}}\",\r\n    \"email\": \"{{$randomEmail}}\",\r\n    \"password\": \"123456\",\r\n    \"passwordConfirmation\": \"123456\",\r\n    \"phone\": \"0901234567\",\r\n    \"address\": \"123 Nguyễn Trãi\",\r\n    \"ward\": \"Phường Bến Thành\",\r\n    \"district\": \"Quận 1\",\r\n    \"province\": \"TP. Hồ Chí Minh\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () \r",
+                      "{\r",
+                      "    pm.response.to.have.status(200)\r",
+                      "})\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
         },
         {
-          "name": "Login",
-          "event": [
+          "name": "Products",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () \r",
-                  "{\r",
-                  "    pm.response.to.have.status(200)\r",
-                  "})\r",
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"123456\"\r\n}\r\n",
-              "options": {
-                "raw": {
-                  "language": "json"
+              "name": "get product",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "",
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has a data array\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property(\"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "",
+                      "pm.test(\"Each item in data has required fields: id, name, price, image, Category\", function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(function (item) {",
+                      "        pm.expect(item).to.have.property(\"id\");",
+                      "        pm.expect(item).to.have.property(\"name\");",
+                      "        pm.expect(item).to.have.property(\"price\");",
+                      "        pm.expect(item).to.have.property(\"image\");",
+                      "        pm.expect(item).to.have.property(\"Category\");",
+                      "    });",
+                      "});",
+                      "",
+                      "pm.test(\"Response has a pagination object with fields: page, limit, total, totalPages\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.property(\"pagination\");",
+                      "    pm.expect(json.pagination).to.have.property(\"page\");",
+                      "    pm.expect(json.pagination).to.have.property(\"limit\");",
+                      "    pm.expect(json.pagination).to.have.property(\"total\");",
+                      "    pm.expect(json.pagination).to.have.property(\"totalPages\");",
+                      "});",
+                      "",
+                      "pm.test(\"pagination.page equals 1 (matches query param page=1)\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json.pagination.page).to.eql(1);",
+                      "});",
+                      "",
+                      "pm.test(\"Each product's Category object (if present) has id and name\", function () {",
+                      "    const json = pm.response.json();",
+                      "    json.data.forEach(function (item) {",
+                      "        if (item.Category) {",
+                      "            pm.expect(item.Category).to.have.property(\"id\");",
+                      "            pm.expect(item.Category).to.have.property(\"name\");",
+                      "        }",
+                      "    });",
+                      "});",
+                      "",
+                      "pm.test(\"Response time is less than 3000ms\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                      "});",
+                      "",
+                      "const products = pm.response.json().data;",
+                      "if (products.length > 0) {",
+                      "    pm.environment.set(\"productId\", products[0].id);",
+                      "} else {",
+                      "    pm.environment.unset(\"productId\");",
+                      "}",
+                      "",
+                      "pm.globals.set(\"name\", \"Tan\")",
+                      "",
+                      "",
+                      "// Visualization Script",
+                      "// Visualization Script",
+                      "const template = `",
+                      "<style>",
+                      "  * { box-sizing: border-box; }",
+                      "  body { font-family: sans-serif; padding: 12px; margin: 0; }",
+                      "  h2 { font-size: 15px; margin: 0 0 10px; }",
+                      "  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }",
+                      "  .card { padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 6px; }",
+                      "  .card .v { font-size: 22px; font-weight: 700; }",
+                      "  .card .l { font-size: 11px; color: #888; text-transform: uppercase; margin-top: 2px; }",
+                      "  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }",
+                      "  th { background: #f5f5f5; text-align: left; padding: 6px 8px; border-bottom: 2px solid #ddd; }",
+                      "  td { padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }",
+                      "  .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }",
+                      "  .in-stock { background: #d1fae5; color: #065f46; }",
+                      "  .out-stock { background: #fee2e2; color: #991b1b; }",
+                      "  .chart-wrap { max-width: 560px; }",
+                      "</style>",
+                      "<h2>Product Overview</h2>",
+                      "<div class=\"grid\">",
+                      "  <div class=\"card\"><div class=\"v\">{{summary.total}}</div><div class=\"l\">Total Products</div></div>",
+                      "  <div class=\"card\"><div class=\"v\">{{summary.inStock}}</div><div class=\"l\">In Stock</div></div>",
+                      "  <div class=\"card\"><div class=\"v\">{{summary.totalSold}}</div><div class=\"l\">Total Sold</div></div>",
+                      "  <div class=\"card\"><div class=\"v\">{{summary.page}} / {{summary.totalPages}}</div><div class=\"l\">Page</div></div>",
+                      "</div>",
+                      "<table>",
+                      "  <tr><th>#</th><th>Name</th><th>Category</th><th>Price (VND)</th><th>Qty</th><th>Sold</th><th>Status</th></tr>",
+                      "  {{#each rows}}",
+                      "  <tr>",
+                      "    <td>{{id}}</td>",
+                      "    <td>{{name}}</td>",
+                      "    <td>{{category}}</td>",
+                      "    <td>{{price}}</td>",
+                      "    <td>{{quantity}}</td>",
+                      "    <td>{{sold}}</td>",
+                      "    <td><span class=\"badge {{stockClass}}\">{{stockLabel}}</span></td>",
+                      "  </tr>",
+                      "  {{/each}}",
+                      "</table>",
+                      "<div class=\"chart-wrap\">",
+                      "  <canvas id=\"chart\" height=\"120\"></canvas>",
+                      "</div>",
+                      "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4\"></script>",
+                      "<script>",
+                      "  pm.getData(function (err, value) {",
+                      "    new Chart(document.getElementById('chart'), {",
+                      "      type: 'bar',",
+                      "      data: {",
+                      "        labels: value.rows.map(function (r) { return r.name; }),",
+                      "        datasets: [",
+                      "          {",
+                      "            label: 'Price (x1000 VND)',",
+                      "            data: value.rows.map(function (r) { return r.priceRaw / 1000; }),",
+                      "            backgroundColor: 'rgba(99,102,241,0.7)'",
+                      "          },",
+                      "          {",
+                      "            label: 'Sold Count',",
+                      "            data: value.rows.map(function (r) { return r.sold; }),",
+                      "            backgroundColor: 'rgba(16,185,129,0.7)'",
+                      "          }",
+                      "        ]",
+                      "      },",
+                      "      options: {",
+                      "        plugins: { legend: { display: true } },",
+                      "        scales: { y: { beginAtZero: true } }",
+                      "      }",
+                      "    });",
+                      "  });",
+                      "</script>`;",
+                      "",
+                      "function createPayload() {",
+                      "  var body = pm.response.json();",
+                      "  var pagination = body.pagination || {};",
+                      "  var inStock = body.data.filter(function (p) { return p.quantity > 0; }).length;",
+                      "  var totalSold = body.data.reduce(function (acc, p) { return acc + (p.sold_count || 0); }, 0);",
+                      "  var rows = body.data.map(function (p) {",
+                      "    var priceRaw = parseFloat(p.price) || 0;",
+                      "    return {",
+                      "      id: p.id,",
+                      "      name: p.name,",
+                      "      category: p.Category ? p.Category.name : 'N/A',",
+                      "      price: priceRaw.toLocaleString('vi-VN'),",
+                      "      priceRaw: priceRaw,",
+                      "      quantity: p.quantity,",
+                      "      sold: p.sold_count || 0,",
+                      "      stockClass: p.quantity > 0 ? 'in-stock' : 'out-stock',",
+                      "      stockLabel: p.quantity > 0 ? 'In Stock' : 'Out of Stock'",
+                      "    };",
+                      "  });",
+                      "  return {",
+                      "    summary: {",
+                      "      total: pagination.total || body.data.length,",
+                      "      inStock: inStock,",
+                      "      totalSold: totalSold,",
+                      "      page: pagination.page || 1,",
+                      "      totalPages: pagination.totalPages || 1",
+                      "    },",
+                      "    rows: rows",
+                      "  };",
+                      "}",
+                      "",
+                      "pm.visualizer.set(template, createPayload());"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
                 }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": [
-                "{{baseUrl}}"
               ],
-              "path": [
-                "api",
-                "auth",
-                "login"
-              ]
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/products?page=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get product by id",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Response time is below 2000 ms\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                      "});",
+                      "",
+                      "pm.test(\"Content-Type is JSON\", function () {",
+                      "    const contentType = pm.response.headers.get(\"Content-Type\");",
+                      "",
+                      "    pm.expect(contentType).to.include(\"application/json\");",
+                      "});",
+                      "",
+                      "console.log(\"Product ID:\", pm.environment.get(\"productId\"));"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/products/{{productId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{productId}}"
+                  ]
+                }
+              },
+              "response": []
             }
-          },
-          "response": []
+          ]
+        },
+        {
+          "name": "My Account",
+          "item": [
+            {
+              "name": "Get Me",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update me",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Nguyễn Văn A\",\r\n  \"phone\": \"0901234567\",\r\n  \"avatarData\": \"\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Products",
+      "name": "Admin",
       "item": [
         {
-          "name": "get product",
+          "name": "Dashboard without login",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
+                  "pm.test(\"Status code is 302\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(302)",
+                  "})",
                   "",
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has a data array\", function () {",
-                  "    const json = pm.response.json();",
-                  "    pm.expect(json).to.have.property(\"data\");",
-                  "    pm.expect(json.data).to.be.an(\"array\");",
-                  "});",
-                  "",
-                  "pm.test(\"Each item in data has required fields: id, name, price, image, Category\", function () {",
-                  "    const json = pm.response.json();",
-                  "    json.data.forEach(function (item) {",
-                  "        pm.expect(item).to.have.property(\"id\");",
-                  "        pm.expect(item).to.have.property(\"name\");",
-                  "        pm.expect(item).to.have.property(\"price\");",
-                  "        pm.expect(item).to.have.property(\"image\");",
-                  "        pm.expect(item).to.have.property(\"Category\");",
-                  "    });",
-                  "});",
-                  "",
-                  "pm.test(\"Response has a pagination object with fields: page, limit, total, totalPages\", function () {",
-                  "    const json = pm.response.json();",
-                  "    pm.expect(json).to.have.property(\"pagination\");",
-                  "    pm.expect(json.pagination).to.have.property(\"page\");",
-                  "    pm.expect(json.pagination).to.have.property(\"limit\");",
-                  "    pm.expect(json.pagination).to.have.property(\"total\");",
-                  "    pm.expect(json.pagination).to.have.property(\"totalPages\");",
-                  "});",
-                  "",
-                  "pm.test(\"pagination.page equals 1 (matches query param page=1)\", function () {",
-                  "    const json = pm.response.json();",
-                  "    pm.expect(json.pagination.page).to.eql(1);",
-                  "});",
-                  "",
-                  "pm.test(\"Each product's Category object (if present) has id and name\", function () {",
-                  "    const json = pm.response.json();",
-                  "    json.data.forEach(function (item) {",
-                  "        if (item.Category) {",
-                  "            pm.expect(item.Category).to.have.property(\"id\");",
-                  "            pm.expect(item.Category).to.have.property(\"name\");",
-                  "        }",
-                  "    });",
-                  "});",
+                  "pm.test(\"Redirect to admin login\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/admin/login\")",
+                  "})",
                   "",
                   "pm.test(\"Response time is less than 3000ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
-                  "});",
-                  "",
-                  "const products = pm.response.json().data;",
-                  "if (products.length > 0) {",
-                  "    pm.environment.set(\"productId\", products[0].id);",
-                  "} else {",
-                  "    pm.environment.unset(\"productId\");",
-                  "}",
-                  "",
-                  "pm.globals.set(\"name\", \"Tan\")",
-                  "",
-                  "",
-                  "// Visualization Script",
-                  "// Visualization Script",
-                  "const template = `",
-                  "<style>",
-                  "  * { box-sizing: border-box; }",
-                  "  body { font-family: sans-serif; padding: 12px; margin: 0; }",
-                  "  h2 { font-size: 15px; margin: 0 0 10px; }",
-                  "  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }",
-                  "  .card { padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 6px; }",
-                  "  .card .v { font-size: 22px; font-weight: 700; }",
-                  "  .card .l { font-size: 11px; color: #888; text-transform: uppercase; margin-top: 2px; }",
-                  "  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }",
-                  "  th { background: #f5f5f5; text-align: left; padding: 6px 8px; border-bottom: 2px solid #ddd; }",
-                  "  td { padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }",
-                  "  .badge { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }",
-                  "  .in-stock { background: #d1fae5; color: #065f46; }",
-                  "  .out-stock { background: #fee2e2; color: #991b1b; }",
-                  "  .chart-wrap { max-width: 560px; }",
-                  "</style>",
-                  "<h2>Product Overview</h2>",
-                  "<div class=\"grid\">",
-                  "  <div class=\"card\"><div class=\"v\">{{summary.total}}</div><div class=\"l\">Total Products</div></div>",
-                  "  <div class=\"card\"><div class=\"v\">{{summary.inStock}}</div><div class=\"l\">In Stock</div></div>",
-                  "  <div class=\"card\"><div class=\"v\">{{summary.totalSold}}</div><div class=\"l\">Total Sold</div></div>",
-                  "  <div class=\"card\"><div class=\"v\">{{summary.page}} / {{summary.totalPages}}</div><div class=\"l\">Page</div></div>",
-                  "</div>",
-                  "<table>",
-                  "  <tr><th>#</th><th>Name</th><th>Category</th><th>Price (VND)</th><th>Qty</th><th>Sold</th><th>Status</th></tr>",
-                  "  {{#each rows}}",
-                  "  <tr>",
-                  "    <td>{{id}}</td>",
-                  "    <td>{{name}}</td>",
-                  "    <td>{{category}}</td>",
-                  "    <td>{{price}}</td>",
-                  "    <td>{{quantity}}</td>",
-                  "    <td>{{sold}}</td>",
-                  "    <td><span class=\"badge {{stockClass}}\">{{stockLabel}}</span></td>",
-                  "  </tr>",
-                  "  {{/each}}",
-                  "</table>",
-                  "<div class=\"chart-wrap\">",
-                  "  <canvas id=\"chart\" height=\"120\"></canvas>",
-                  "</div>",
-                  "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4\"></script>",
-                  "<script>",
-                  "  pm.getData(function (err, value) {",
-                  "    new Chart(document.getElementById('chart'), {",
-                  "      type: 'bar',",
-                  "      data: {",
-                  "        labels: value.rows.map(function (r) { return r.name; }),",
-                  "        datasets: [",
-                  "          {",
-                  "            label: 'Price (x1000 VND)',",
-                  "            data: value.rows.map(function (r) { return r.priceRaw / 1000; }),",
-                  "            backgroundColor: 'rgba(99,102,241,0.7)'",
-                  "          },",
-                  "          {",
-                  "            label: 'Sold Count',",
-                  "            data: value.rows.map(function (r) { return r.sold; }),",
-                  "            backgroundColor: 'rgba(16,185,129,0.7)'",
-                  "          }",
-                  "        ]",
-                  "      },",
-                  "      options: {",
-                  "        plugins: { legend: { display: true } },",
-                  "        scales: { y: { beginAtZero: true } }",
-                  "      }",
-                  "    });",
-                  "  });",
-                  "</script>`;",
-                  "",
-                  "function createPayload() {",
-                  "  var body = pm.response.json();",
-                  "  var pagination = body.pagination || {};",
-                  "  var inStock = body.data.filter(function (p) { return p.quantity > 0; }).length;",
-                  "  var totalSold = body.data.reduce(function (acc, p) { return acc + (p.sold_count || 0); }, 0);",
-                  "  var rows = body.data.map(function (p) {",
-                  "    var priceRaw = parseFloat(p.price) || 0;",
-                  "    return {",
-                  "      id: p.id,",
-                  "      name: p.name,",
-                  "      category: p.Category ? p.Category.name : 'N/A',",
-                  "      price: priceRaw.toLocaleString('vi-VN'),",
-                  "      priceRaw: priceRaw,",
-                  "      quantity: p.quantity,",
-                  "      sold: p.sold_count || 0,",
-                  "      stockClass: p.quantity > 0 ? 'in-stock' : 'out-stock',",
-                  "      stockLabel: p.quantity > 0 ? 'In Stock' : 'Out of Stock'",
-                  "    };",
-                  "  });",
-                  "  return {",
-                  "    summary: {",
-                  "      total: pagination.total || body.data.length,",
-                  "      inStock: inStock,",
-                  "      totalSold: totalSold,",
-                  "      page: pagination.page || 1,",
-                  "      totalPages: pagination.totalPages || 1",
-                  "    },",
-                  "    rows: rows",
-                  "  };",
-                  "}",
-                  "",
-                  "pm.visualizer.set(template, createPayload());"
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -322,18 +478,253 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products?page=1",
+              "raw": "{{baseUrl}}/admin/api/dashboard",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "admin",
                 "api",
-                "products"
+                "dashboard"
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Login admin fail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response contains invalid credentials message\", function () {",
+                  "    pm.expect(pm.response.text()).to.contain(\"invalidCredentials\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{adminEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{adminPassword}}-invalid",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 302\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(302)",
+                  "})",
+                  "",
+                  "pm.test(\"Redirect to admin page\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Location\")).to.eql(\"/admin\")",
+                  "})",
+                  "",
+                  "pm.test(\"Admin session cookie is created\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Set-Cookie\")).to.be.a(\"string\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "email",
+                  "value": "{{adminEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{adminPassword}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Get dashboard admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Dashboard has required fields\", function () {",
+                  "    pm.expect(data).to.have.property(\"users\")",
+                  "    pm.expect(data).to.have.property(\"products\")",
+                  "    pm.expect(data).to.have.property(\"orders\")",
+                  "    pm.expect(data).to.have.property(\"feedback\")",
+                  "    pm.expect(data).to.have.property(\"categories\")",
+                  "    pm.expect(data).to.have.property(\"expired\")",
+                  "    pm.expect(data).to.have.property(\"expiringSoon\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/users/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "users",
+                "actions",
+                "list"
               ],
               "query": [
                 {
                   "key": "page",
                   "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
                 }
               ]
             }
@@ -341,27 +732,34 @@
           "response": []
         },
         {
-          "name": "get product by id",
+          "name": "Get categories",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
+                  "var data = pm.response.json()",
                   "",
-                  "pm.test(\"Response time is below 2000 ms\", function () {",
-                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
-                  "});",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
                   "",
-                  "pm.test(\"Content-Type is JSON\", function () {",
-                  "    const contentType = pm.response.headers.get(\"Content-Type\");",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
                   "",
-                  "    pm.expect(contentType).to.include(\"application/json\");",
-                  "});",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
                   "",
-                  "console.log(\"Product ID:\", pm.environment.get(\"productId\"));"
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -373,72 +771,492 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "raw": "{{baseUrl}}/admin/api/resources/categories/actions/list?page=1&perPage=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "admin",
                 "api",
-                "products",
-                "{{productId}}"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "My Account",
-      "item": [
-        {
-          "name": "Get Me",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/me",
-              "host": [
-                "{{baseUrl}}"
+                "resources",
+                "categories",
+                "actions",
+                "list"
               ],
-              "path": [
-                "api",
-                "auth",
-                "me"
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
               ]
             }
           },
           "response": []
         },
         {
-          "name": "update me",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"Nguyễn Văn A\",\r\n  \"phone\": \"0901234567\",\r\n  \"avatarData\": \"\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "Get brands",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
-            },
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/profile",
+              "raw": "{{baseUrl}}/admin/api/resources/brands/actions/list?page=1&perPage=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
+                "admin",
                 "api",
-                "auth",
-                "profile"
+                "resources",
+                "brands",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/products/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "products",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get banners",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/banner/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "banner",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get news",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/news/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "news",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get coupons",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/coupons/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "coupons",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response time is less than 3000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).below(3000)",
+                  "})",
+                  "",
+                  "pm.test(\"Response has a records array\", function () {",
+                  "    pm.expect(data).to.have.property(\"records\")",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "})",
+                  "",
+                  "pm.test(\"Response has pagination meta\", function () {",
+                  "    pm.expect(data).to.have.property(\"meta\")",
+                  "    pm.expect(data.meta).to.have.property(\"page\")",
+                  "    pm.expect(data.meta).to.have.property(\"perPage\")",
+                  "    pm.expect(data.meta).to.have.property(\"total\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/orders/actions/list?page=1&perPage=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "orders",
+                "actions",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create feedback fail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var data = pm.response.json()",
+                  "",
+                  "pm.test(\"Status code is 200\", function ()",
+                  "{",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Response notice type is error\", function () {",
+                  "    pm.expect(data.notice.type).to.eql(\"error\")",
+                  "})",
+                  "",
+                  "pm.test(\"Feedback is not created\", function () {",
+                  "    pm.expect(data.records).to.be.an(\"array\")",
+                  "    pm.expect(data.records).to.be.empty",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/api/resources/feedback/actions/new",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "api",
+                "resources",
+                "feedback",
+                "actions",
+                "new"
               ]
             }
           },
           "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "admin123"
     }
   ]
 }
