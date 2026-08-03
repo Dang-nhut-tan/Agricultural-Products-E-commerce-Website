@@ -1,0 +1,214 @@
+.recipe-assistant {
+  padding: 34px 0 60px;
+  background: #f5f8f2;
+  border-bottom: 1px solid #dce7d6;
+  scroll-margin-top: 20px;
+}
+.recipe-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) repeat(4, minmax(120px, 0.55fr));
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+.recipe-filter-bar h2 {
+  margin: 4px 0 0;
+  color: #183d29;
+}
+.recipe-filter-bar label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3c5847;
+}
+.recipe-filter-bar select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px;
+  border: 1px solid #cad8c7;
+  border-radius: 10px;
+  background: #fff;
+  color: #243d2d;
+}
+.recipe-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) 1.4fr;
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 14px 35px #1b4b2920;
+}
+.recipe-hero {
+  min-height: 390px;
+  background-size: cover;
+  background-position: center;
+}
+.recipe-hero.no-image {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #dfead9, #f3e8cb);
+  color: #48634c;
+}
+.recipe-body {
+  padding: 34px;
+}
+.recipe-kicker {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #d86c2c;
+}
+.recipe-body h2 {
+  font-size: 32px;
+  margin: 6px 0 8px;
+  color: #173c27;
+}
+.recipe-columns {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 28px;
+  margin-top: 25px;
+}
+.recipe-columns h3 {
+  color: #204b31;
+}
+.recipe-columns li {
+  margin: 9px 0;
+  line-height: 1.55;
+}
+.recipe-columns ul {
+  padding-left: 18px;
+}
+.recipe-columns ol {
+  padding-left: 22px;
+}
+.recipe-columns em {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #dff1df;
+  color: #27733d;
+  font-size: 11px;
+  font-style: normal;
+}
+.recipe-columns em.missing {
+  background: #fff0df;
+  color: #a75a14;
+}
+.recipe-safety {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #fff7df;
+  color: #664b16;
+}
+.recipe-safety ul {
+  margin-bottom: 0;
+}
+.recipe-products {
+  margin-top: 30px;
+}
+.recipe-products-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.recipe-products-head h2 {
+  margin: 4px 0 0;
+}
+.recipe-products-head button {
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 20px;
+  background: #e8742e;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.recipe-product {
+  position: relative;
+}
+.recipe-check {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 10px;
+  padding: 7px 10px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 3px 10px #0002;
+  font-size: 12px;
+  font-weight: 800;
+}
+.recipe-qty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.recipe-qty input {
+  width: 68px;
+  padding: 7px;
+  border: 1px solid #ccd8ca;
+  border-radius: 8px;
+}
+.recipe-loading,
+.recipe-error {
+  text-align: center;
+  padding: 55px;
+  background: #fff;
+  border-radius: 20px;
+}
+.recipe-loading span {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  border: 4px solid #d9e7d4;
+  border-top-color: #2d7b47;
+  border-radius: 50%;
+  animation: recipe-spin 0.8s linear infinite;
+}
+@keyframes recipe-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 900px) {
+  .recipe-filter-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .recipe-filter-bar > div {
+    grid-column: 1/-1;
+  }
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
+  .recipe-hero {
+    min-height: 280px;
+  }
+  .recipe-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .recipe-filter-bar {
+    grid-template-columns: 1fr;
+  }
+  .recipe-filter-bar > div {
+    grid-column: auto;
+  }
+  .recipe-body {
+    padding: 22px;
+  }
+  .recipe-products-head {
+    display: block;
+  }
+  .recipe-products-head button {
+    margin-top: 14px;
+    width: 100%;
+  }
+}

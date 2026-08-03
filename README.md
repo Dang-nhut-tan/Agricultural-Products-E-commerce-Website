@@ -369,6 +369,17 @@ Pipeline hiện thực hiện:
 - Dùng tài khoản PayPal Sandbox khi `PAYPAL_MODE=sandbox`.
 - Kiểm tra `PAYPAL_VND_PER_USD` là số dương.
 
+### Bếp thông minh Gemini + FAISS
+
+1. Đặt `GEMINI_API_KEY` trong `.env` (hệ thống vẫn đọc tên cũ `Gemini_key` để tương thích).
+2. Chạy migration: `yarn db:migrate`.
+3. Đặt sách PDF scan trong `src/pdf/`.
+4. Tạo hoặc tiếp tục chỉ mục: `yarn recipes:index`.
+
+Pipeline dùng Gemini OCR cho PDF scan, lưu checkpoint và metadata trong `data/recipes/`, rồi tạo FAISS index 768 chiều bằng `gemini-embedding-001`. Có thể chạy `yarn recipes:index:smoke` để dựng lại thử 30 trang đầu (lệnh này xóa checkpoint cũ). Không commit thư mục index hoặc ảnh AI đã cache.
+
+Người dùng phải đăng nhập mới gọi được `POST /api/recipes/suggest`. Trong AdminJS, mục **Món ăn thông minh** cho phép quản lý ảnh/công thức và liên kết tên nguyên liệu với sản phẩm. Hệ thống không gọi model tạo ảnh; giao diện chỉ dùng ảnh do quản trị viên tải lên hoặc ảnh sản phẩm phù hợp.
+
 ### Test AdminJS trả về trang login với status 200
 
 Điều này thường xảy ra khi `adminEmail` hoặc `adminPassword` trong Postman không khớp `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.

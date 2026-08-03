@@ -93,6 +93,14 @@ function renderRoute() {
     setupPaypalCheckout();
     return "checkout";
   }
+  if (path === "/gio-hang") {
+    main.innerHTML = `<section class="cart-page-shell"><div class="container cart-page-container">
+      <div class="cart-page-header"><div><span>Đơn hàng của bạn</span><h1>Giỏ hàng</h1><p>Kiểm tra sản phẩm và điều chỉnh số lượng trước khi thanh toán.</p></div><a href="/san-pham">← Tiếp tục mua sắm</a></div>
+      <div id="cartPageContent"></div>
+    </div></section>`;
+    renderCartPage();
+    return "cart";
+  }
   if (path === "/don-hang" || /^\/don-hang\/\d+$/.test(path)) {
     const orderId = path.split("/")[2];
     main.innerHTML = title(orderId ? `Đơn hàng #${safe(orderId)}` : "Lịch sử mua hàng") +
@@ -101,10 +109,6 @@ function renderRoute() {
     return "orders";
   }
   const pages = {
-    "/gio-hang": [
-      "Giỏ hàng",
-      "Giỏ hàng của bạn được lưu trên trình duyệt. Mở biểu tượng giỏ hàng phía trên để xem và chỉnh sửa sản phẩm.",
-    ],
     "/tai-khoan": [
       "Tài khoản của tôi",
       "Quản lý thông tin cá nhân, địa chỉ nhận hàng và mật khẩu.",
@@ -343,6 +347,37 @@ function renderCart() {
       state.cart.reduce((n, x) => n + Number(x.price) * Number(x.qty), 0),
     );
   }
+  renderCartPage();
+}
+
+function renderCartPage() {
+  const box = document.querySelector("#cartPageContent");
+  if (!box) return;
+  if (!state.cart.length) {
+    box.innerHTML = `<div class="cart-page-empty"><div aria-hidden="true">🛒</div><h2>Giỏ hàng đang trống</h2><p>Bạn chưa chọn sản phẩm nào. Hãy khám phá nông sản tươi đang có tại cửa hàng.</p><a href="/san-pham">Khám phá sản phẩm <span>→</span></a></div>`;
+    return;
+  }
+  const count = state.cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  const total = state.cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+  box.innerHTML = `<div class="cart-page-grid">
+    <section class="cart-products-panel" aria-label="Sản phẩm trong giỏ">
+      <div class="cart-panel-title"><h2>Sản phẩm đã chọn</h2><span>${count} sản phẩm</span></div>
+      <div class="cart-page-items">${state.cart.map((item) => `<article class="cart-page-item">
+        <a class="cart-item-image${item.image ? "" : " no-image"}" href="/san-pham/${item.id}" ${item.image ? `style="background-image:url('${safe(item.image)}')"` : ""} aria-label="Xem ${safe(item.name)}">${item.image ? "" : "🌿"}</a>
+        <div class="cart-item-info"><span>Nông sản tươi</span><h3><a href="/san-pham/${item.id}">${safe(item.name)}</a></h3><strong>${money(item.price)}</strong></div>
+        <div class="cart-item-actions"><label>Số lượng</label><div class="cart-quantity"><button type="button" data-cart-decrease="${item.id}" aria-label="Giảm số lượng">−</button><b>${Number(item.qty)}</b><button type="button" data-cart-increase="${item.id}" aria-label="Tăng số lượng">+</button></div><button class="cart-remove" type="button" data-cart-page-remove="${item.id}">Xóa</button></div>
+        <div class="cart-item-subtotal"><span>Thành tiền</span><strong>${money(Number(item.price) * Number(item.qty))}</strong></div>
+      </article>`).join("")}</div>
+    </section>
+    <aside class="cart-summary">
+      <span class="cart-summary-kicker">Tóm tắt đơn hàng</span><h2>Thanh toán</h2>
+      <div class="cart-summary-row"><span>Sản phẩm (${count})</span><b>${money(total)}</b></div>
+      <div class="cart-summary-row"><span>Phí giao hàng</span><b>Tính ở bước sau</b></div>
+      <div class="cart-summary-total"><span>Tổng tạm tính</span><strong>${money(total)}</strong></div>
+      <a class="cart-checkout-button" href="/thanh-toan">Tiến hành thanh toán <span>→</span></a>
+      <div class="cart-assurance"><i>✓</i><p><b>Thanh toán an toàn</b><small>Thông tin đơn hàng được bảo mật.</small></p></div>
+    </aside>
+  </div>`;
 }
 window.addEventListener("cart:updated", (event) => {
   state.cart = JSON.parse(localStorage.getItem("nong-san-cart") || "[]");
@@ -350,6 +385,18 @@ window.addEventListener("cart:updated", (event) => {
   if (event.detail?.message) toast(event.detail.message);
 });
 document.addEventListener("click", (e) => {
+  const cartDecrease = e.target.closest("[data-cart-decrease]");
+  const cartIncrease = e.target.closest("[data-cart-increase]");
+  const cartPageRemove = e.target.closest("[data-cart-page-remove]");
+  if (cartDecrease || cartIncrease || cartPageRemove) {
+    const id = Number((cartDecrease || cartIncrease || cartPageRemove).dataset.cartDecrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartIncrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartPageRemove);
+    const item = state.cart.find((entry) => Number(entry.id) === id);
+    if (cartPageRemove) state.cart = state.cart.filter((entry) => Number(entry.id) !== id);
+    else if (item && cartDecrease) item.qty = Math.max(1, Number(item.qty) - 1);
+    else if (item && cartIncrease) item.qty = Number(item.qty) + 1;
+    renderCart();
+    return;
+  }
   const page = e.target.closest("#pagination button[data-page]");
   if (page && !page.disabled) {
     state.page = Number(page.dataset.page);
@@ -420,13 +467,155 @@ const drawer = (v) => {
 $("#cartBtn").onclick = () => drawer(true);
 $("#backdrop").onclick = () => drawer(false);
 $(".drawer .close").onclick = () => drawer(false);
-$("#chatFab").onclick = () => $("#chat").classList.toggle("open");
-$("#chatClose").onclick = () => $("#chat").classList.remove("open");
+$("#chatFab").onclick = () => {
+  const isOpen = $("#chat").classList.toggle("open");
+  $("#chatFab").setAttribute("aria-expanded", String(isOpen));
+  if (isOpen) setTimeout(() => $("#chatForm input").focus(), 180);
+};
+$("#chatClose").onclick = () => {
+  $("#chat").classList.remove("open");
+  $("#chatFab").setAttribute("aria-expanded", "false");
+  $("#chatFab").focus();
+};
+const chatHistory = [];
+const quickChatAnswers = {
+  "Cửa hàng đang có những sản phẩm nào?": "Bạn có thể xem toàn bộ nông sản đang bán tại mục Sản phẩm. Dùng ô tìm kiếm ở đầu trang để tìm nhanh theo tên; sản phẩm còn hàng sẽ có nút thêm vào giỏ.",
+  "Phí giao hàng được tính như thế nào?": "Phí giao hàng được tính theo địa chỉ nhận hàng và sẽ hiển thị rõ ở bước thanh toán trước khi bạn xác nhận đơn.",
+  "Hướng dẫn tôi cách đặt hàng": "Cách đặt hàng:\n• Chọn sản phẩm và nhấn nút + để thêm vào giỏ.\n• Mở giỏ hàng, kiểm tra và điều chỉnh số lượng.\n• Nhấn Thanh toán, chọn địa chỉ nhận hàng và hoàn tất thanh toán.",
+};
+const appendChatMessage = (role, text, extraClass = "") => {
+  const body = $("#chat .chat-body");
+  const message = document.createElement("div");
+  message.className = `${role === "user" ? "chat-user" : "bot"} ${extraClass}`.trim();
+  message.textContent = text;
+  body.appendChild(message);
+  body.scrollTop = body.scrollHeight;
+  return message;
+};
+const renderChatAnswer = (element, text) => {
+  const lines = String(text || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  let html = "";
+  let inList = false;
+  for (const line of lines) {
+    const bullet = line.match(/^[•*-]\s*(.+)$/);
+    if (bullet) {
+      if (!inList) { html += "<ul>"; inList = true; }
+      html += `<li>${safe(bullet[1])}</li>`;
+      continue;
+    }
+    if (inList) { html += "</ul>"; inList = false; }
+    html += `<p>${safe(line)}</p>`;
+  }
+  if (inList) html += "</ul>";
+  element.innerHTML = html || `<p>${safe(text)}</p>`;
+};
+const appendChatProducts = (products = [], afterElement) => {
+  if (!products.length) return;
+  const list = document.createElement("div");
+  list.className = "chat-products";
+  list.setAttribute("aria-label", "Sản phẩm gợi ý");
+  list.innerHTML = products.map((product) => {
+    const image = product.image || "";
+    return `<article class="chat-product">
+      <a href="/san-pham/${product.id}" class="chat-product-image" ${image ? `style="background-image:url('${safe(image)}')"` : ""} aria-label="Xem ${safe(product.name)}">${image ? "" : "🌿"}</a>
+      <div class="chat-product-info"><a href="/san-pham/${product.id}">${safe(product.name)}</a><b>${money(product.price)}</b><small>Còn ${Number(product.quantity).toLocaleString("vi-VN")} ${safe(productUnit(product.unit))}</small></div>
+      <button type="button" data-chat-add="${product.id}" aria-label="Thêm ${safe(product.name)} vào giỏ">+</button>
+    </article>`;
+  }).join("");
+  list._products = products;
+  afterElement.insertAdjacentElement("afterend", list);
+};
+const appendChatRecipe = (recipe, afterElement) => {
+  if (!recipe) return afterElement;
+  const card = document.createElement("section");
+  card.className = "chat-recipe";
+  card.innerHTML = `<h4>${safe(recipe.name)}</h4>
+    <details open><summary>Nguyên liệu</summary><ul>${(recipe.ingredients || []).map((item) => `<li><b>${safe(item.name || item)}</b>${item.amount ? ` — ${safe(item.amount)}` : ""}</li>`).join("")}</ul></details>
+    <details><summary>Các bước nấu</summary><ol>${(recipe.steps || []).map((step) => `<li>${safe(step)}</li>`).join("")}</ol></details>
+    ${(recipe.missingIngredients || []).length ? `<div class="chat-recipe-missing"><b>Cửa hàng chưa có:</b> ${recipe.missingIngredients.map(safe).join(", ")}</div>` : ""}
+    ${(recipe.safetyNotes || []).length ? `<details class="chat-recipe-safety"><summary>Lưu ý an toàn</summary><ul>${recipe.safetyNotes.map((note) => `<li>${safe(note)}</li>`).join("")}</ul></details>` : ""}`;
+  afterElement.insertAdjacentElement("afterend", card);
+  return card;
+};
+async function sendChatMessage(message) {
+  const text = String(message || "").trim();
+  if (!text) return;
+  appendChatMessage("user", text);
+  const loading = appendChatMessage("model", "Đang trả lời…", "chat-loading");
+  const form = $("#chatForm");
+  const input = form.querySelector("input");
+  const button = form.querySelector("button");
+  input.disabled = true;
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, history: chatHistory }),
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      loading.textContent = "Bạn cần đăng nhập để sử dụng trợ lý. Đang chuyển đến trang đăng nhập…";
+      setTimeout(() => { location.href = "/dang-nhap?returnTo=/"; }, 1200);
+      return;
+    }
+    if (!response.ok) throw new Error(result.message || "Trợ lý chưa thể trả lời.");
+    loading.classList.remove("chat-loading");
+    renderChatAnswer(loading, result.data.answer);
+    const recipeCard = appendChatRecipe(result.data.recipe, loading);
+    appendChatProducts(result.data.products, recipeCard);
+    chatHistory.push({ role: "user", text }, { role: "model", text: result.data.answer });
+    if (chatHistory.length > 8) chatHistory.splice(0, chatHistory.length - 8);
+  } catch (error) {
+    loading.classList.remove("chat-loading");
+    loading.classList.add("chat-error");
+    loading.textContent = error.message;
+  } finally {
+    input.disabled = false;
+    button.disabled = false;
+    input.focus();
+    $("#chat .chat-body").scrollTop = $("#chat .chat-body").scrollHeight;
+  }
+}
 $("#chatForm").onsubmit = (e) => {
   e.preventDefault();
+  const input = e.currentTarget.querySelector("input");
+  const message = input.value;
   e.target.reset();
-  toast("Đã nhận tin nhắn");
+  sendChatMessage(message);
 };
+$("#chat .quick").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-chat-question]");
+  if (!button) return;
+  const question = button.dataset.chatQuestion;
+  const answer = quickChatAnswers[question];
+  if (!answer) return sendChatMessage(question);
+  appendChatMessage("user", button.textContent.trim());
+  const response = appendChatMessage("model", "");
+  renderChatAnswer(response, answer);
+  chatHistory.push({ role: "user", text: question }, { role: "model", text: answer });
+  if (chatHistory.length > 8) chatHistory.splice(0, chatHistory.length - 8);
+  $("#chat .chat-body").scrollTop = $("#chat .chat-body").scrollHeight;
+});
+$("#chat .chat-body").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-chat-add]");
+  if (!button) return;
+  const list = button.closest(".chat-products");
+  const product = list?._products?.find((item) => Number(item.id) === Number(button.dataset.chatAdd));
+  if (!product || Number(product.quantity) <= 0) return toast("Sản phẩm đang hết hàng");
+  const existing = state.cart.find((item) => Number(item.id) === Number(product.id));
+  if (existing) {
+    if (existing.qty >= Number(product.quantity)) return toast("Đã đạt số lượng còn trong kho");
+    existing.qty += 1;
+  } else {
+    state.cart.push({ id: product.id, name: product.name, price: Number(product.price), image: product.image || "", qty: 1 });
+  }
+  renderCart();
+  button.classList.add("added");
+  button.textContent = "✓";
+  setTimeout(() => { button.classList.remove("added"); button.textContent = "+"; }, 1200);
+  toast(`Đã thêm ${product.name} vào giỏ hàng`);
+});
 $(".checkout").onclick = () => {
   location.href = "/thanh-toan";
 };
@@ -435,8 +624,9 @@ const currentPage = renderRoute();
 if (currentPage === "home") loadProducts();
 import("/js/banner.js");
 import("/js/header.js");
-import("/js/suppliers.js");
+import("/js/suppliers.js?v=3");
 import("/js/home-extras.js");
 import("/js/promotion.js");
 import("/js/auth.js");
 import("/js/profile.js");
+import("/js/recipe-assistant.js");

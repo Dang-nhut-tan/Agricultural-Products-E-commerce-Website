@@ -2,7 +2,7 @@
 {% extends "base.njk" %}
 
 {% block styles %}
-  <link rel="stylesheet" href="/css/contact.css">
+  <link rel="stylesheet" href="/css/contact.css?v=2">
 {% endblock %}
 
 {% block content %}
@@ -11,6 +11,11 @@
       <span class="contact-eyebrow">LUÔN SẴN SÀNG LẮNG NGHE</span>
       <h1>Chúng tôi có thể giúp gì cho bạn?</h1>
       <p>Gửi câu hỏi về sản phẩm, đơn hàng hoặc hợp tác. Đội ngũ Nông Sản Xanh sẽ phản hồi trong thời gian sớm nhất.</p>
+      <div class="contact-hero-pills" aria-label="Cam kết hỗ trợ">
+        <span><b>24h</b> Phản hồi nhanh</span>
+        <span><b>08:00–20:00</b> Hỗ trợ mỗi ngày</span>
+        <span><b>1:1</b> Tư vấn tận tâm</span>
+      </div>
     </div>
   </section>
 
@@ -43,9 +48,12 @@
       </div>
 
       <div class="contact-form-card">
-        <span class="contact-form-kicker">GỬI LỜI NHẮN</span>
-        <h2>Để lại thông tin cho chúng tôi</h2>
-        <p>Điền các thông tin bên dưới, chúng tôi sẽ chủ động liên hệ lại.</p>
+        <div class="contact-form-heading">
+          <span class="contact-form-number">01</span>
+          <div><span class="contact-form-kicker">GỬI LỜI NHẮN</span>
+          <h2>Để lại thông tin cho chúng tôi</h2>
+          <p>Điền các thông tin bên dưới, chúng tôi sẽ chủ động liên hệ lại.</p></div>
+        </div>
 
         <form id="contactForm" novalidate>
           <div class="contact-form-grid">

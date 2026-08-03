@@ -1,0 +1,42 @@
+/* Giao diện riêng cho trang nhà cung cấp, tách khỏi style chung để dễ bảo trì. */
+.supplier-page { --supplier-ink:#173d30; --supplier-green:#0d714e; --supplier-pale:#eef8f2; }
+.supplier-hero { position:relative; min-height:270px; display:flex; align-items:center; justify-content:space-between; gap:42px; overflow:hidden; margin-bottom:46px; padding:48px 56px; border:1px solid #dbe9e1; border-radius:28px; background:linear-gradient(125deg,#f1faf5 0%,#fff 58%,#fff8ed 100%); box-shadow:0 18px 50px rgba(19,75,52,.08); }
+.supplier-hero::after { content:""; position:absolute; right:-80px; bottom:-130px; width:320px; height:320px; border-radius:50%; border:58px solid rgba(19,121,81,.06); }
+.supplier-hero-copy { position:relative; z-index:1; max-width:660px; }
+.supplier-kicker,.supplier-section-head > div > span { display:block; margin-bottom:10px; color:#e87519; font-size:.75rem; font-weight:800; letter-spacing:.11em; text-transform:uppercase; }
+.supplier-hero h1 { max-width:620px; margin:0; color:var(--supplier-ink); font-size:clamp(2rem,4vw,3.2rem)!important; line-height:1.12; letter-spacing:-.04em; }
+.supplier-hero p { max-width:610px; margin:18px 0 0; color:#5d7168; font-size:1rem!important; line-height:1.75; }
+.supplier-hero-mark { position:relative; z-index:1; flex:0 0 210px; display:flex; align-items:center; gap:14px; padding:18px; border:1px solid rgba(13,113,78,.14); border-radius:18px; background:rgba(255,255,255,.78); box-shadow:0 12px 30px rgba(15,83,57,.1); backdrop-filter:blur(8px); color:var(--supplier-ink); }
+.supplier-hero-mark > span { width:48px; height:48px; display:grid; place-items:center; flex:none; border-radius:50%; background:var(--supplier-green); color:#fff; font-size:1.25rem; }
+.supplier-hero-mark strong { font-size:.9rem; line-height:1.5; }
+.supplier-section-head { display:flex; align-items:end; justify-content:space-between; gap:24px; margin:0 0 22px; }
+.supplier-section-head h2 { margin:0; color:var(--supplier-ink); font-size:clamp(1.4rem,2.5vw,2rem)!important; letter-spacing:-.025em; }
+.supplier-section-head > p { margin:0 0 4px; color:#6c7b74; font-size:.875rem; }
+.supplier-section-head > p strong { color:var(--supplier-green); }
+.supplier-card { position:relative; padding:22px!important; border-radius:22px!important; box-shadow:0 8px 28px rgba(18,69,48,.065)!important; transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease; }
+.supplier-card::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; border-radius:22px 0 0 22px; background:linear-gradient(#0d714e,#73b46b); opacity:0; transition:opacity .2s ease; }
+.supplier-card:hover::before { opacity:1; }
+.supplier-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.supplier-logo { width:82px; height:82px; display:grid; place-items:center; overflow:hidden; padding:10px; border:1px solid #dfeae4; border-radius:20px; background:#f7fbf8; }
+.supplier-logo img,.supplier-profile-logo img { width:100%; height:100%; object-fit:contain; }
+.supplier-avatar { width:56px; height:56px; display:grid; place-items:center; border-radius:16px; background:linear-gradient(135deg,#0e7651,#8bbd65); color:#fff; font-size:1.15rem; font-weight:800; letter-spacing:.05em; }
+.supplier-verified { display:inline-flex; align-items:center; gap:6px; color:#547066; font-size:.72rem; font-weight:700; white-space:nowrap; }
+.supplier-verified i { width:18px; height:18px; display:grid; place-items:center; border-radius:50%; background:#dff3e7; color:var(--supplier-green); font-style:normal; font-size:.68rem; }
+.supplier-card .supplier-body { padding:22px 0 0!important; }
+.supplier-card .supplier-body h2 { min-height:auto; margin:0 0 7px; color:var(--supplier-ink); font-size:1.12rem!important; }
+.supplier-card .supplier-body p { margin:0 0 18px; }
+.supplier-card .supplier-cta { min-height:46px; padding:0 16px; border:1px solid #d8e9df; border-radius:13px; background:#f2f9f5; }
+.supplier-card:hover .supplier-cta { border-color:var(--supplier-green); }
+.supplier-back { display:inline-flex; align-items:center; gap:9px; margin:0 0 18px; color:var(--supplier-green); text-decoration:none; font-size:.875rem; font-weight:700; }
+.supplier-back span { font-size:1.1rem; }
+.supplier-profile { display:grid; grid-template-columns:140px 1fr auto; align-items:center; gap:30px; margin-bottom:46px; padding:34px; border:1px solid #dce9e2; border-radius:26px; background:linear-gradient(120deg,#fff,#f2faf5); box-shadow:0 16px 42px rgba(16,71,49,.08); }
+.supplier-profile-logo { width:140px; height:140px; display:grid; place-items:center; overflow:hidden; padding:18px; border:1px solid #dce8e1; border-radius:24px; background:#fff; }
+.supplier-avatar.is-large { width:88px; height:88px; border-radius:24px; font-size:1.55rem; }
+.supplier-profile-copy h1 { margin:10px 0 10px; color:var(--supplier-ink); font-size:clamp(1.75rem,3vw,2.55rem)!important; line-height:1.2; letter-spacing:-.035em; }
+.supplier-profile-copy p { max-width:650px; margin:0; color:#62736b; font-size:.9rem; line-height:1.7; }
+.supplier-profile-stat { min-width:150px; display:flex; align-items:center; gap:12px; padding:18px 20px; border-left:1px solid #d9e7df; }
+.supplier-profile-stat strong { color:var(--supplier-green); font-size:2.15rem; line-height:1; }
+.supplier-profile-stat span { color:#687970; font-size:.78rem; line-height:1.45; }
+.supplier-products-head { padding-bottom:18px; border-bottom:1px solid #e1e9e4; }
+@media(max-width:900px){.supplier-hero{padding:40px}.supplier-hero-mark{display:none}.supplier-profile{grid-template-columns:110px 1fr}.supplier-profile-logo{width:110px;height:110px}.supplier-profile-stat{grid-column:1/-1;border-left:0;border-top:1px solid #d9e7df;padding:18px 0 0}}
+@media(max-width:620px){.supplier-page.container{width:calc(100% - 28px)!important}.supplier-hero{min-height:0;margin-bottom:34px;padding:32px 24px;border-radius:22px}.supplier-hero h1{font-size:2rem!important}.supplier-section-head{display:block}.supplier-section-head>p{margin-top:10px}.supplier-card{padding:18px!important}.supplier-profile{grid-template-columns:76px 1fr;gap:18px;padding:22px;border-radius:21px}.supplier-profile-logo{width:76px;height:76px;padding:10px;border-radius:17px}.supplier-avatar.is-large{width:58px;height:58px;border-radius:15px;font-size:1.1rem}.supplier-profile-copy p{display:none}.supplier-profile-stat{grid-column:1/-1}.supplier-products-head>p{display:none}}

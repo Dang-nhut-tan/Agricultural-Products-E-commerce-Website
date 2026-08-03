@@ -1,33 +1,27 @@
 {% extends "base.njk" %}
 
-{% block styles %}
-  <link rel="stylesheet" href="/css/news-detail.css">
-{% endblock %}
+{% block styles %}<link rel="stylesheet" href="/css/news-detail.css?v=5">{% endblock %}
 
 {% block content %}
-  <section class="page-title">
-    <div class="container">
-      <span class="breadcrumbs"><a href="/">Trang chủ</a> / Tin tức</span>
-      <h1>Tin tức</h1>
-      <p>Kiến thức hữu ích về nông sản và bữa ăn gia đình.</p>
+<section class="news-page container">
+  <header class="news-hero">
+    <div><span class="news-eyebrow">Góc sống xanh</span><h1>Chuyện nông sản<br>và căn bếp Việt</h1><p>Mẹo chọn thực phẩm, cách bảo quản và những kiến thức hữu ích để mỗi bữa ăn luôn tươi ngon.</p></div>
+    <aside aria-label="Chủ đề nổi bật"><span>Khám phá chủ đề</span><div><b>Thực phẩm sạch</b><b>Mẹo vào bếp</b><b>Sống khỏe</b></div></aside>
+  </header>
+  {% if news.length %}
+    <div class="news-section-heading"><div><span>Bài viết mới</span><h2>Kiến thức dành cho bạn</h2></div><p>{{ news.length }} bài viết</p></div>
+    <div class="news-list">
+      {% for item in news %}
+      <article class="news-card">
+        <a href="/tin-tuc/{{ item.id }}" class="news-card-image{% if not item.image %} no-image{% endif %}" {% if item.image %}style="background-image:url('{{ item.image }}')"{% endif %} aria-label="Đọc {{ item.title }}">{% if not item.image %}<span aria-hidden="true">Nông Sản Xanh</span>{% endif %}</a>
+        <div class="news-card-body">
+          <div class="news-card-meta"><span>Kiến thức nông sản</span><time>{{ item.publishedDate }}</time></div>
+          <h2><a href="/tin-tuc/{{ item.id }}">{{ item.title }}</a></h2>
+          <a class="news-read-more" href="/tin-tuc/{{ item.id }}">Đọc bài viết <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+      {% endfor %}
     </div>
-  </section>
-  <section class="news-page container">
-    {% if news.length %}
-      <div class="news-list">
-        {% for item in news %}
-          <article class="news-card">
-            <a href="/tin-tuc/{{ item.id }}" class="news-card-image" {% if item.image %}style="background-image: url('{{ item.image }}')"{% endif %}></a>
-            <div>
-              <time>{{ item.publishedDate }}</time>
-              <h2><a href="/tin-tuc/{{ item.id }}">{{ item.title }}</a></h2>
-              <a href="/tin-tuc/{{ item.id }}">Đọc bài viết →</a>
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="clean-empty"><span>📰</span><h2>Chưa có bài viết</h2><p>Bài viết mới sẽ xuất hiện tại đây.</p></div>
-    {% endif %}
-  </section>
+  {% else %}<div class="clean-empty"><span>📰</span><h2>Chưa có bài viết</h2><p>Bài viết mới sẽ xuất hiện tại đây.</p></div>{% endif %}
+</section>
 {% endblock %}

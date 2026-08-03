@@ -601,6 +601,8 @@ footer {
 .chat-body {
   padding: 18px;
   min-height: 190px;
+  max-height: 360px;
+  overflow-y: auto;
   background: #f5f7f2;
 }
 .bot {
@@ -610,6 +612,22 @@ footer {
   font-size: 11px;
   line-height: 1.6;
 }
+.chat-user {
+  width: fit-content;
+  max-width: 88%;
+  margin: 10px 0 10px auto;
+  padding: 10px 12px;
+  border-radius: 12px 4px 12px 12px;
+  background: var(--green);
+  color: white;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.chat-body .bot { margin-top: 10px; white-space: pre-wrap; }
+.chat-body .bot:first-child { margin-top: 0; }
+.chat-loading { color: #718078; font-style: italic; }
+.chat-error { color: #a43b2b; background: #fff0ed; }
 .quick {
   display: flex;
   flex-wrap: wrap;

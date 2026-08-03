@@ -445,6 +445,25 @@ const InventoryTransaction = sequelize.define("InventoryTransaction", {
   updatedAt: false,
 });
 
+const Recipe = sequelize.define("Recipe", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  aliases: DataTypes.TEXT,
+  ingredients: { type: DataTypes.TEXT("long"), allowNull: false },
+  steps: { type: DataTypes.TEXT("long"), allowNull: false },
+  safety_notes: DataTypes.TEXT,
+  image: DataTypes.TEXT,
+  source: { type: DataTypes.STRING, defaultValue: "pdf" },
+  active: { type: DataTypes.BOOLEAN, defaultValue: true },
+}, modelOptions("recipes"));
+
+const RecipeProductLink = sequelize.define("RecipeProductLink", {
+  recipe_id: DataTypes.INTEGER,
+  ingredient_name: { type: DataTypes.STRING, allowNull: false },
+  aliases: DataTypes.TEXT,
+  product_id: { type: DataTypes.INTEGER, allowNull: false },
+  priority: { type: DataTypes.INTEGER, defaultValue: 0 },
+}, modelOptions("recipe_product_links"));
+
 User.hasMany(UserAddress, { foreignKey: "user_id" });
 UserAddress.belongsTo(User, { foreignKey: "user_id" });
 
@@ -515,6 +534,11 @@ WishlistItem.belongsTo(Wishlist, { foreignKey: "wishlist_id" });
 Product.hasMany(WishlistItem, { foreignKey: "product_id" });
 WishlistItem.belongsTo(Product, { foreignKey: "product_id" });
 
+Recipe.hasMany(RecipeProductLink, { foreignKey: "recipe_id" });
+RecipeProductLink.belongsTo(Recipe, { foreignKey: "recipe_id" });
+Product.hasMany(RecipeProductLink, { foreignKey: "product_id" });
+RecipeProductLink.belongsTo(Product, { foreignKey: "product_id" });
+
 module.exports = {
   sequelize,
   Sequelize,
@@ -543,4 +567,6 @@ module.exports = {
   Wishlist,
   WishlistItem,
   InventoryTransaction,
+  Recipe,
+  RecipeProductLink,
 };

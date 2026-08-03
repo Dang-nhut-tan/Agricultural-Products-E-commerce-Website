@@ -14,3 +14,4 @@ playwright-report/
 test-results/
 api-testing-project/reports/*
 !api-testing-project/reports/.gitkeep
+/data/recipes/

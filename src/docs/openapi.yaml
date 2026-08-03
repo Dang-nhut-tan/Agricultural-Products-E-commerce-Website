@@ -25,8 +25,65 @@ tags:
   - name: My Orders
   - name: Payments
   - name: Admin Orders
+  - name: Smart Recipes
+  - name: Chatbot
 
 paths:
+  /api/chat:
+    post:
+      tags: [Chatbot]
+      summary: Trò chuyện với trợ lý Nông Sản Xanh
+      description: Yêu cầu đăng nhập. Lịch sử chỉ được gửi trong request và không lưu vào database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, minLength: 1, maxLength: 500 }
+                history:
+                  type: array
+                  maxItems: 8
+                  items:
+                    type: object
+                    required: [role, text]
+                    properties:
+                      role: { type: string, enum: [user, model] }
+                      text: { type: string, maxLength: 1000 }
+      responses:
+        "200": { description: Câu trả lời từ Gemini }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { description: Chưa đăng nhập }
+
+  /api/recipes/suggest:
+    post:
+      tags: [Smart Recipes]
+      summary: Gợi ý công thức và sản phẩm đang còn hàng
+      description: Yêu cầu session đăng nhập. Dùng Gemini và chỉ mục FAISS cục bộ.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query: { type: string, minLength: 2, maxLength: 200, example: "Tôi muốn nấu lẩu bò" }
+                filters:
+                  type: object
+                  properties:
+                    meal: { type: string, enum: ["", sáng, trưa, tối, "ăn nhẹ"] }
+                    difficulty: { type: string, enum: ["", dễ, vừa, "nâng cao"] }
+                    time: { type: string, enum: ["", "15", "30", "60", "60+"] }
+                    diet: { type: string, enum: ["", "không yêu cầu", chay, "ít béo", "giàu đạm"] }
+      responses:
+        "200": { description: Công thức, nguyên liệu thiếu và các sản phẩm phù hợp }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { description: Chưa đăng nhập }
+        "503": { description: Chưa tạo chỉ mục FAISS hoặc Gemini chưa cấu hình }
+
   /api/auth/register:
     post:
       tags: [Authentication]

@@ -9,6 +9,7 @@ const resourceNames = {
   OrderCoupon: "Mã giảm giá của đơn", CouponUser: "Mã giảm giá của khách",
   Wishlist: "Danh sách yêu thích", WishlistItem: "Sản phẩm yêu thích",
   InventoryTransaction: "Giao dịch kho",
+  Recipe: "Công thức món ăn", RecipeProductLink: "Liên kết nguyên liệu - sản phẩm",
 };
 
 const { cloudinaryProvider, createUploadPath } = require("./cloudinary-provider");
@@ -22,6 +23,7 @@ const imagePropertyByModel = {
   ProductImage: "image",
   News: "image",
   Banner: "image",
+  Recipe: "image",
 };
 
 // Chỉ giữ các cột hữu ích để bảng không bị dài và rối.
@@ -33,6 +35,7 @@ const listPropertiesByModel = {
   ProductImage: ["id", "image", "product_id", "sort_order"],
   News: ["id", "image", "title", "createdAt"],
   Banner: ["id", "image", "name", "status", "sort_order"],
+  Recipe: ["id", "image", "name", "source", "active", "updatedAt"],
 };
 
 const navigationByModel = {
@@ -49,6 +52,8 @@ const navigationByModel = {
   OrderCoupon: { name: "Khuyến mãi", icon: "Gift" }, CouponUser: { name: "Khuyến mãi", icon: "Gift" },
   Wishlist: { name: "Yêu thích", icon: "Heart" }, WishlistItem: { name: "Yêu thích", icon: "Heart" },
   InventoryTransaction: { name: "Giao dịch kho", icon: "Warehouse" },
+  Recipe: { name: "Món ăn thông minh", icon: "Restaurant" },
+  RecipeProductLink: { name: "Món ăn thông minh", icon: "Link" },
 };
 
 const hiddenModels = [

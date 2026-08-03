@@ -10,6 +10,8 @@ const userRoutes = require("./userRoutes");
 const viewRoutes = require("./viewRoutes");
 const paymentRoutes = require("./paymentRoutes");
 const orderRoutes = require("./orderRoutes");
+const recipeRoutes = require("./recipeRoutes");
+const chatRoutes = require("./chatRoutes");
 
 function configRoutes(app) {
   app.use("/api/auth", authRoutes);
@@ -23,6 +25,8 @@ function configRoutes(app) {
   app.use("/api/users", userRoutes);
   app.use("/api/payments", paymentRoutes);
   app.use("/api/orders", orderRoutes);
+  app.use("/api/recipes", recipeRoutes);
+  app.use("/api/chat", chatRoutes);
   app.use(viewRoutes);
 
   app.use((error, req, res, next) => {
