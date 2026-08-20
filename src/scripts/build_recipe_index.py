@@ -135,45 +135,44 @@ def main():
     pdfs = list((ROOT / "src" / "pdf").glob("*.pdf"))
     if not pdfs:
         raise RuntimeError("Không tìm thấy PDF trong src/pdf")
-    reader = PdfReader(str(pdfs[0]))
-    end_page = min(len(reader.pages), args.max_pages or len(reader.pages))
-    checkpoint = {"nextPage": 0, "recipes": []}
+    checkpoint = {"files": {}}
     if CHECKPOINT.exists() and not args.reset:
         checkpoint = json.loads(CHECKPOINT.read_text(encoding="utf-8"))
+    if "files" not in checkpoint:
+        checkpoint = {"files": {}}
     text_model = os.environ.get("GEMINI_TEXT_MODEL", "gemini-3.5-flash")
-    for start in range(checkpoint["nextPage"], end_page, args.batch_size):
-        end = min(start + args.batch_size, end_page)
-        while True:
-            try:
-                found = extract_batch(reader, start, end, text_model)
-                break
-            except Exception as rate_error:
-                if "HTTP 429" not in str(rate_error):
-                    batch_error = rate_error
+    current_files = {pdf.name for pdf in pdfs}
+    checkpoint["files"] = {
+        name: value for name, value in checkpoint["files"].items() if name in current_files
+    }
+
+    for pdf in pdfs:
+        reader = PdfReader(str(pdf))
+        end_page = min(len(reader.pages), args.max_pages or len(reader.pages))
+        state = checkpoint["files"].setdefault(pdf.name, {"nextPage": 0, "recipes": []})
+        for start in range(state["nextPage"], end_page, args.batch_size):
+            end = min(start + args.batch_size, end_page)
+            while True:
+                try:
+                    found = extract_batch(reader, start, end, text_model)
                     break
-                print(f"Đang chờ quota Gemini cho trang {start + 1}-{end}…", flush=True)
-                time.sleep(60)
-        if 'batch_error' in locals():
-            print(f"Batch trang {start + 1}-{end} lỗi ({batch_error}); thử từng trang.", flush=True)
-            found = []
-            for page in range(start, end):
-                while True:
-                    try:
-                        found.extend(extract_batch(reader, page, page + 1, text_model))
-                        break
-                    except Exception as page_error:
-                        if "HTTP 429" in str(page_error):
-                            print(f"Đang chờ quota Gemini cho trang {page + 1}…", flush=True)
-                            time.sleep(60)
-                            continue
-                        print(f"Bỏ qua trang {page + 1}: {page_error}", file=sys.stderr, flush=True)
-                        break
-            del batch_error
-        checkpoint["recipes"].extend(found)
-        checkpoint["nextPage"] = end
-        CHECKPOINT.write_text(json.dumps(checkpoint, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"OCR trang {start + 1}-{end}: +{len(found)} công thức", flush=True)
-    recipes = dedupe(checkpoint["recipes"])
+                except Exception as error:
+                    if "HTTP 429" not in str(error):
+                        raise
+                    print(f"Đang chờ quota Gemini cho {pdf.name}, trang {start + 1}-{end}…", flush=True)
+                    time.sleep(60)
+            for recipe in found:
+                recipe["sourceFile"] = pdf.name
+            state["recipes"].extend(found)
+            state["nextPage"] = end
+            CHECKPOINT.write_text(json.dumps(checkpoint, ensure_ascii=False, indent=2), encoding="utf-8")
+            print(f"OCR {pdf.name}, trang {start + 1}-{end}: +{len(found)} công thức", flush=True)
+
+    recipes = dedupe([
+        recipe
+        for state in checkpoint["files"].values()
+        for recipe in state["recipes"]
+    ])
     if not recipes:
         raise RuntimeError("Chưa tìm thấy công thức trong phạm vi trang đã quét; hãy tăng --max-pages.")
     METADATA.write_text(json.dumps(recipes, ensure_ascii=False, indent=2), encoding="utf-8")

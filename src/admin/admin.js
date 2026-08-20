@@ -48,6 +48,15 @@ async function createAdmin() {
     branding: {
       companyName: "Quản trị Nông Sản Xanh",
       withMadeWithLove: false,
+      theme: {
+        colors: {
+          primary100: "#168554",
+          primary80: "#2f9669",
+          primary60: "#68b18a",
+          primary20: "#d9f0e4",
+          filterBg: "#f5f8f6",
+        },
+      },
     },
     locale: locale(resourceLabels),
   });

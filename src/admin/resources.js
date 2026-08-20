@@ -8,7 +8,7 @@ const resourceNames = {
   BannerDetail: "Sản phẩm trong banner", Coupon: "Mã giảm giá",
   OrderCoupon: "Mã giảm giá của đơn", CouponUser: "Mã giảm giá của khách",
   Wishlist: "Danh sách yêu thích", WishlistItem: "Sản phẩm yêu thích",
-  InventoryTransaction: "Giao dịch kho",
+  InventoryTransaction: "Giao dịch kho", RecipeSource: "Nguồn PDF công thức",
   Recipe: "Công thức món ăn", RecipeProductLink: "Liên kết nguyên liệu - sản phẩm",
 };
 
@@ -36,6 +36,7 @@ const listPropertiesByModel = {
   News: ["id", "image", "title", "createdAt"],
   Banner: ["id", "image", "name", "status", "sort_order"],
   Recipe: ["id", "image", "name", "source", "active", "updatedAt"],
+  RecipeSource: ["id", "name", "file_name", "status", "error_message", "updatedAt"],
 };
 
 const navigationByModel = {
@@ -53,6 +54,7 @@ const navigationByModel = {
   Wishlist: { name: "Yêu thích", icon: "Heart" }, WishlistItem: { name: "Yêu thích", icon: "Heart" },
   InventoryTransaction: { name: "Giao dịch kho", icon: "Warehouse" },
   Recipe: { name: "Món ăn thông minh", icon: "Restaurant" },
+  RecipeSource: { name: "Món ăn thông minh", icon: "Document" },
   RecipeProductLink: { name: "Món ăn thông minh", icon: "Link" },
 };
 
@@ -229,6 +231,23 @@ const propertiesByModel = {
       ],
     },
   },
+  RecipeSource: {
+    name: { label: "Tên nguồn / tài liệu" },
+    file_path: { isVisible: false },
+    file_name: { label: "Tên file", isVisible: { list: true, show: true, edit: false, filter: false } },
+    mime_type: { isVisible: false },
+    file_size: { label: "Dung lượng", isVisible: { list: false, show: true, edit: false, filter: false } },
+    status: {
+      label: "Trạng thái",
+      isVisible: { list: true, show: true, edit: false, filter: true },
+      availableValues: [
+        { value: "processing", label: "Đang xử lý" },
+        { value: "ready", label: "Hoàn tất" },
+        { value: "error", label: "Có lỗi" },
+      ],
+    },
+    error_message: { label: "Chi tiết lỗi", isVisible: { list: true, show: true, edit: false, filter: false } },
+  },
 };
 
 const buildResources = (
@@ -240,6 +259,7 @@ const buildResources = (
 ) => Object.keys(resourceNames)
   .filter((modelName) => !hiddenModels.includes(modelName))
   .map((modelName) => {
+    const isRecipeSource = modelName === "RecipeSource";
     const imageProperty = imagePropertyByModel[modelName];
     // Trang chi tiết của resource có ảnh luôn đặt ảnh lên đầu.
     const showProperties = imageProperty ? [
@@ -281,7 +301,32 @@ const buildResources = (
           },
         },
       }),
+    ] : isRecipeSource ? [
+      uploadFeature({
+        componentLoader,
+        provider: {
+          local: {
+            bucket: require("path").join(__dirname, "..", "pdf"),
+            opts: {},
+          },
+        },
+        properties: {
+          key: "file_path",
+          file: "uploadPdf",
+          filename: "file_name",
+          mimeType: "mime_type",
+          size: "file_size",
+        },
+        uploadPath: (record, filename) => `${record.id()}-${Date.now()}-${filename}`,
+        validation: { mimeTypes: ["application/pdf"], maxSize: 30 * 1024 * 1024 },
+      }),
     ] : [];
+
+    const rebuildAfter = async (response) => {
+      const { rebuildRecipeIndex } = require("../services/recipeIndex");
+      setTimeout(rebuildRecipeIndex, 500);
+      return response;
+    };
 
     return {
       resource: models[modelName],
@@ -302,6 +347,7 @@ const buildResources = (
           },
           uploadImage: { label: "Ảnh từ máy tính" },
         } : {}),
+        ...(isRecipeSource ? { uploadPdf: { label: "Chọn file PDF" } } : {}),
       },
       actions: readOnlyModels.includes(modelName)
         ? readOnlyActions
@@ -312,7 +358,12 @@ const buildResources = (
               new: { before: normalizeShipment },
               edit: { before: normalizeShipment },
             }
-            : undefined,
+            : isRecipeSource
+              ? {
+                new: { after: rebuildAfter }, edit: { after: rebuildAfter },
+                delete: { after: rebuildAfter }, bulkDelete: { after: rebuildAfter },
+              }
+              : undefined,
       },
     };
   });

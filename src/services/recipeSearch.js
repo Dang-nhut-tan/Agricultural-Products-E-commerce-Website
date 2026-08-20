@@ -111,7 +111,7 @@ Bộ lọc: ${JSON.stringify(filters)}
 Tư liệu tìm từ FAISS: ${JSON.stringify(references)}
 Sản phẩm đang còn hàng (chỉ được dùng id trong danh sách này cho productId): ${JSON.stringify(plainProducts.map((p) => ({ id: p.id, name: p.name, unit: p.unit, quantity: p.quantity })))}
 Liên kết do quản trị viên đặt: ${JSON.stringify(links.map((l) => ({ ingredient: l.ingredient_name, aliases: l.aliases, productId: l.product_id })))}
-Ưu tiên tư liệu, nhưng được bổ sung kiến thức phổ biến. Ghép tên gần nghĩa. Nguyên liệu không có hàng phải có productId=null và xuất hiện trong missingIngredients. Chỉ viết nguyên liệu và các bước nấu, kèm cảnh báo dị ứng/vệ sinh/an toàn nhiệt độ. Không đưa thông tin y tế tuyệt đối.`;
+Ưu tiên tư liệu, nhưng được bổ sung kiến thức phổ biến. Không tiết lộ tên file PDF, đường dẫn, số trang, tên nguồn hoặc dữ liệu kỹ thuật cho người dùng. Ghép tên gần nghĩa. Nguyên liệu không có hàng phải có productId=null và xuất hiện trong missingIngredients. Chỉ viết nguyên liệu và các bước nấu, kèm cảnh báo dị ứng/vệ sinh/an toàn nhiệt độ. Không đưa thông tin y tế tuyệt đối.`;
   let recipe;
   try {
     recipe = await generateJson(prompt, recipeSchema);

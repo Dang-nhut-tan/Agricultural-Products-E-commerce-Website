@@ -456,6 +456,16 @@ const Recipe = sequelize.define("Recipe", {
   active: { type: DataTypes.BOOLEAN, defaultValue: true },
 }, modelOptions("recipes"));
 
+const RecipeSource = sequelize.define("RecipeSource", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  file_path: { type: DataTypes.TEXT, allowNull: false },
+  file_name: DataTypes.STRING,
+  mime_type: DataTypes.STRING,
+  file_size: DataTypes.INTEGER,
+  status: { type: DataTypes.STRING, defaultValue: "processing" },
+  error_message: DataTypes.TEXT,
+}, modelOptions("recipe_sources"));
+
 const RecipeProductLink = sequelize.define("RecipeProductLink", {
   recipe_id: DataTypes.INTEGER,
   ingredient_name: { type: DataTypes.STRING, allowNull: false },
@@ -568,5 +578,6 @@ module.exports = {
   WishlistItem,
   InventoryTransaction,
   Recipe,
+  RecipeSource,
   RecipeProductLink,
 };
