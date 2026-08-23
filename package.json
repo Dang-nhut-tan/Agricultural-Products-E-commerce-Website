@@ -29,7 +29,9 @@
     "test:register": "jest tests/register.test.js",
     "test:e2e": "playwright test",
     "api:test": "newman run \"api-testing-project/collections/Web Nông Sản API.postman_collection.json\" -e \"api-testing-project/environments/web-nong-san-api.postman_environment.json\" -d \"api-testing-project/data/api-test-data.json\"",
-    "test:allure": "playwright test && cross-env JAVA_HOME= allure generate allure-results --clean -o allure-report",
+    "test:allure": "yarn allure:clean && yarn test --runInBand && yarn test:e2e && yarn allure:generate",
+    "test:allure:unit": "yarn allure:clean && yarn test --runInBand && yarn allure:generate",
+    "allure:clean": "node -e \"require('fs').rmSync('allure-results',{recursive:true,force:true});require('fs').rmSync('allure-report',{recursive:true,force:true})\"",
     "allure:generate": "cross-env JAVA_HOME= allure generate allure-results --clean -o allure-report",
     "allure:open": "cross-env JAVA_HOME= allure open allure-report",
     "allure:serve": "cross-env JAVA_HOME= allure serve allure-results",
@@ -38,15 +40,26 @@
     "docker:logs": "docker compose logs -f mysql",
     "db:create": "sequelize-cli db:create",
     "db:migrate": "sequelize-cli db:migrate",
-    "db:migrate:undo": "sequelize-cli db:migrate:undo"
-    ,"recipes:index": "python src/scripts/build_recipe_index.py"
-    ,"recipes:index:smoke": "python src/scripts/build_recipe_index.py --reset --max-pages 30"
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "recipes:index": "python src/scripts/build_recipe_index.py",
+    "recipes:index:smoke": "python src/scripts/build_recipe_index.py --reset --max-pages 30"
   },
   "name": "web-nong-san",
   "version": "1.0.0",
   "main": "index.js",
   "jest": {
-    "testEnvironment": "node",
+    "testEnvironment": "allure-jest/node",
+    "testEnvironmentOptions": {
+      "resultsDir": "allure-results",
+      "environmentInfo": {
+        "test_layer": "unit",
+        "runtime": "Node.js"
+      },
+      "globalLabels": {
+        "framework": "Jest",
+        "layer": "unit"
+      }
+    },
     "testMatch": [
       "<rootDir>/tests/**/*.test.js"
     ],
@@ -59,9 +72,12 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "allure-commandline": "^2.43.0",
+    "allure-jest": "3.10.2",
+    "allure-js-commons": "3.10.2",
     "allure-playwright": "^3.10.2",
     "cross-env": "^10.1.0",
     "jest": "^30.0.0",
+    "jest-environment-node": "30.4.1",
     "newman": "6.2.2"
   }
 }

@@ -3067,6 +3067,13 @@ allure-commandline@^2.43.0:
   resolved "https://registry.npmjs.org/allure-commandline/-/allure-commandline-2.43.0.tgz"
   integrity sha512-nsqccDOgi80fi9WjvBapZjlFlugodVWudotNtWx6XKiSI7NuN6oTWEkXnkxQBzNg02Yf9lZLtCFlKvjAlcpu6Q==
 
+allure-jest@3.10.2:
+  version "3.10.2"
+  resolved "https://registry.npmjs.org/allure-jest/-/allure-jest-3.10.2.tgz#78b864dce62ae0526f482d9946aca8e4557b2066"
+  integrity sha512-R1GUol7z3PKBDgFKdav/lE0mU2wmserAElxGsa9JvZ/ixd22s56eqdgGbHTgJ5uOycsuPd12rAe7ECdVpF5DwA==
+  dependencies:
+    allure-js-commons "3.10.2"
+
 allure-js-commons@3.10.2:
   version "3.10.2"
   resolved "https://registry.npmjs.org/allure-js-commons/-/allure-js-commons-3.10.2.tgz"
