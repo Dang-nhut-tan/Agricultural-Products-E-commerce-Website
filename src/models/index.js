@@ -364,7 +364,11 @@ const NewsDetail = sequelize.define("NewsDetail", {
 }, modelOptions("news_details"));
 
 const Banner = sequelize.define("Banner", {
-  name: DataTypes.STRING,
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { notEmpty: true },
+  },
   image: DataTypes.TEXT,
   status: { type: DataTypes.INTEGER, defaultValue: 1 },
   sort_order: { type: DataTypes.INTEGER, defaultValue: 0 },

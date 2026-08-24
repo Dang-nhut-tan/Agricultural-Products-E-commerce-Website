@@ -36,6 +36,7 @@
           ></a
         >
         <form class="search" id="searchForm">
+          <label class="sr-only" for="searchInput">Tìm kiếm sản phẩm</label>
           <input
             id="searchInput"
             placeholder="Bạn muốn nấu món gì? Ví dụ: lẩu bò"
@@ -212,7 +213,8 @@
         ><button type="button" data-chat-question="Hướng dẫn tôi cách đặt hàng">Cách đặt hàng</button>
       </div>
       <form class="chat-input" id="chatForm">
-        <input name="message" maxlength="500" autocomplete="off" placeholder="Nhập tin nhắn…" /><button type="submit" aria-label="Gửi tin nhắn">➤</button>
+        <label class="sr-only" for="chatMessage">Tin nhắn</label>
+        <input id="chatMessage" name="message" maxlength="500" autocomplete="off" placeholder="Nhập tin nhắn…" /><button type="submit" aria-label="Gửi tin nhắn">➤</button>
       </form>
     </aside>
     <div class="drawer-backdrop" id="backdrop"></div>
