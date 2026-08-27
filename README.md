@@ -1,82 +1,72 @@
 # Nông Sản Xanh
 
-Ứng dụng bán nông sản gồm website khách hàng, REST API và trang quản trị AdminJS. Backend được xây dựng bằng Express, Sequelize và MySQL; giao diện sử dụng Nunjucks kết hợp JavaScript phía trình duyệt.
+Nền tảng thương mại điện tử bán nông sản gồm website khách hàng, REST API và trang quản trị AdminJS. Hệ thống hỗ trợ bán lẻ cho gia đình, combo số lượng lớn cho nhà hàng, tồn kho theo lô, PayPal và trợ lý món ăn Gemini.
 
 ## Chức năng chính
 
 ### Khách hàng
 
-- Đăng ký, đăng nhập, đăng xuất và kiểm tra phiên đăng nhập.
-- Cập nhật hồ sơ, ảnh đại diện và địa chỉ nhận hàng.
-- Xem, tìm kiếm và lọc sản phẩm theo danh mục.
-- Xem thương hiệu, nhà cung cấp, banner, khuyến mãi và tin tức.
-- Thêm sản phẩm vào giỏ hàng lưu trên trình duyệt.
-- Thanh toán PayPal Sandbox hoặc Live.
-- Xem chi tiết, lịch sử trạng thái và hủy đơn hàng hợp lệ.
-- Xem, tạo, cập nhật và xóa đánh giá sản phẩm.
+- Đăng ký, đăng nhập, quản lý hồ sơ và địa chỉ nhận hàng.
+- Tìm kiếm, lọc sản phẩm; trang chủ nhóm sản phẩm thành từng hàng danh mục cuộn ngang theo alphabet.
+- Hai chế độ mua sắm: **Dành cho nội trợ** và **Dành cho nhà hàng**.
+- Mua chung sản phẩm lẻ và combo trong một giỏ hàng.
+- Thanh toán PayPal, theo dõi vận chuyển, lịch sử đơn và mua lại combo.
+- Đánh giá sản phẩm và nhận gợi ý công thức món ăn.
+
+### Combo nhà hàng
+
+- Combo nhỏ, vừa, lớn do quản trị viên thiết lập thủ công.
+- Một combo gồm một hoặc nhiều sản phẩm với hệ số số lượng lớn.
+- Giá theo phần trăm giảm, số tiền giảm cố định hoặc giá nhập thủ công.
+- Hiển thị giá mua lẻ, giá combo, số tiền và phần trăm tiết kiệm.
+- Tự tính khả dụng từ tồn kho; tự ẩn khi thiếu hàng hoặc không rẻ hơn mua lẻ.
+- Backend kiểm tra lại giá, mức mua tối thiểu và tồn kho khi đặt hàng.
+- Đơn có combo được miễn phí giao hàng; kho được trừ/hoàn theo từng thành phần.
+
+### Chatbot và công thức
+
+- Tư vấn sản phẩm và combo đang còn hàng.
+- Trả lời trạng thái đơn, mã vận đơn, lịch sử mua và tổng chi tiêu của tài khoản đang đăng nhập.
+- Tổng chi tiêu chỉ tính đơn đã hoàn thành; mọi truy vấn đơn đều lọc theo `session.userId`.
+- Gợi ý công thức từ PDF, Gemini và chỉ mục FAISS.
 
 ### Quản trị
 
-- Đăng nhập AdminJS tại `/admin`.
-- Quản lý người dùng, sản phẩm, danh mục, thương hiệu, lô hàng, đơn hàng, vận chuyển, tin tức, banner và mã giảm giá.
-- Dashboard thống kê người dùng, sản phẩm, đơn hàng, đánh giá và lô hàng sắp hết hạn.
-- Upload ảnh lên Cloudinary.
-- Một số resource như địa chỉ, đánh giá và giao dịch kho được cấu hình chỉ đọc.
+- AdminJS tiếng Việt tại `/admin`, menu được tổ chức theo nghiệp vụ.
+- Quản lý người dùng, sản phẩm, thương hiệu, danh mục, lô hàng, combo, đơn hàng, vận chuyển, nội dung, khuyến mãi, kho và công thức.
+- Các bảng liên kết được ẩn khỏi sidebar nhưng có thể mở từ bản ghi cha.
+- Cảnh báo combo thiếu thành phần, chưa cấu hình hoặc không có lợi hơn mua lẻ.
+- Upload ảnh qua Cloudinary và dashboard thống kê.
 
-### Kho và đơn hàng
+## Công nghệ
 
-- Quản lý tồn kho theo lô sản phẩm.
-- Tự động đồng bộ tổng tồn kho của sản phẩm.
-- Lưu giao dịch nhập, xuất và điều chỉnh kho.
-- Giữ lịch sử thay đổi trạng thái đơn hàng.
-- Lưu giá vốn tại thời điểm bán.
-- Hoàn kho khi đơn hàng được hủy.
-
-## Công nghệ sử dụng
-
-- Node.js, Express 4
-- MySQL 8.4
-- Sequelize 6 và Sequelize CLI
-- AdminJS 7
-- Nunjucks
-- Joi
-- bcryptjs và express-session
-- PayPal REST API
-- Cloudinary
-- Swagger UI và OpenAPI 3
-- Playwright, Newman và Allure
-- Docker Compose
-- GitHub Actions
+- Node.js, Express 4, MySQL, Sequelize 6
+- AdminJS 7, Nunjucks, JavaScript, CSS
+- Joi, bcryptjs, express-session
+- PayPal REST API, Cloudinary, Gemini API, FAISS
+- Jest, Playwright, Newman, Allure
+- Docker Compose, GitHub Actions
 
 ## Yêu cầu
 
-- Node.js 22 được khuyến nghị
+- Node.js 22 trở lên
 - Yarn 1.x
-- Docker Desktop và Docker Compose, hoặc MySQL cài trực tiếp
+- Docker Desktop/Compose hoặc MySQL cài trực tiếp
+- Python nếu cần xây dựng chỉ mục công thức
 
 ## Cài đặt
-
-### 1. Cài dependencies
 
 ```bash
 yarn install
 ```
 
-### 2. Tạo file môi trường
-
-Windows PowerShell:
+Tạo file môi trường:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-macOS hoặc Linux:
-
-```bash
-cp .env.example .env
-```
-
-Các biến cấu hình:
+Các biến quan trọng:
 
 ```env
 HOST=127.0.0.1
@@ -92,7 +82,12 @@ DB_DIALECT=mysql
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=admin123
 ADMIN_COOKIE_SECRET=thay-bang-mot-chuoi-bi-mat
+ADMIN_WATCH=false
 SESSION_SECRET=thay-bang-mot-chuoi-bi-mat-khac
+
+GEMINI_API_KEY=
+GEMINI_TEXT_MODEL=gemini-3.5-flash
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
 
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
@@ -103,286 +98,162 @@ PAYPAL_MODE=sandbox
 PAYPAL_CLIENT_ID=
 PAYPAL_CLIENT_SECRET=
 PAYPAL_VND_PER_USD=25000
+STANDARD_SHIPPING_FEE=0
 ```
 
-Cloudinary và PayPal có thể để trống khi chỉ cần khởi động và xem ứng dụng. Các chức năng upload ảnh và thanh toán chỉ hoạt động khi đã cung cấp thông tin hợp lệ.
+Không commit `.env`, mật khẩu, cookie secret hoặc API key. Giữ `ADMIN_WATCH=false` khi phát triển API/storefront; chỉ bật khi sửa component React của AdminJS.
 
-Không commit `.env`, khóa API, mật khẩu hoặc cookie secret lên Git.
-
-### 3. Khởi động MySQL
+### Khởi động database
 
 ```bash
 yarn docker:up
-```
-
-Kiểm tra container:
-
-```bash
 docker compose ps
-```
-
-Docker Compose mở MySQL ở `127.0.0.1:3307` và tự tạo database `web_nong_san`.
-
-Nếu dùng MySQL cài trực tiếp và database chưa tồn tại:
-
-```bash
-yarn db:create
-```
-
-### 4. Chạy migration
-
-```bash
 yarn db:migrate
 ```
 
-Kiểm tra trạng thái migration:
+Docker Compose mặc định mở MySQL tại `127.0.0.1:3307`. Nếu dùng MySQL cài trực tiếp và database chưa tồn tại, chạy `yarn db:create` trước migration.
 
-```bash
-npx sequelize-cli db:migrate:status
-```
-
-Nạp dữ liệu dùng cho CI hoặc kiểm thử khi cần:
-
-```bash
-npx sequelize-cli db:seed:all
-```
-
-### 5. Khởi động ứng dụng
-
-Chạy thông thường:
-
-```bash
-yarn start
-```
-
-Chạy phát triển và tự khởi động lại khi code thay đổi:
+### Chạy ứng dụng
 
 ```bash
 yarn dev
 ```
 
-Các địa chỉ mặc định:
-
 | Thành phần | Địa chỉ |
 | --- | --- |
 | Website | <http://127.0.0.1:3000> |
+| Combo nhà hàng | <http://127.0.0.1:3000/combo-nha-hang> |
 | AdminJS | <http://127.0.0.1:3000/admin> |
 | Swagger UI | <http://127.0.0.1:3000/api-docs> |
 
-Đăng nhập AdminJS bằng `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
+## Tạo combo nhà hàng
 
-## REST API
+1. Mở **Combo nhà hàng** trong AdminJS và tạo bản ghi.
+2. Chọn kích cỡ, hệ số số lượng và cách tính giá.
+3. Mở combo, chọn **Sản phẩm trong combo** và thêm thành phần.
+4. Mở **Cấu hình combo** để đặt số lượng mua tối thiểu dùng chung.
+5. Combo xuất hiện khi đang bật, đủ tồn kho và có giá thấp hơn mua lẻ.
 
-Các route đang được mount trong ứng dụng:
+```text
+Giá mua lẻ = Σ (giá sản phẩm × số lượng cơ sở × hệ số)
+Tiền tiết kiệm = giá mua lẻ − giá combo
+Phần trăm tiết kiệm = tiền tiết kiệm / giá mua lẻ × 100
+```
 
-| Nhóm | Prefix | Quyền truy cập |
+## API chính
+
+| Nhóm | Prefix | Truy cập |
 | --- | --- | --- |
-| Xác thực và tài khoản | `/api/auth` | Công khai hoặc yêu cầu đăng nhập tùy endpoint |
-| Cửa hàng | `/api/storefront` | Công khai |
-| Sản phẩm và đánh giá | `/api/products` | Xem công khai; ghi đánh giá cần đăng nhập |
-| Danh mục | `/api/categories` | Xem công khai; thay đổi cần quyền admin |
-| Thương hiệu | `/api/brands` | Xem công khai; thay đổi cần quyền admin |
-| Banner | `/api/banners` | Xem công khai; thay đổi cần quyền admin |
-| Tin tức | `/api/news` | Xem công khai; thay đổi cần quyền admin |
-| Mã giảm giá | `/api/coupons` | Yêu cầu quyền admin |
-| Người dùng | `/api/users` | Yêu cầu quyền admin |
-| Đơn hàng của khách | `/api/orders` | Yêu cầu đăng nhập |
-| Thanh toán PayPal | `/api/payments` | Cấu hình công khai; tạo và capture cần đăng nhập |
+| Xác thực/tài khoản | `/api/auth` | Tùy endpoint |
+| Storefront | `/api/storefront` | Công khai |
+| Sản phẩm/danh mục | `/api/products`, `/api/categories` | Xem công khai |
+| Combo nhà hàng | `/api/combos` | Công khai |
+| Đơn hàng | `/api/orders` | Cần đăng nhập |
+| PayPal | `/api/payments` | Tạo/capture cần đăng nhập |
+| Chatbot | `/api/chat` | Cần đăng nhập |
+| Công thức | `/api/recipes` | Gợi ý cần đăng nhập |
 
-Chi tiết request, response và schema nằm trong:
+- `GET /api/storefront`: sản phẩm có phân trang và bộ lọc.
+- `GET /api/storefront/grouped`: sản phẩm nhóm theo danh mục cho các hàng cuộn ngang trên trang chủ.
 
-- Swagger UI: <http://127.0.0.1:3000/api-docs>
-- OpenAPI source: `src/docs/openapi.yaml`
+## Tồn kho và thanh toán
 
-Lưu ý: OpenAPI hiện có mô tả thêm nhóm `/api/admin/*`, nhưng các route này chưa được mount trong `src/routes/index.js`. Phần quản trị đang hoạt động thông qua AdminJS tại `/admin` và API nội bộ `/admin/api/*`.
+1. Client chỉ gửi ID và số lượng.
+2. Backend tải lại sản phẩm/combo, tính giá và xác thực tồn kho.
+3. Đơn, chi tiết, vận chuyển và payment được tạo trong transaction.
+4. PayPal phải xác nhận đủ tiền trước khi giữ kho.
+5. Combo được bung thành từng thành phần để xuất kho theo lô.
+6. Hủy đơn hợp lệ sẽ hoàn kho và ghi giao dịch tương ứng.
 
-## Xác thực
+`STANDARD_SHIPPING_FEE` áp dụng cho đơn chỉ có hàng lẻ. Đơn có combo hợp lệ luôn có phí giao hàng bằng `0`.
 
-Ứng dụng có hai phiên đăng nhập độc lập:
+## Công thức thông minh
 
-- Khách hàng dùng session cookie `nong-san.sid`.
-- AdminJS dùng session riêng do AdminJS Express quản lý.
+```bash
+yarn recipes:index
+yarn recipes:index:smoke
+```
 
-Các REST API yêu cầu khách hàng đăng nhập sử dụng middleware `signedIn`. Các API quản lý danh mục, thương hiệu, banner, tin tức, coupon và người dùng sử dụng middleware `adminOnly`.
-
-## Thanh toán PayPal
-
-Luồng thanh toán:
-
-1. Client lấy cấu hình từ `/api/payments/paypal/config`.
-2. Server kiểm tra giỏ hàng, địa chỉ và tồn kho.
-3. Server tạo đơn hàng, chi tiết đơn, vận chuyển và payment trong database.
-4. Server tạo PayPal order theo USD.
-5. Sau khi PayPal capture thành công, server xác nhận số tiền và giữ tồn kho.
-6. Khách được chuyển đến trang chi tiết đơn hàng.
-
-PayPal không hỗ trợ VND trực tiếp. `PAYPAL_VND_PER_USD` quy định số VND được quy đổi thành một USD.
+Đặt `GEMINI_API_KEY`, chạy migration và thêm nguồn PDF trước khi xây dựng chỉ mục. Dữ liệu tại `data/recipes/` không được commit.
 
 ## Kiểm thử
 
-### Playwright
-
-Cài browser ở lần chạy đầu:
-
 ```bash
+# Jest
+yarn test --runInBand
+
+# Playwright
 npx playwright install
-```
+yarn test:e2e
 
-Chạy smoke test trên Chromium, Firefox và WebKit:
-
-```bash
-yarn test
-```
-
-Xem báo cáo HTML:
-
-```bash
-npx playwright show-report
-```
-
-Playwright tự khởi động server theo cấu hình trong `playwright.config.js`.
-
-### Newman
-
-Collection duy nhất nằm tại:
-
-```text
-api-testing-project/collections/Web Nông Sản API.postman_collection.json
-```
-
-Collection được chia thành hai nhóm:
-
-- `Người dùng`
-- `Admin`
-
-Chạy API test:
-
-```bash
+# Newman
 yarn api:test
-```
 
-Server và database phải chạy trước khi chạy Newman.
-
-Để test đăng nhập AdminJS trong Postman hoặc Newman, cấu hình hai biến sau với giá trị tương ứng trong `.env`:
-
-```text
-adminEmail
-adminPassword
-```
-
-Không lưu mật khẩu thật vào collection nếu collection được commit lên Git.
-
-### Allure
-
-```bash
+# Allure
 yarn test:allure
 yarn allure:generate
 yarn allure:open
 ```
 
-Máy chạy Allure cần có Java.
+Các test mới quan trọng:
 
-## CI
-
-Workflow `.github/workflows/playwright.yml` chạy khi push hoặc tạo pull request vào `main` hoặc `master`.
-
-Pipeline hiện thực hiện:
-
-1. Khởi tạo MySQL 8.4.
-2. Cài dependencies.
-3. Chạy migration và seeder.
-4. Cài Chromium.
-5. Chạy Playwright smoke test.
-6. Khởi động backend.
-7. Chạy Newman collection.
-
-## Các lệnh thường dùng
-
-| Lệnh | Chức năng |
-| --- | --- |
-| `yarn start` | Chạy server bằng Node.js |
-| `yarn dev` | Chạy server bằng Nodemon |
-| `yarn test` | Chạy Playwright |
-| `yarn api:test` | Chạy collection bằng Newman |
-| `yarn test:allure` | Chạy Playwright và tạo dữ liệu Allure |
-| `yarn allure:generate` | Tạo báo cáo Allure |
-| `yarn allure:open` | Mở báo cáo Allure |
-| `yarn allure:serve` | Tạo và phục vụ báo cáo Allure tạm thời |
-| `yarn docker:up` | Khởi động MySQL |
-| `yarn docker:down` | Dừng MySQL |
-| `yarn docker:logs` | Theo dõi log MySQL |
-| `yarn db:create` | Tạo database |
-| `yarn db:migrate` | Chạy migration |
-| `yarn db:migrate:undo` | Hoàn tác migration gần nhất |
+```bash
+yarn test tests/combo-pricing.test.js --runInBand
+yarn test tests/chat-order-history.test.js --runInBand
+yarn test tests/cart.test.js --runInBand
+```
 
 ## Cấu trúc dự án
 
 ```text
-.
-├── api-testing-project/
-│   ├── collections/       # Postman collection
-│   ├── data/              # Dữ liệu chạy Newman
-│   └── environments/      # Postman environment
-├── src/
-│   ├── admin/             # AdminJS, dashboard và resource config
-│   ├── config/            # Server, database, view engine, Cloudinary
-│   ├── controllers/       # Xử lý request
-│   ├── docs/              # OpenAPI
-│   ├── dtos/              # Request validation và response mapping
-│   ├── middlewares/       # Xác thực, phân quyền, validate, async wrapper
-│   ├── migration/         # Sequelize migrations
-│   ├── models/            # Models, associations và hooks
-│   ├── public/            # CSS và JavaScript phía trình duyệt
-│   ├── routes/            # REST API và page routes
-│   ├── seeders/           # Dữ liệu kiểm thử
-│   ├── services/          # Cloudinary, tồn kho, sanitize HTML
-│   ├── views/             # Nunjucks và trang legacy
-│   └── index.js           # Điểm khởi động ứng dụng
-├── tests/                 # Playwright tests
-├── docker-compose.yml
-├── playwright.config.js
-└── package.json
+src/
+├── admin/          # AdminJS và dashboard
+├── config/         # Server, database, Cloudinary, view engine
+├── controllers/    # Xử lý request
+├── docs/           # OpenAPI
+├── dtos/           # Validate request/response
+├── middlewares/    # Xác thực và phân quyền
+├── migration/      # Sequelize migrations
+├── models/         # Models, associations, hooks
+├── public/         # CSS, JavaScript, hình ảnh
+├── routes/         # API và page routes
+├── scripts/        # Xây dựng chỉ mục công thức
+├── services/       # Combo, kho, Gemini, Cloudinary
+└── views/          # Nunjucks và trang legacy
+
+tests/              # Jest và Playwright
+api-testing-project/# Postman/Newman
 ```
 
-## Xử lý lỗi thường gặp
+## Lệnh thường dùng
 
-### Không kết nối được MySQL
+| Lệnh | Mô tả |
+| --- | --- |
+| `yarn dev` | Chạy server với Nodemon |
+| `yarn start` | Chạy server với Node.js |
+| `yarn docker:up` | Khởi động MySQL |
+| `yarn docker:down` | Dừng Docker Compose |
+| `yarn db:create` | Tạo database |
+| `yarn db:migrate` | Chạy migration |
+| `yarn db:migrate:undo` | Hoàn tác migration gần nhất |
+| `yarn test` | Chạy Jest |
+| `yarn test:e2e` | Chạy Playwright |
+| `yarn api:test` | Chạy Newman |
 
-- Kiểm tra Docker Desktop đang chạy.
-- Chạy `docker compose ps`.
-- Khi dùng Docker Compose, đặt `DB_HOST=127.0.0.1` và `DB_PORT=3307`.
-- Đảm bảo `DB_PASSWORD` khớp `MYSQL_ROOT_PASSWORD`.
-- Xem log bằng `yarn docker:logs`.
+## Xử lý lỗi nhanh
 
-### Cổng 3000 hoặc 3307 đang được sử dụng
+- **Không kết nối MySQL:** kiểm tra Docker, host, port, mật khẩu và `yarn docker:logs`.
+- **AdminJS khởi động chậm:** giữ `ADMIN_WATCH=false`.
+- **Combo không xuất hiện:** kiểm tra trạng thái, thành phần, tồn kho và giá.
+- **PayPal lỗi:** kiểm tra mode, client ID, secret và tỷ giá.
+- **Upload ảnh lỗi:** kiểm tra các biến Cloudinary.
+- **Chatbot/công thức lỗi:** kiểm tra Gemini API key và chỉ mục.
 
-- Đổi `PORT` trong `.env` nếu cổng web bị trùng.
-- Đổi cổng bên trái trong `docker-compose.yml`, sau đó cập nhật `DB_PORT`.
+## Bảo mật
 
-### Upload ảnh không hoạt động
-
-Điền đầy đủ `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`, sau đó khởi động lại server.
-
-### PayPal không hoạt động
-
-- Kiểm tra `PAYPAL_MODE`, `PAYPAL_CLIENT_ID` và `PAYPAL_CLIENT_SECRET`.
-- Dùng tài khoản PayPal Sandbox khi `PAYPAL_MODE=sandbox`.
-- Kiểm tra `PAYPAL_VND_PER_USD` là số dương.
-
-### Bếp thông minh Gemini + FAISS
-
-1. Đặt `GEMINI_API_KEY` trong `.env` (hệ thống vẫn đọc tên cũ `Gemini_key` để tương thích).
-2. Chạy migration: `yarn db:migrate`.
-3. Đặt sách PDF scan trong `src/pdf/`.
-4. Tạo hoặc tiếp tục chỉ mục: `yarn recipes:index`.
-
-Pipeline dùng Gemini OCR cho PDF scan, lưu checkpoint và metadata trong `data/recipes/`, rồi tạo FAISS index 768 chiều bằng `gemini-embedding-001`. Có thể chạy `yarn recipes:index:smoke` để dựng lại thử 30 trang đầu (lệnh này xóa checkpoint cũ). Không commit thư mục index hoặc ảnh AI đã cache.
-
-Người dùng phải đăng nhập mới gọi được `POST /api/recipes/suggest`. Trong AdminJS, mục **Món ăn thông minh** cho phép quản lý ảnh/công thức và liên kết tên nguyên liệu với sản phẩm. Hệ thống không gọi model tạo ảnh; giao diện chỉ dùng ảnh do quản trị viên tải lên hoặc ảnh sản phẩm phù hợp.
-
-### Test AdminJS trả về trang login với status 200
-
-Điều này thường xảy ra khi `adminEmail` hoặc `adminPassword` trong Postman không khớp `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong `.env`.
+- `.env`, `docs/` ở thư mục gốc, báo cáo test và dữ liệu chỉ mục đều được ignore.
+- Chatbot chỉ đọc đơn hàng theo `session.userId`.
+- Giá, phí giao hàng và tồn kho luôn được xác minh lại ở backend.
 
 ## Giấy phép
 

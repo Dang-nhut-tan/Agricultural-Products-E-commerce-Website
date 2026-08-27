@@ -10,6 +10,8 @@ const resourceNames = {
   Wishlist: "Danh sách yêu thích", WishlistItem: "Sản phẩm yêu thích",
   InventoryTransaction: "Giao dịch kho", RecipeSource: "Nguồn PDF công thức",
   Recipe: "Công thức món ăn", RecipeProductLink: "Liên kết nguyên liệu - sản phẩm",
+  Combo: "Combo nhà hàng", ComboItem: "Sản phẩm trong combo",
+  ComboSetting: "Cấu hình combo",
 };
 
 const { cloudinaryProvider, createUploadPath } = require("./cloudinary-provider");
@@ -17,19 +19,19 @@ const { cloudinaryProvider, createUploadPath } = require("./cloudinary-provider"
 // Model và cột sẽ nhận URL ảnh sau khi admin chọn file từ máy tính.
 const imagePropertyByModel = {
   User: "avatar",
-  Category: "image",
   Brand: "image",
   Product: "image",
   ProductImage: "image",
   News: "image",
   Banner: "image",
   Recipe: "image",
+  Combo: "image",
 };
 
 // Chỉ giữ các cột hữu ích để bảng không bị dài và rối.
 const listPropertiesByModel = {
   User: ["id", "avatar", "name", "email", "phone", "status", "role"],
-  Category: ["id", "image", "name", "createdAt"],
+  Category: ["id", "name", "createdAt"],
   Brand: ["id", "image", "name", "createdAt"],
   Product: ["id", "image", "name", "price", "quantity", "status"],
   ProductImage: ["id", "image", "product_id", "sort_order"],
@@ -43,27 +45,40 @@ const navigationByModel = {
   User: { name: "Người dùng", icon: "Users" }, UserAddress: { name: "Người dùng", icon: "Users" },
   Category: { name: "Sản phẩm", icon: "Package" }, Brand: { name: "Sản phẩm", icon: "Package" },
   Product: { name: "Sản phẩm", icon: "Package" }, ProductBatch: { name: "Sản phẩm", icon: "Package" },
-  ProductImage: { name: "Sản phẩm", icon: "Package" }, Feedback: { name: "Đánh giá", icon: "MessageSquare" },
+  ProductImage: { name: "Sản phẩm", icon: "Package" }, Feedback: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
   Cart: { name: "Giỏ hàng", icon: "ShoppingCart" }, CartItem: { name: "Giỏ hàng", icon: "ShoppingCart" },
-  Order: { name: "Đơn hàng", icon: "ClipboardList" }, OrderDetail: { name: "Đơn hàng", icon: "ClipboardList" },
-  OrderHistory: { name: "Đơn hàng", icon: "ClipboardList" }, Payment: { name: "Thanh toán", icon: "CreditCard" },
-  Shipment: { name: "Vận chuyển", icon: "Truck" }, News: { name: "Nội dung", icon: "Newspaper" },
-  NewsDetail: { name: "Nội dung", icon: "Newspaper" }, Banner: { name: "Nội dung", icon: "Newspaper" },
-  BannerDetail: { name: "Nội dung", icon: "Newspaper" }, Coupon: { name: "Khuyến mãi", icon: "Gift" },
-  OrderCoupon: { name: "Khuyến mãi", icon: "Gift" }, CouponUser: { name: "Khuyến mãi", icon: "Gift" },
+  Order: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
+  Shipment: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
+  News: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
+  Banner: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
+  Coupon: { name: "Khuyến mãi", icon: "Gift" },
   Wishlist: { name: "Yêu thích", icon: "Heart" }, WishlistItem: { name: "Yêu thích", icon: "Heart" },
-  InventoryTransaction: { name: "Giao dịch kho", icon: "Warehouse" },
-  Recipe: { name: "Món ăn thông minh", icon: "Restaurant" },
-  RecipeSource: { name: "Món ăn thông minh", icon: "Document" },
-  RecipeProductLink: { name: "Món ăn thông minh", icon: "Link" },
+  InventoryTransaction: { name: "Kho & Công thức", icon: "Warehouse" },
+  Recipe: { name: "Kho & Công thức", icon: "Warehouse" },
+  RecipeSource: { name: "Kho & Công thức", icon: "Warehouse" },
+  RecipeProductLink: { name: "Kho & Công thức", icon: "Warehouse" },
+  Combo: { name: "Combo nhà hàng", icon: "ShoppingBag" },
+  ComboSetting: { name: "Combo nhà hàng", icon: "ShoppingBag" },
 };
+
+// Các resource nghiệp vụ con vẫn được đăng ký để association/link từ bản ghi
+// cha hoạt động, nhưng không chiếm chỗ trong sidebar.
+const sidebarHiddenModels = [
+  "OrderDetail",
+  "OrderHistory",
+  "Payment",
+  "NewsDetail",
+  "BannerDetail",
+  "OrderCoupon",
+  "CouponUser",
+  "ComboItem",
+];
 
 const hiddenModels = [
   "Cart",
   "CartItem",
   "Wishlist",
   "WishlistItem",
-  "Payment",
   "ProductImage",
 ];
 const readOnlyModels = ["UserAddress", "Feedback", "InventoryTransaction"];
@@ -91,6 +106,11 @@ const normalizeNewUser = async (request) => {
   };
   return request;
 };
+const singletonSettingActions = {
+  new: { isAccessible: false, isVisible: false },
+  delete: { isAccessible: false, isVisible: false },
+  bulkDelete: { isAccessible: false, isVisible: false },
+};
 
 // AdminJS gửi ô ngày trống thành chuỗi rỗng, Sequelize sẽ đổi thành "Invalid date".
 const normalizeShipment = async (request) => {
@@ -105,6 +125,61 @@ const normalizeShipment = async (request) => {
     tracking_code: String(firstValue(payload.tracking_code) || "").trim() || null,
   };
   return request;
+};
+
+const relatedListAction = (label, resourceId, foreignKey) => ({
+  actionType: "record",
+  label,
+  icon: "View",
+  component: false,
+  handler: async (_request, _response, context) => ({
+    record: context.record.toJSON(context.currentAdmin),
+    redirectUrl: `/admin/resources/${resourceId}?filters.${foreignKey}=${encodeURIComponent(context.record.id())}`,
+  }),
+});
+
+const relatedActionsByModel = {
+  User: {
+    addresses: relatedListAction("Địa chỉ người dùng", "user_addresses", "user_id"),
+    assignedCoupons: relatedListAction("Mã giảm giá của khách", "coupon_users", "user_id"),
+  },
+  Order: {
+    orderDetails: relatedListAction("Chi tiết đơn hàng", "order_details", "order_id"),
+    orderHistory: relatedListAction("Lịch sử đơn hàng", "order_histories", "order_id"),
+    payments: relatedListAction("Thanh toán", "payments", "order_id"),
+    appliedCoupons: relatedListAction("Mã giảm giá đã dùng", "order_coupons", "order_id"),
+  },
+  News: {
+    newsProducts: relatedListAction("Sản phẩm trong tin", "news_details", "news_id"),
+  },
+  Banner: {
+    bannerProducts: relatedListAction("Sản phẩm trong banner", "banner_details", "banner_id"),
+  },
+  Coupon: {
+    couponOrders: relatedListAction("Đơn hàng đã áp dụng", "order_coupons", "coupon_id"),
+    couponUsers: relatedListAction("Khách hàng được nhận", "coupon_users", "coupon_id"),
+  },
+  Combo: {
+    comboItems: relatedListAction("Sản phẩm trong combo", "combo_items", "combo_id"),
+  },
+};
+
+const enrichComboRecords = async (response) => {
+  const combos = await require("../services/comboService").findCombos({ includeUnavailable: true });
+  const byId = new Map(combos.map((combo) => [String(combo.id), combo]));
+  for (const record of response.records || (response.record ? [response.record] : [])) {
+    const combo = byId.get(String(record.id));
+    if (!combo) continue;
+    record.params.retail_price = combo.retailPrice;
+    record.params.calculated_price = combo.comboPrice;
+    record.params.savings_display = `${combo.savings.toLocaleString("vi-VN")} ₫ (${combo.savingsPercent}%)`;
+    record.params.availability_warning = combo.isAvailable
+      ? `Đủ hàng: có thể bán ${combo.availableQuantity} combo`
+      : combo.items.length
+        ? `Đang tự ẩn: ${combo.items.filter((item) => item.availableSets < 1).map((item) => `thiếu ${item.name}`).join(", ") || "giá combo chưa thấp hơn giá lẻ"}`
+        : "Đang tự ẩn: chưa có sản phẩm trong combo";
+  }
+  return response;
 };
 
 const userProperties = {
@@ -248,6 +323,32 @@ const propertiesByModel = {
     },
     error_message: { label: "Chi tiết lỗi", isVisible: { list: true, show: true, edit: false, filter: false } },
   },
+  Combo: {
+    size: {
+      label: "Kích cỡ",
+      availableValues: [
+        { value: "small", label: "Nhỏ" },
+        { value: "medium", label: "Vừa" },
+        { value: "large", label: "Lớn" },
+      ],
+    },
+    price_mode: {
+      label: "Cách tính giá",
+      availableValues: [
+        { value: "percent", label: "Giảm theo phần trăm" },
+        { value: "fixed", label: "Giảm số tiền cố định" },
+        { value: "manual", label: "Nhập giá cuối cùng" },
+      ],
+    },
+    status: {
+      label: "Trạng thái",
+      availableValues: [{ value: true, label: "Đang bán" }, { value: false, label: "Đang ẩn" }],
+    },
+    retail_price: { label: "Tổng giá mua lẻ", isVisible: { list: true, show: true, edit: false, filter: false } },
+    calculated_price: { label: "Giá combo hiện tại", isVisible: { list: true, show: true, edit: false, filter: false } },
+    savings_display: { label: "Mức tiết kiệm", isVisible: { list: true, show: true, edit: false, filter: false } },
+    availability_warning: { label: "Tồn kho / tự động ẩn", isVisible: { list: true, show: true, edit: false, filter: false } },
+  },
 };
 
 const buildResources = (
@@ -332,7 +433,9 @@ const buildResources = (
       resource: models[modelName],
       features,
       options: {
-      navigation: navigationByModel[modelName],
+      navigation: sidebarHiddenModels.includes(modelName)
+        ? false
+        : navigationByModel[modelName],
       ...(listPropertiesByModel[modelName] ? {
         listProperties: listPropertiesByModel[modelName],
       } : {}),
@@ -349,21 +452,24 @@ const buildResources = (
         } : {}),
         ...(isRecipeSource ? { uploadPdf: { label: "Chọn file PDF" } } : {}),
       },
-      actions: readOnlyModels.includes(modelName)
-        ? readOnlyActions
-        : modelName === "User"
-          ? { new: { before: normalizeNewUser } }
-          : modelName === "Shipment"
-            ? {
-              new: { before: normalizeShipment },
-              edit: { before: normalizeShipment },
-            }
-            : isRecipeSource
-              ? {
-                new: { after: rebuildAfter }, edit: { after: rebuildAfter },
-                delete: { after: rebuildAfter }, bulkDelete: { after: rebuildAfter },
-              }
-              : undefined,
+      actions: {
+        ...(readOnlyModels.includes(modelName) ? readOnlyActions : {}),
+        ...(modelName === "User" ? { new: { before: normalizeNewUser } } : {}),
+        ...(modelName === "Shipment" ? {
+          new: { before: normalizeShipment },
+          edit: { before: normalizeShipment },
+        } : {}),
+        ...(modelName === "ComboSetting" ? singletonSettingActions : {}),
+        ...(modelName === "Combo" ? {
+          list: { after: enrichComboRecords },
+          show: { after: enrichComboRecords },
+        } : {}),
+        ...(isRecipeSource ? {
+          new: { after: rebuildAfter }, edit: { after: rebuildAfter },
+          delete: { after: rebuildAfter }, bulkDelete: { after: rebuildAfter },
+        } : {}),
+        ...(relatedActionsByModel[modelName] || {}),
+      },
       },
     };
   });

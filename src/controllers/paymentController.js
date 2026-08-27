@@ -53,6 +53,7 @@ function getConfig(req, res) {
     enabled: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET),
     clientId: process.env.PAYPAL_CLIENT_ID || "",
     currency: "USD",
+    standardShippingFee: Math.max(0, Number(process.env.STANDARD_SHIPPING_FEE || 0)),
   });
 }
 
@@ -62,18 +63,24 @@ async function createOrder(req, res) {
   if (!items.length) return res.status(400).json({ message: "Giỏ hàng đang trống." });
 
   const quantities = new Map();
+  const comboQuantities = new Map();
   for (const item of items) {
-    const id = Number(item.id);
+    const isCombo = item.type === "combo" || item.comboId;
+    const id = Number(isCombo ? item.comboId : item.id);
     const quantity = Number(item.quantity);
     if (!Number.isInteger(id) || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
       return res.status(400).json({ message: "Sản phẩm hoặc số lượng không hợp lệ." });
     }
-    quantities.set(id, (quantities.get(id) || 0) + quantity);
+    const target = isCombo ? comboQuantities : quantities;
+    target.set(id, (target.get(id) || 0) + quantity);
   }
 
-  const [address, products] = await Promise.all([
+  const [address, products, availableCombos] = await Promise.all([
     db.UserAddress.findOne({ where: { id: addressId, user_id: req.session.userId } }),
     db.Product.findAll({ where: { id: [...quantities.keys()], status: 1 } }),
+    comboQuantities.size
+      ? require("../services/comboService").findCombos()
+      : Promise.resolve([]),
   ]);
   if (!address) return res.status(400).json({ message: "Vui lòng chọn địa chỉ nhận hàng hợp lệ." });
   if (products.length !== quantities.size) return res.status(400).json({ message: "Có sản phẩm không còn bán." });
@@ -91,6 +98,44 @@ async function createOrder(req, res) {
     return { product, quantity, price };
   });
 
+  const combosById = new Map(availableCombos.map((combo) => [Number(combo.id), combo]));
+  for (const [comboId, comboQuantity] of comboQuantities) {
+    const combo = combosById.get(comboId);
+    if (!combo) return res.status(409).json({ message: "Combo không còn đủ hàng hoặc đã tạm ẩn." });
+    if (comboQuantity < Number(combo.minimum_quantity || 1)) {
+      return res.status(400).json({ message: `${combo.name} yêu cầu mua tối thiểu ${combo.minimum_quantity} combo.` });
+    }
+    if (comboQuantity > combo.availableQuantity) {
+      return res.status(409).json({ message: `${combo.name} chỉ còn ${combo.availableQuantity} combo.` });
+    }
+    subtotal += combo.comboPrice * comboQuantity;
+    let allocated = 0;
+    combo.items.forEach((item, index) => {
+      const quantity = item.quantity * comboQuantity;
+      if (!Number.isInteger(quantity)) {
+        const error = new Error(`${combo.name} có số lượng thành phần không hợp lệ.`);
+        error.status = 400;
+        throw error;
+      }
+      const lineTotal = index === combo.items.length - 1
+        ? combo.comboPrice * comboQuantity - allocated
+        : Math.round((item.retailTotal / combo.retailPrice) * combo.comboPrice * comboQuantity);
+      allocated += lineTotal;
+      details.push({
+        product: { id: item.productId, name: item.name, unit: item.unit },
+        quantity,
+        price: quantity ? lineTotal / quantity : 0,
+        comboId: combo.id,
+        comboName: combo.name,
+        comboQuantity,
+      });
+    });
+  }
+
+  const shippingFee = comboQuantities.size
+    ? 0
+    : Math.max(0, Number(process.env.STANDARD_SHIPPING_FEE || 0));
+  const total = subtotal + shippingFee;
   const transaction = await db.sequelize.transaction();
   let order;
   let payment;
@@ -100,17 +145,20 @@ async function createOrder(req, res) {
       address_id: address.id,
       status: 0,
       subtotal,
-      shipping_fee: 0,
+      shipping_fee: shippingFee,
       discount: 0,
-      total: subtotal,
+      total,
     }, { transaction });
-    await db.OrderDetail.bulkCreate(details.map(({ product, quantity, price }) => ({
+    await db.OrderDetail.bulkCreate(details.map(({ product, quantity, price, comboId, comboName, comboQuantity }) => ({
       order_id: order.id,
       product_id: product.id,
       product_name: product.name,
       price,
       quantity,
       unit: product.unit,
+      combo_id: comboId || null,
+      combo_name: comboName || null,
+      combo_quantity: comboQuantity || null,
     })), { transaction });
     await db.Shipment.create({
       order_id: order.id,
@@ -121,13 +169,13 @@ async function createOrder(req, res) {
       district: address.district,
       province: address.province,
       shipping_status: 0,
-      shipping_fee: 0,
+      shipping_fee: shippingFee,
     }, { transaction });
     payment = await db.Payment.create({
       order_id: order.id,
       method: "PAYPAL",
       status: 0,
-      amount: subtotal,
+      amount: total,
     }, { transaction });
     await transaction.commit();
   } catch (error) {
@@ -136,7 +184,7 @@ async function createOrder(req, res) {
   }
 
   try {
-    const usdAmount = (subtotal / getExchangeRate()).toFixed(2);
+    const usdAmount = (total / getExchangeRate()).toFixed(2);
     const paypalOrder = await paypalRequest("/v2/checkout/orders", {
       method: "POST",
       headers: { "PayPal-Request-Id": `order-${order.id}` },

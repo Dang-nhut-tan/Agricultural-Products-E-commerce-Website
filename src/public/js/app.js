@@ -83,6 +83,7 @@ function renderRoute() {
               <small>Thẻ quốc tế hoặc tài khoản PayPal</small>
             </div>
           </div>
+          ${state.cart.some((item) => item.type === "combo") ? '<p class="checkout-rate-note"><b>✓ Miễn phí giao hàng</b> vì đơn có Combo nhà hàng.</p>' : ""}
           <div id="paypalPaymentPanel" class="payment-panel active">
             <p class="checkout-rate-note">Số tiền được quy đổi sang USD theo tỷ giá của cửa hàng.</p>
             <div id="paypalButtons"></div>
@@ -146,6 +147,19 @@ function renderOrderList(orders,box){
 }
 function renderOrderDetail(order,box){
   const status=orderStatus(order.status),histories=order.OrderHistories||[],shipment=order.Shipment;
+  const previousCombos=[...(order.OrderDetails||[]).reduce((map,item)=>{if(item.combo_id&&!map.has(item.combo_id))map.set(item.combo_id,{id:item.combo_id,name:item.combo_name,quantity:item.combo_quantity||1});return map},new Map()).values()];
+  if(previousCombos.length) queueMicrotask(()=>{
+    const host=box.querySelector(".order-detail-main");
+    host?.insertAdjacentHTML("beforeend",`<div class="order-totals"><b>Mua lại combo</b>${previousCombos.map(combo=>`<button type="button" class="primary" data-rebuy-combo="${combo.id}" data-rebuy-quantity="${combo.quantity}">${safe(combo.name)} · Mua lại</button>`).join("")}</div>`);
+    host?.querySelectorAll("[data-rebuy-combo]").forEach(button=>button.addEventListener("click",async()=>{
+      const response=await fetch(`/api/combos/${button.dataset.rebuyCombo}`),result=await response.json();
+      if(!response.ok)return alert(result.message||"Combo hiện không còn đủ hàng.");
+      const combo=result.data,cart=JSON.parse(localStorage.getItem("nong-san-cart")||"[]"),quantity=Math.max(Number(button.dataset.rebuyQuantity||1),Number(combo.minimum_quantity||1));
+      const existing=cart.find(item=>item.type==="combo"&&Number(item.comboId)===Number(combo.id));
+      if(existing)existing.qty+=quantity;else cart.push({id:`combo-${combo.id}`,comboId:combo.id,type:"combo",name:combo.name,price:combo.comboPrice,image:combo.image||"",minimumQuantity:combo.minimum_quantity,qty:quantity,freeShipping:true});
+      localStorage.setItem("nong-san-cart",JSON.stringify(cart));button.textContent="Đã thêm lại ✓";
+    }));
+  });
   box.innerHTML=`<div class="order-detail-grid"><div class="panel order-detail-main"><div class="order-detail-head"><div><a href="/don-hang">← Lịch sử mua hàng</a><h2>Đơn hàng #${order.id}</h2><small>${orderDate(order.createdAt)}</small></div><span class="order-status ${status[1]}">${status[0]}</span></div><div class="order-products">${(order.OrderDetails||[]).map(item=>`<div class="order-product"><div class="order-product-image"${item.Product?.image?` style="background-image:url('${safe(item.Product.image)}')"`:""}></div><div><b>${safe(item.product_name)}</b><small>${item.quantity} × ${money(item.price)}</small></div><strong>${money(Number(item.price)*Number(item.quantity))}</strong></div>`).join("")}</div><div class="order-totals"><span>Tạm tính <b>${money(order.subtotal)}</b></span><span>Phí giao hàng <b>${money(order.shipping_fee)}</b></span><span class="grand">Tổng cộng <b>${money(order.total)}</b></span></div></div><aside class="panel order-timeline"><h3>Trạng thái đơn hàng</h3><div class="timeline"><div class="timeline-item active"><i></i><div><b>Đã tạo đơn</b><small>${orderDate(order.createdAt)}</small></div></div>${histories.map(item=>`<div class="timeline-item active"><i></i><div><b>${orderStatus(item.to_status)[0]}</b><small>${orderDate(item.createdAt)}${item.reason?` · ${safe(item.reason)}`:""}</small></div></div>`).join("")}</div><div class="payment-summary"><span>Thanh toán</span><b>${safe(order.Payment?.method||"Chưa thanh toán")}</b></div>${[0,1].includes(Number(order.status))?`<button class="cancel-order" data-cancel-order="${order.id}">Hủy đơn hàng</button>`:""}</aside></div>`;
   if(shipment) box.querySelector(".payment-summary")?.insertAdjacentHTML("afterend",`<div class="shipment-summary"><h4>Thông tin vận chuyển</h4><p><b>${safe(shipment.receiver_name)}</b> · ${safe(shipment.phone)}</p><p>${safe([shipment.address,shipment.ward,shipment.district,shipment.province].filter(Boolean).join(", "))}</p>${shipment.tracking_code?`<p>Mã vận đơn: <strong>${safe(shipment.tracking_code)}</strong></p>`:""}${shipment.delivery_time?`<p>Giao lúc: ${orderDate(shipment.delivery_time)}</p>`:""}</div>`);
   box.querySelector("[data-cancel-order]")?.addEventListener("click",async(event)=>{if(!confirm("Bạn chắc chắn muốn hủy đơn hàng này?"))return;event.currentTarget.disabled=true;const response=await fetch(`/api/orders/${order.id}/cancel`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({reason:"Khách hàng hủy từ lịch sử mua hàng"})}),result=await response.json();if(!response.ok){alert(result.message||"Không thể hủy đơn hàng.");event.currentTarget.disabled=false;return}loadOrders(order.id)});
@@ -180,6 +194,9 @@ async function setupPaypalCheckout() {
     if (!addressesResponse.ok || !configResponse.ok) throw new Error("Không thể tải thông tin thanh toán.");
     const addresses = (await addressesResponse.json()).data || [];
     const config = await configResponse.json();
+    const shippingFee = state.cart.some((item) => item.type === "combo") ? 0 : Number(config.standardShippingFee || 0);
+    total += shippingFee;
+    totalBox.textContent = money(total);
     if (!addresses.length) {
       addressesBox.innerHTML = '<p>Bạn chưa có địa chỉ nhận hàng. Hãy thêm địa chỉ trong trang tài khoản.</p><a class="primary" href="/tai-khoan">Thêm địa chỉ</a>';
       return;
@@ -206,7 +223,9 @@ async function setupPaypalCheckout() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             addressId,
-            items: state.cart.map((item) => ({ id: item.id, quantity: item.qty })),
+            items: state.cart.map((item) => item.type === "combo"
+              ? { type: "combo", comboId: item.comboId, quantity: item.qty }
+              : { type: "product", id: item.id, quantity: item.qty }),
           }),
         });
         const data = await response.json();
@@ -242,6 +261,11 @@ function toast(message) {
   toastBox.classList.add("show");
   setTimeout(() => toastBox.classList.remove("show"), 2200);
 }
+function productCard(p) {
+  const img = productImage(p);
+  const available = Number(p.quantity) > 0;
+  return `<article class="product"><a class="product-image ${img ? "" : "no-image"}" href="/san-pham/${p.id}" aria-label="Xem ${safe(p.name)}"${img ? ` style="background-image:url('${safe(img)}')" role="img"` : ' role="img" aria-label="Sản phẩm chưa có ảnh"'}>${img ? "" : '<span aria-hidden="true">▧</span>'}</a><div class="product-info"><span class="product-cat">${safe(p.Category?.name || "Nông sản")}</span><h3><a href="/san-pham/${p.id}">${safe(p.name)}</a></h3><div class="product-price-row"><div><span class="price">${money(p.price)}</span>${Number(p.oldprice) > Number(p.price) ? `<span class="old">${money(p.oldprice)}</span>` : ""}</div><button type="button" class="add" data-add="${p.id}" aria-label="${available ? `Thêm ${safe(p.name)} vào giỏ hàng` : `${safe(p.name)} đã hết hàng`}" ${available ? "" : "disabled"}>${available ? "+" : "Hết hàng"}</button></div>${available ? `<span class="stock in-stock"><b>Số lượng còn lại:</b> ${Number(p.quantity).toLocaleString("vi-VN")} ${safe(productUnit(p.unit))}</span>` : ""}</div></article>`;
+}
 function renderProducts() {
   const grid = $("#productGrid");
   if (!state.products.length) {
@@ -249,13 +273,33 @@ function renderProducts() {
       '<div class="empty-state"><span aria-hidden="true">⌕</span><h3>Chưa tìm thấy sản phẩm</h3><p>Thử từ khóa khác hoặc xem lại tất cả sản phẩm.</p></div>';
     return;
   }
-  grid.innerHTML = state.products
-    .map((p) => {
-      const img = productImage(p);
-      const available = Number(p.quantity) > 0;
-      return `<article class="product"><a class="product-image ${img ? "" : "no-image"}" href="/san-pham/${p.id}" aria-label="Xem ${safe(p.name)}"${img ? ` style="background-image:url('${safe(img)}')" role="img"` : ' role="img" aria-label="Sản phẩm chưa có ảnh"'}>${img ? "" : '<span aria-hidden="true">▧</span>'}</a><div class="product-info"><span class="product-cat">${safe(p.Category?.name || "Nông sản")}</span><h3><a href="/san-pham/${p.id}">${safe(p.name)}</a></h3><div class="product-price-row"><div><span class="price">${money(p.price)}</span>${Number(p.oldprice) > Number(p.price) ? `<span class="old">${money(p.oldprice)}</span>` : ""}</div><button type="button" class="add" data-add="${p.id}" aria-label="${available ? `Thêm ${safe(p.name)} vào giỏ hàng` : `${safe(p.name)} đã hết hàng`}" ${available ? "" : "disabled"}>${available ? "+" : "Hết hàng"}</button></div>${available ? `<span class="stock in-stock"><b>Số lượng còn lại:</b> ${Number(p.quantity).toLocaleString("vi-VN")} ${safe(productUnit(p.unit))}</span>` : ""}</div></article>`;
-    })
-    .join("");
+  grid.innerHTML = state.products.map(productCard).join("");
+}
+
+async function loadGroupedProducts() {
+  const host = document.querySelector("#categoryProductRows");
+  if (!host) return;
+  try {
+    const response = await fetch("/api/storefront/grouped");
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+    state.categories = data.categories || [];
+    state.products = state.categories.flatMap((category) => category.products || []);
+    host.innerHTML = state.categories.map((category) => `
+      <section class="category-product-row" aria-labelledby="category-${category.id}">
+        <div class="category-row-head">
+          <div><span>DANH MỤC</span><h3 id="category-${category.id}">${safe(category.name)}</h3></div>
+          <div class="category-row-actions">
+            <a href="/san-pham?category=${category.id}">Xem tất cả</a>
+            <button type="button" data-product-scroll="left" data-scroll-target="category-track-${category.id}" aria-label="Cuộn ${safe(category.name)} sang trái">←</button>
+            <button type="button" data-product-scroll="right" data-scroll-target="category-track-${category.id}" aria-label="Cuộn ${safe(category.name)} sang phải">→</button>
+          </div>
+        </div>
+        <div class="category-product-track" id="category-track-${category.id}">${category.products.map(productCard).join("")}</div>
+      </section>`).join("") || '<div class="empty-state"><h3>Chưa có sản phẩm</h3></div>';
+  } catch (_error) {
+    host.innerHTML = '<div class="empty-state error"><h3>Chưa thể tải sản phẩm</h3><button type="button" onclick="location.reload()">Thử lại</button></div>';
+  }
 }
 function renderPagination() {
   const el = $("#pagination");
@@ -358,13 +402,13 @@ function renderCartPage() {
     return;
   }
   const count = state.cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
-  const total = state.cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+  let total = state.cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
   box.innerHTML = `<div class="cart-page-grid">
     <section class="cart-products-panel" aria-label="Sản phẩm trong giỏ">
       <div class="cart-panel-title"><h2>Sản phẩm đã chọn</h2><span>${count} sản phẩm</span></div>
       <div class="cart-page-items">${state.cart.map((item) => `<article class="cart-page-item">
-        <a class="cart-item-image${item.image ? "" : " no-image"}" href="/san-pham/${item.id}" ${item.image ? `style="background-image:url('${safe(item.image)}')"` : ""} aria-label="Xem ${safe(item.name)}">${item.image ? "" : "🌿"}</a>
-        <div class="cart-item-info"><span>Nông sản tươi</span><h3><a href="/san-pham/${item.id}">${safe(item.name)}</a></h3><strong>${money(item.price)}</strong></div>
+        <a class="cart-item-image${item.image ? "" : " no-image"}" href="${item.type === "combo" ? "/combo-nha-hang" : `/san-pham/${item.id}`}" ${item.image ? `style="background-image:url('${safe(item.image)}')"` : ""} aria-label="Xem ${safe(item.name)}">${item.image ? "" : "🌿"}</a>
+        <div class="cart-item-info"><span>${item.type === "combo" ? "Combo nhà hàng · Miễn phí giao hàng" : "Nông sản tươi"}</span><h3><a href="${item.type === "combo" ? "/combo-nha-hang" : `/san-pham/${item.id}`}">${safe(item.name)}</a></h3><strong>${money(item.price)}</strong></div>
         <div class="cart-item-actions"><label>Số lượng</label><div class="cart-quantity"><button type="button" data-cart-decrease="${item.id}" aria-label="Giảm số lượng">−</button><b>${Number(item.qty)}</b><button type="button" data-cart-increase="${item.id}" aria-label="Tăng số lượng">+</button></div><button class="cart-remove" type="button" data-cart-page-remove="${item.id}">Xóa</button></div>
         <div class="cart-item-subtotal"><span>Thành tiền</span><strong>${money(Number(item.price) * Number(item.qty))}</strong></div>
       </article>`).join("")}</div>
@@ -373,6 +417,7 @@ function renderCartPage() {
       <span class="cart-summary-kicker">Tóm tắt đơn hàng</span><h2>Thanh toán</h2>
       <div class="cart-summary-row"><span>Sản phẩm (${count})</span><b>${money(total)}</b></div>
       <div class="cart-summary-row"><span>Phí giao hàng</span><b>Tính ở bước sau</b></div>
+      ${state.cart.some((item) => item.type === "combo") ? '<div class="cart-summary-row"><span>Ưu đãi vận chuyển</span><b>Miễn phí nhờ Combo nhà hàng</b></div>' : ""}
       <div class="cart-summary-total"><span>Tổng tạm tính</span><strong>${money(total)}</strong></div>
       <a class="cart-checkout-button" href="/thanh-toan">Tiến hành thanh toán <span>→</span></a>
       <div class="cart-assurance"><i>✓</i><p><b>Thanh toán an toàn</b><small>Thông tin đơn hàng được bảo mật.</small></p></div>
@@ -385,14 +430,23 @@ window.addEventListener("cart:updated", (event) => {
   if (event.detail?.message) toast(event.detail.message);
 });
 document.addEventListener("click", (e) => {
+  const scrollButton = e.target.closest("[data-product-scroll]");
+  if (scrollButton) {
+    const track = document.getElementById(scrollButton.dataset.scrollTarget);
+    track?.scrollBy({
+      left: (scrollButton.dataset.productScroll === "left" ? -1 : 1) * Math.max(280, track.clientWidth * 0.8),
+      behavior: "smooth",
+    });
+    return;
+  }
   const cartDecrease = e.target.closest("[data-cart-decrease]");
   const cartIncrease = e.target.closest("[data-cart-increase]");
   const cartPageRemove = e.target.closest("[data-cart-page-remove]");
   if (cartDecrease || cartIncrease || cartPageRemove) {
-    const id = Number((cartDecrease || cartIncrease || cartPageRemove).dataset.cartDecrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartIncrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartPageRemove);
-    const item = state.cart.find((entry) => Number(entry.id) === id);
-    if (cartPageRemove) state.cart = state.cart.filter((entry) => Number(entry.id) !== id);
-    else if (item && cartDecrease) item.qty = Math.max(1, Number(item.qty) - 1);
+    const id = (cartDecrease || cartIncrease || cartPageRemove).dataset.cartDecrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartIncrease || (cartDecrease || cartIncrease || cartPageRemove).dataset.cartPageRemove;
+    const item = state.cart.find((entry) => String(entry.id) === String(id));
+    if (cartPageRemove) state.cart = state.cart.filter((entry) => String(entry.id) !== String(id));
+    else if (item && cartDecrease) item.qty = Math.max(Number(item.minimumQuantity || 1), Number(item.qty) - 1);
     else if (item && cartIncrease) item.qty = Number(item.qty) + 1;
     renderCart();
     return;
@@ -456,6 +510,10 @@ document.addEventListener("click", (e) => {
 $("#searchForm").onsubmit = (e) => {
   e.preventDefault();
   state.search = $("#searchInput").value.trim();
+  if (location.pathname === "/") {
+    location.href = `/san-pham${state.search ? `?search=${encodeURIComponent(state.search)}` : ""}`;
+    return;
+  }
   state.page = 1;
   loadProducts();
   location.hash = "products";
@@ -621,7 +679,7 @@ $(".checkout").onclick = () => {
 };
 renderCart();
 const currentPage = renderRoute();
-if (currentPage === "home") loadProducts();
+if (currentPage === "home") loadGroupedProducts();
 import("/js/banner.js");
 import("/js/header.js");
 import("/js/suppliers.js?v=3");

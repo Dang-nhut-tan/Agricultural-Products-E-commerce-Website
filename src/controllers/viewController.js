@@ -153,6 +153,27 @@ async function getProductDetailPage(req, res, next) {
   }
 }
 
+async function getCombosPage(req, res, next) {
+  try {
+    const { findCombos } = require("../services/comboService");
+    const combos = (await findCombos()).map((combo) => ({
+      ...combo,
+      displayRetailPrice: formatMoney(combo.retailPrice),
+      displayComboPrice: formatMoney(combo.comboPrice),
+      displaySavings: formatMoney(combo.savings),
+      sizeLabel: { small: "Nhỏ", medium: "Vừa", large: "Lớn" }[combo.size] || combo.size,
+    }));
+    res.render("pages/combos/index.njk", {
+      pageTitle: "Combo nhà hàng | Nông Sản Xanh",
+      pageDescription: "Nguồn hàng số lượng lớn, giá tốt và miễn phí giao hàng cho quán ăn, nhà hàng và bếp công ty.",
+      currentPath: req.path,
+      combos,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function getNewsPage(req, res, next) {
   try {
     const news = await db.News.findAll({ order: [["createdAt", "DESC"]] });
@@ -199,6 +220,7 @@ module.exports = {
   getContactPage,
   getProductsPage,
   getProductDetailPage,
+  getCombosPage,
   getNewsPage,
   getNewsDetailPage,
 };

@@ -62,7 +62,9 @@ async function createAdmin() {
   });
 
   // Theo dõi và bundle lại component dashboard khi sửa code ở môi trường dev.
-  if (process.env.NODE_ENV !== "production") {
+  // The AdminJS component bundler is expensive, so enable it only while
+  // actively editing AdminJS React components.
+  if (process.env.ADMIN_WATCH?.trim().toLowerCase() === "true") {
     admin.watch().catch((error) => {
       console.error("Không thể bundle dashboard AdminJS:", error);
     });

@@ -4,6 +4,7 @@ const controller = require("../controllers/viewController");
 router.get("/lien-he", controller.getContactPage);
 router.get("/san-pham", controller.getProductsPage);
 router.get("/san-pham/:id", controller.getProductDetailPage);
+router.get("/combo-nha-hang", controller.getCombosPage);
 router.get("/tin-tuc", controller.getNewsPage);
 router.get("/tin-tuc/:id", controller.getNewsDetailPage);
 

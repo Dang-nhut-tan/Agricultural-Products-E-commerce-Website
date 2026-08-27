@@ -9,6 +9,7 @@
       content="Nông Sản Xanh - Nông sản sạch, rõ nguồn gốc, giao tận nhà."
     />
     <title>Nông Sản Xanh | Tươi lành mỗi ngày</title>
+    <link rel="icon" type="image/png" href="/images/brand/nong-san-xanh-mark.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="/css/recipe-assistant.css" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,6 +20,7 @@
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fix.css" />
     <link rel="stylesheet" href="/css/chat.css?v=3" />
+    <link rel="stylesheet" href="/css/home-extras.css?v=4" />
   </head>
   <body>
     <div class="topbar">
@@ -30,7 +32,7 @@
     <header>
       <div class="container header-in">
         <a class="logo" href="#"
-          ><span class="logo-mark">🌿</span
+          ><img class="logo-mark" src="/images/brand/nong-san-xanh-mark.png" alt=""
           ><span
             >NÔNG SẢN <b>XANH</b><small>Tươi lành từ nông trại</small></span
           ></a
@@ -129,38 +131,30 @@
           </article>
         </div>
       </section>
-      <section class="section container">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">DANH MỤC</span>
-            <h2>Chọn món tươi ngon</h2>
-          </div>
-        </div>
-        <div id="categories" class="category-grid">
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
-          <div class="skeleton"></div>
+      <section class="section container shopping-modes">
+        <div class="section-head"><div><span class="eyebrow">MUA SẮM THEO NHU CẦU</span><h2>Bạn đang mua cho ai?</h2></div></div>
+        <div class="shopping-mode-grid">
+          <a class="shopping-mode home-mode" href="/san-pham">
+            <small>DÀNH CHO NỘI TRỢ</small><h3>Sản phẩm tươi mỗi ngày</h3>
+            <p>Mua linh hoạt theo kg, chọn Cá, Rau, Thịt, Trái cây và các danh mục quen thuộc.</p><b>Khám phá sản phẩm →</b>
+          </a>
+          <a class="shopping-mode restaurant-mode" href="/combo-nha-hang">
+            <small>DÀNH CHO NHÀ HÀNG</small><h3>Combo nhập hàng giá tốt</h3>
+            <p>Nguồn hàng ổn định cho quán ăn, nhà hàng và bếp công ty. Mua số lượng lớn, miễn phí giao hàng.</p><b>Xem combo tiết kiệm →</b>
+          </a>
         </div>
       </section>
       <section id="products" class="section products-bg">
         <div class="container">
           <div class="section-head">
             <div>
-              <span class="eyebrow">CỬA HÀNG</span>
-              <h2>Tất cả sản phẩm</h2>
-            </div>
-            <div id="filters" class="filters">
-              <button class="active" data-category="all">Tất cả</button>
+              <span class="eyebrow">MUA THEO DANH MỤC</span>
+              <h2>Nông sản dành cho nội trợ</h2>
             </div>
           </div>
-          <div id="productGrid" class="product-grid">
-            <div class="loading">Đang tải sản phẩm…</div>
+          <div id="categoryProductRows" class="category-product-rows">
+            <div class="loading">Đang tải sản phẩm theo danh mục…</div>
           </div>
-          <nav
-            id="pagination"
-            class="pagination"
-            aria-label="Phân trang sản phẩm"
-          ></nav>
         </div>
       </section>
     </main>
@@ -168,7 +162,7 @@
       <div class="container footer-grid">
         <div class="footer-brand">
           <div class="logo light">
-            <span class="logo-mark">🌿</span><span>NÔNG SẢN <b>XANH</b></span>
+            <img class="logo-mark" src="/images/brand/nong-san-xanh-mark.png" alt=""><span>NÔNG SẢN <b>XANH</b></span>
           </div>
           <p>
             Nông sản tươi sạch, nguồn gốc rõ ràng cho bữa cơm gia đình Việt.

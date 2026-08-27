@@ -52,7 +52,7 @@ const resources = [
     insert: "insertCategories",
     update: "updateCategories",
     remove: "deleteCategories",
-    body: { name: "Vegetables", image: "" },
+    body: { name: "Vegetables" },
   },
   {
     name: "brand",

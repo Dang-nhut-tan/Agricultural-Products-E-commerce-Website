@@ -71,7 +71,11 @@ a {
   margin-top: 5px;
 }
 .logo-mark {
-  font-size: 38px;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  display: block;
+  flex: 0 0 auto;
   margin-right: 8px;
 }
 .search {

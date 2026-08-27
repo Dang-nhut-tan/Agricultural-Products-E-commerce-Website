@@ -53,7 +53,6 @@ const UserAddress = sequelize.define("UserAddress", {
 
 const Category = sequelize.define("Category", {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
-  image: DataTypes.TEXT,
   deleted_at: DataTypes.DATE,
 }, {
   tableName: "categories",
@@ -278,6 +277,9 @@ const OrderDetail = sequelize.define("OrderDetail", {
   cost_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
   quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
   unit: DataTypes.STRING,
+  combo_id: DataTypes.INTEGER,
+  combo_name: DataTypes.STRING,
+  combo_quantity: DataTypes.INTEGER,
 }, modelOptions("order_details"));
 
 const OrderHistory = sequelize.define("OrderHistory", {
@@ -478,6 +480,35 @@ const RecipeProductLink = sequelize.define("RecipeProductLink", {
   priority: { type: DataTypes.INTEGER, defaultValue: 0 },
 }, modelOptions("recipe_product_links"));
 
+const Combo = sequelize.define("Combo", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  description: DataTypes.TEXT,
+  image: DataTypes.TEXT,
+  size: { type: DataTypes.ENUM("small", "medium", "large"), defaultValue: "small" },
+  quantity_multiplier: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 1 },
+  price_mode: { type: DataTypes.ENUM("percent", "fixed", "manual"), defaultValue: "percent" },
+  discount_value: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 10 },
+  manual_price: DataTypes.DECIMAL(12, 2),
+  minimum_quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+  serving_from: DataTypes.INTEGER,
+  serving_to: DataTypes.INTEGER,
+  usage_days: DataTypes.INTEGER,
+  badge: DataTypes.STRING,
+  status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+  sort_order: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+}, modelOptions("combos"));
+
+const ComboItem = sequelize.define("ComboItem", {
+  combo_id: { type: DataTypes.INTEGER, allowNull: false },
+  product_id: { type: DataTypes.INTEGER, allowNull: false },
+  base_quantity: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 1 },
+}, modelOptions("combo_items"));
+
+const ComboSetting = sequelize.define("ComboSetting", {
+  id: { type: DataTypes.INTEGER, primaryKey: true },
+  minimum_quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+}, modelOptions("combo_settings"));
+
 User.hasMany(UserAddress, { foreignKey: "user_id" });
 UserAddress.belongsTo(User, { foreignKey: "user_id" });
 
@@ -553,6 +584,11 @@ RecipeProductLink.belongsTo(Recipe, { foreignKey: "recipe_id" });
 Product.hasMany(RecipeProductLink, { foreignKey: "product_id" });
 RecipeProductLink.belongsTo(Product, { foreignKey: "product_id" });
 
+Combo.hasMany(ComboItem, { foreignKey: "combo_id" });
+ComboItem.belongsTo(Combo, { foreignKey: "combo_id" });
+Product.hasMany(ComboItem, { foreignKey: "product_id" });
+ComboItem.belongsTo(Product, { foreignKey: "product_id" });
+
 module.exports = {
   sequelize,
   Sequelize,
@@ -584,4 +620,7 @@ module.exports = {
   Recipe,
   RecipeSource,
   RecipeProductLink,
+  Combo,
+  ComboItem,
+  ComboSetting,
 };
