@@ -40,8 +40,7 @@
 
 .contact-page { position: relative; z-index: 2; margin-top: -52px; padding-bottom: 84px; }
 .contact-layout {
-  display: grid; grid-template-columns: minmax(330px,.78fr) minmax(500px,1.22fr);
-  gap: 24px; align-items: stretch;
+  display: block;
 }
 .contact-info {
   display: flex; flex-direction: column;
@@ -54,7 +53,7 @@
 .contact-info-heading > span { color: #f9b875; }
 .contact-info-heading h2 { margin: 10px 0 12px; color: #fff; font-size: clamp(1.7rem,3vw,2.25rem); line-height: 1.22; }
 .contact-info-heading p { margin: 0; color: rgba(255,255,255,.7); font-size: .8rem; line-height: 1.7; }
-.contact-methods { display: grid; gap: 10px; margin-top: 27px; }
+.contact-methods { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-top: 27px; }
 .contact-method {
   display: flex; align-items: center; gap: 14px; padding: 14px;
   border: 1px solid rgba(255,255,255,.14); border-radius: 16px;
@@ -72,7 +71,7 @@ a.contact-method:hover { border-color: rgba(255,255,255,.3); background: rgba(25
 .contact-method strong { overflow-wrap: anywhere; color: #fff; font-size: .84rem; }
 .contact-method em { margin-top: 3px; color: rgba(255,255,255,.62); font-size: .67rem; font-style: normal; }
 .contact-note {
-  margin-top: auto; padding: 17px 18px; border: 1px solid rgba(248,177,107,.2); border-radius: 15px;
+  margin-top: 22px; padding: 17px 18px; border: 1px solid rgba(248,177,107,.2); border-radius: 15px;
   background: rgba(245,130,32,.13);
 }
 .contact-note strong { color: #ffd09d; font-size: .76rem; }

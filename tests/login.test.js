@@ -31,14 +31,14 @@ function activeUser(overrides = {}) {
   };
 }
 
-describe("Login - equivalence partitions and boundary values", () => {
+describe("Đăng nhập - các lớp tương đương và giá trị biên", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     bcrypt.compare.mockResolvedValue(true);
   });
 
   it.each(["", "unknown@example.com"])(
-    "rejects the unknown-email partition (%p)",
+    "từ chối trường hợp email không xác định (%p)",
     async (email) => {
       User.findOne.mockResolvedValue(null);
       const req = { body: { email, password: "secret" }, session: {} };
@@ -52,7 +52,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     },
   );
 
-  it("normalizes email and logs in an active user with a correct password", async () => {
+  it("chuẩn hóa email và đăng nhập người dùng đang hoạt động bằng mật khẩu đúng", async () => {
     const user = activeUser();
     User.findOne.mockResolvedValue(user);
     const req = {
@@ -73,7 +73,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     );
   });
 
-  it("rejects the inactive-account partition before checking password", async () => {
+  it("từ chối tài khoản không hoạt động trước khi kiểm tra mật khẩu", async () => {
     User.findOne.mockResolvedValue(activeUser({ status: 0 }));
     const res = response();
 
@@ -83,7 +83,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     expect(bcrypt.compare).not.toHaveBeenCalled();
   });
 
-  it("increments failures at max - 1 without locking", async () => {
+  it("tăng số lần thất bại ở mức tối đa trừ một mà chưa khóa", async () => {
     const user = activeUser({ failed_login_attempts: 3 });
     User.findOne.mockResolvedValue(user);
     bcrypt.compare.mockResolvedValue(false);
@@ -98,7 +98,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it("locks exactly on the fifth failed attempt (max boundary)", async () => {
+  it("khóa chính xác ở lần đăng nhập sai thứ năm", async () => {
     const user = activeUser({ failed_login_attempts: 4 });
     User.findOne.mockResolvedValue(user);
     bcrypt.compare.mockResolvedValue(false);
@@ -117,7 +117,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     expect(res.status).toHaveBeenCalledWith(423);
   });
 
-  it("rejects an account whose lock expires just after now", async () => {
+  it("từ chối tài khoản có thời gian khóa hết hạn ngay sau thời điểm hiện tại", async () => {
     const user = activeUser({ locked_until: new Date(Date.now() + 1_000) });
     User.findOne.mockResolvedValue(user);
     const res = response();
@@ -129,7 +129,7 @@ describe("Login - equivalence partitions and boundary values", () => {
     expect(bcrypt.compare).not.toHaveBeenCalled();
   });
 
-  it("clears an expired lock and accepts a correct password", async () => {
+  it("xóa trạng thái khóa đã hết hạn và chấp nhận mật khẩu đúng", async () => {
     const user = activeUser({
       failed_login_attempts: 5,
       locked_until: new Date(Date.now() - 1),

@@ -59,13 +59,6 @@ function getContactPage(req, res) {
         note: "Thứ Hai – Thứ Bảy",
       },
     ],
-    contactSubjects: [
-      "Hỏi về sản phẩm",
-      "Hỗ trợ đơn hàng",
-      "Góp ý dịch vụ",
-      "Hợp tác kinh doanh",
-      "Khác",
-    ],
   });
 }
 

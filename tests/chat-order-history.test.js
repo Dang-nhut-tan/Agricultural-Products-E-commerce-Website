@@ -14,10 +14,10 @@ jest.mock("../src/services/recipeSearch", () => ({ suggestRecipe: jest.fn() }));
 const db = require("../src/models");
 const { getOrderContext, localReply } = require("../src/controllers/chatController");
 
-describe("Chatbot order history", () => {
+describe("Lịch sử đơn hàng trong chatbot", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("scopes every order query to the signed-in user", async () => {
+  it("giới hạn mọi truy vấn đơn hàng theo người dùng đã đăng nhập", async () => {
     db.Order.findAll.mockResolvedValue([]);
     db.Order.sum.mockResolvedValue(250000);
     db.Order.count.mockResolvedValue(2);
@@ -37,7 +37,7 @@ describe("Chatbot order history", () => {
     expect(context.completedTotal).toBe(250000);
   });
 
-  it("answers completed spending without Gemini", () => {
+  it("trả lời tổng chi tiêu đã hoàn thành mà không cần Gemini", () => {
     const answer = localReply("Tôi đã mua ở quán bao nhiêu tiền?", [], {
       completedOrderCount: 3,
       completedTotal: 475000,
@@ -48,7 +48,7 @@ describe("Chatbot order history", () => {
     expect(answer).toContain("475.000");
   });
 
-  it("reports the latest order status and tracking code", () => {
+  it("thông báo trạng thái đơn gần nhất và mã vận đơn", () => {
     const answer = localReply("Theo dõi đơn hàng của tôi", [], {
       completedOrderCount: 0,
       completedTotal: 0,

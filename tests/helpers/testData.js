@@ -22,6 +22,11 @@ async function deleteTestUser(email) {
   if (!user) return;
 
   await db.sequelize.transaction(async (transaction) => {
+    await db.Feedback.destroy({
+      where: { user_id: user.id },
+      force: true,
+      transaction,
+    });
     await db.UserAddress.destroy({
       where: { user_id: user.id },
       transaction,

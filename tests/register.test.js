@@ -13,7 +13,7 @@ const GENERAL_VALIDATION_MESSAGE =
 const ADDRESS_VALIDATION_MESSAGE =
   "Vui lòng nhập số điện thoại, địa chỉ và tỉnh/thành phố.";
 
-describe("Register", () => {
+describe("Đăng ký tài khoản", () => {
   let testBase;
 
   beforeEach(() => {
@@ -39,8 +39,8 @@ describe("Register", () => {
     expect(UserAddress.create).not.toHaveBeenCalled();
   }
 
-  describe("Valid registration", () => {
-    it("registers a user and default address for the valid equivalence partition", async () => {
+  describe("Đăng ký hợp lệ", () => {
+    it("đăng ký người dùng và địa chỉ mặc định với dữ liệu hợp lệ", async () => {
       // Arrange
       const data = testBase.getValidRegisterData({
         name: "  Nguyen Van An  ",
@@ -91,7 +91,7 @@ describe("Register", () => {
       );
     });
 
-    it("accepts empty ward and district because they are optional partitions", async () => {
+    it("chấp nhận phường xã và quận huyện rỗng vì đây là thông tin không bắt buộc", async () => {
       // Arrange / Act
       const { res } = await execute({ ward: "", district: "" });
 
@@ -104,12 +104,12 @@ describe("Register", () => {
     });
   });
 
-  describe("Required-field validation", () => {
+  describe("Kiểm tra các trường bắt buộc", () => {
     it.each([
       ["name", ""],
       ["email", ""],
       ["password", ""],
-    ])("rejects the invalid partition when %s is empty", async (field, value) => {
+    ])("từ chối dữ liệu không hợp lệ khi trường %s bị bỏ trống", async (field, value) => {
       // Arrange / Act
       const { res } = await execute({ [field]: value });
 
@@ -117,7 +117,7 @@ describe("Register", () => {
       expectRejectedBeforePersistence(res, GENERAL_VALIDATION_MESSAGE);
     });
 
-    it("rejects an empty passwordConfirmation as a mismatch", async () => {
+    it("từ chối xác nhận mật khẩu rỗng do không khớp", async () => {
       // Arrange / Act
       const { res } = await execute({ passwordConfirmation: "" });
 
@@ -129,7 +129,7 @@ describe("Register", () => {
     });
 
     it.each(["phone", "address", "province"])(
-      "rejects the invalid partition when %s is empty",
+      "từ chối dữ liệu không hợp lệ khi trường %s bị bỏ trống",
       async (field) => {
         // Arrange / Act
         const { res } = await execute({ [field]: "" });
@@ -140,8 +140,8 @@ describe("Register", () => {
     );
   });
 
-  describe("Name validation", () => {
-    it("rejects a whitespace-only name after trimming", async () => {
+  describe("Kiểm tra họ và tên", () => {
+    it("từ chối tên chỉ chứa khoảng trắng sau khi cắt khoảng trắng", async () => {
       // Arrange / Act
       const { res } = await execute({ name: "   " });
 
@@ -150,12 +150,12 @@ describe("Register", () => {
     });
   });
 
-  describe("Email validation", () => {
+  describe("Kiểm tra email", () => {
     it.each([
-      ["plain text", "invalid-email"],
-      ["missing @", "user.example.com"],
-      ["missing domain suffix", "user@example"],
-    ])("rejects the invalid email partition: %s", async (_label, email) => {
+      ["văn bản thông thường", "invalid-email"],
+      ["thiếu ký tự @", "user.example.com"],
+      ["thiếu phần mở rộng tên miền", "user@example"],
+    ])("từ chối trường hợp email không hợp lệ: %s", async (_label, email) => {
       // Arrange / Act
       const { res } = await execute({ email });
 
@@ -163,7 +163,7 @@ describe("Register", () => {
       expectRejectedBeforePersistence(res, GENERAL_VALIDATION_MESSAGE);
     });
 
-    it("accepts an email matching the controller regex", async () => {
+    it("chấp nhận email khớp biểu thức kiểm tra của controller", async () => {
       // Arrange / Act
       const { res } = await execute({ email: "user+tag@example.co" });
 
@@ -172,8 +172,8 @@ describe("Register", () => {
     });
   });
 
-  describe("Password boundary-value analysis", () => {
-    it("rejects 5 characters at min - 1", async () => {
+  describe("Phân tích giá trị biên của mật khẩu", () => {
+    it("từ chối mật khẩu 5 ký tự vì ngắn hơn mức tối thiểu", async () => {
       // Arrange / Act
       const { res } = await execute({
         password: "12345",
@@ -185,9 +185,9 @@ describe("Register", () => {
     });
 
     it.each([
-      ["min boundary", "123456"],
-      ["min + 1", "1234567"],
-    ])("accepts password length at %s", async (_label, password) => {
+      ["giới hạn tối thiểu", "123456"],
+      ["tối thiểu cộng một", "1234567"],
+    ])("chấp nhận độ dài mật khẩu tại %s", async (_label, password) => {
       // Arrange / Act
       const { res } = await execute({
         password,
@@ -203,8 +203,8 @@ describe("Register", () => {
     });
   });
 
-  describe("Password confirmation validation", () => {
-    it("accepts the matching confirmation partition", async () => {
+  describe("Kiểm tra xác nhận mật khẩu", () => {
+    it("chấp nhận xác nhận mật khẩu khớp", async () => {
       // Arrange / Act
       const { res } = await execute({
         password: "abcdef",
@@ -215,7 +215,7 @@ describe("Register", () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it("rejects the mismatching confirmation partition", async () => {
+    it("từ chối xác nhận mật khẩu không khớp", async () => {
       // Arrange / Act
       const { res } = await execute({ passwordConfirmation: "different" });
 
@@ -227,8 +227,8 @@ describe("Register", () => {
     });
   });
 
-  describe("Duplicate email", () => {
-    it("returns conflict without creating records when email already exists", async () => {
+  describe("Email trùng lặp", () => {
+    it("trả về xung đột và không tạo bản ghi khi email đã tồn tại", async () => {
       // Arrange
       User.findOne.mockResolvedValue({ id: 99, email: "valid@example.com" });
       const req = testBase.createRequest();
@@ -248,8 +248,8 @@ describe("Register", () => {
     });
   });
 
-  describe("Transaction failure", () => {
-    it("rolls back and rethrows when creating the address fails", async () => {
+  describe("Giao dịch thất bại", () => {
+    it("hoàn tác giao dịch và ném lại lỗi khi tạo địa chỉ thất bại", async () => {
       // Arrange
       const databaseError = new Error("address insert failed");
       UserAddress.create.mockRejectedValue(databaseError);

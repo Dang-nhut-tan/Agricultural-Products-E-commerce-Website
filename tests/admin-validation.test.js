@@ -21,8 +21,8 @@ function run(requestType, body) {
   return { req, res, next };
 }
 
-describe("Admin request validation - boundary values", () => {
-  describe("create user", () => {
+describe("Kiểm tra yêu cầu quản trị - các giá trị biên", () => {
+  describe("Tạo người dùng", () => {
     const valid = {
       email: "admin@example.com",
       password: "123456",
@@ -30,12 +30,12 @@ describe("Admin request validation - boundary values", () => {
       status: 1,
     };
 
-    it("accepts password at the minimum boundary of 6 characters", () => {
+    it("chấp nhận mật khẩu tại giới hạn tối thiểu 6 ký tự", () => {
       const { next } = run(InsertUserReq, valid);
       expect(next).toHaveBeenCalledTimes(1);
     });
 
-    it("rejects password at min - 1", () => {
+    it("từ chối mật khẩu ngắn hơn giới hạn tối thiểu một ký tự", () => {
       const { res, next } = run(InsertUserReq, {
         ...valid,
         password: "12345",
@@ -44,32 +44,32 @@ describe("Admin request validation - boundary values", () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it.each([1, 2])("accepts role boundary %i", (role) => {
+    it.each([1, 2])("chấp nhận giá trị biên của vai trò: %i", (role) => {
       expect(run(InsertUserReq, { ...valid, role }).next).toHaveBeenCalled();
     });
 
-    it.each([0, 3])("rejects role outside the valid set: %i", (role) => {
+    it.each([0, 3])("từ chối vai trò ngoài tập hợp hợp lệ: %i", (role) => {
       expect(run(InsertUserReq, { ...valid, role }).res.status).toHaveBeenCalledWith(400);
     });
 
-    it.each([0, 1, 2])("accepts status value %i", (status) => {
+    it.each([0, 1, 2])("chấp nhận giá trị trạng thái: %i", (status) => {
       expect(run(InsertUserReq, { ...valid, status }).next).toHaveBeenCalled();
     });
 
-    it.each([-1, 3])("rejects status outside boundaries: %i", (status) => {
+    it.each([-1, 3])("từ chối trạng thái ngoài giới hạn: %i", (status) => {
       expect(run(InsertUserReq, { ...valid, status }).res.status).toHaveBeenCalledWith(400);
     });
 
-    it("rejects the invalid-email partition", () => {
+    it("từ chối email không hợp lệ", () => {
       expect(
         run(InsertUserReq, { ...valid, email: "not-an-email" }).res.status,
       ).toHaveBeenCalledWith(400);
     });
   });
 
-  describe("update requests", () => {
+  describe("Các yêu cầu cập nhật", () => {
     it.each([UpdateUserReq, UpdateCouponReq, UpdateCategoryReq])(
-      "rejects an empty update body for %p",
+      "từ chối nội dung cập nhật rỗng đối với %p",
       (requestType) => {
         const { res, next } = run(requestType, {});
         expect(res.status).toHaveBeenCalledWith(400);
@@ -77,18 +77,18 @@ describe("Admin request validation - boundary values", () => {
       },
     );
 
-    it("replaces req.body with Joi-normalized values", () => {
+    it("thay req.body bằng các giá trị đã được Joi chuẩn hóa", () => {
       const { req, next } = run(UpdateUserReq, { role: "1", status: "0" });
       expect(next).toHaveBeenCalled();
       expect(req.body).toEqual({ role: 1, status: 0 });
     });
   });
 
-  describe("coupon numeric boundaries", () => {
+  describe("Các giới hạn số của mã giảm giá", () => {
     const valid = { code: "SALE", discount_type: 1 };
 
     it.each(["discount_value", "min_order_value", "quantity", "used_quantity"])(
-      "accepts zero at the minimum boundary for %s",
+      "chấp nhận số không tại giới hạn tối thiểu của trường %s",
       (field) => {
         expect(
           run(InsertCouponReq, { ...valid, [field]: 0 }).next,
@@ -97,7 +97,7 @@ describe("Admin request validation - boundary values", () => {
     );
 
     it.each(["discount_value", "min_order_value", "quantity", "used_quantity"])(
-      "rejects min - 1 for %s",
+      "từ chối giá trị nhỏ hơn giới hạn tối thiểu một đơn vị của trường %s",
       (field) => {
         expect(
           run(InsertCouponReq, { ...valid, [field]: -1 }).res.status,
@@ -105,19 +105,19 @@ describe("Admin request validation - boundary values", () => {
       },
     );
 
-    it("rejects a fractional coupon quantity", () => {
+    it("từ chối số lượng mã giảm giá là số thập phân", () => {
       expect(
         run(InsertCouponReq, { ...valid, quantity: 1.5 }).res.status,
       ).toHaveBeenCalledWith(400);
     });
   });
 
-  describe("category required field partition", () => {
-    it("accepts a non-empty category name", () => {
+  describe("Phân lớp trường bắt buộc của danh mục", () => {
+    it("chấp nhận tên danh mục không rỗng", () => {
       expect(run(InsertCategoryReq, { name: "Fruit" }).next).toHaveBeenCalled();
     });
 
-    it.each([{}, { name: "" }])("rejects missing or empty name: %p", (body) => {
+    it.each([{}, { name: "" }])("từ chối tên bị thiếu hoặc để trống: %p", (body) => {
       expect(run(InsertCategoryReq, body).res.status).toHaveBeenCalledWith(400);
     });
   });

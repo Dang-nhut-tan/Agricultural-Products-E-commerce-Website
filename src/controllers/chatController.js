@@ -122,6 +122,12 @@ async function reply(req, res) {
       return res.json({ data: new ChatRespone(answer, recipe.products, recipe) });
     } catch (error) {
       console.warn("Không thể tạo công thức trong chatbot:", error.message);
+      if (error.code === "RECIPE_NOT_FOUND") {
+        return res.json({ data: new ChatRespone(
+          "Tôi không biết món này. Bạn hãy thử hỏi một món khác có trong danh sách công thức.",
+          [],
+        ) });
+      }
       return res.json({ data: new ChatRespone(
         "Mình chưa tạo được công thức lúc này. Bạn có thể thử lại sau; mình sẽ không đề xuất sản phẩm không liên quan.",
         [],

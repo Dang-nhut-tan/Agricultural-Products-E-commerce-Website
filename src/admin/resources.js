@@ -1,13 +1,11 @@
 const resourceNames = {
   User: "Người dùng", UserAddress: "Địa chỉ người dùng", Category: "Danh mục",
   Brand: "Thương hiệu", Product: "Sản phẩm", ProductBatch: "Lô sản phẩm",
-  ProductImage: "Ảnh sản phẩm", Feedback: "Đánh giá", Cart: "Giỏ hàng",
-  CartItem: "Sản phẩm trong giỏ", Order: "Đơn hàng", OrderDetail: "Chi tiết đơn hàng",
+  ProductImage: "Ảnh sản phẩm", Feedback: "Đánh giá", Order: "Đơn hàng", OrderDetail: "Chi tiết đơn hàng",
   OrderHistory: "Lịch sử đơn hàng", Payment: "Thanh toán", Shipment: "Vận chuyển",
   News: "Tin tức", NewsDetail: "Sản phẩm trong tin", Banner: "Banner",
   BannerDetail: "Sản phẩm trong banner", Coupon: "Mã giảm giá",
   OrderCoupon: "Mã giảm giá của đơn", CouponUser: "Mã giảm giá của khách",
-  Wishlist: "Danh sách yêu thích", WishlistItem: "Sản phẩm yêu thích",
   InventoryTransaction: "Giao dịch kho", RecipeSource: "Nguồn PDF công thức",
   Recipe: "Công thức món ăn", RecipeProductLink: "Liên kết nguyên liệu - sản phẩm",
   Combo: "Combo nhà hàng", ComboItem: "Sản phẩm trong combo",
@@ -39,6 +37,9 @@ const listPropertiesByModel = {
   Banner: ["id", "image", "name", "status", "sort_order"],
   Recipe: ["id", "image", "name", "source", "active", "updatedAt"],
   RecipeSource: ["id", "name", "file_name", "status", "error_message", "updatedAt"],
+  Combo: ["id", "image", "name", "size", "calculated_price", "savings_display", "status", "availability_warning"],
+  ComboItem: ["id", "combo_id", "product_id", "base_quantity"],
+  ComboSetting: ["minimum_quantity", "updatedAt"],
 };
 
 const navigationByModel = {
@@ -46,13 +47,11 @@ const navigationByModel = {
   Category: { name: "Sản phẩm", icon: "Package" }, Brand: { name: "Sản phẩm", icon: "Package" },
   Product: { name: "Sản phẩm", icon: "Package" }, ProductBatch: { name: "Sản phẩm", icon: "Package" },
   ProductImage: { name: "Sản phẩm", icon: "Package" }, Feedback: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
-  Cart: { name: "Giỏ hàng", icon: "ShoppingCart" }, CartItem: { name: "Giỏ hàng", icon: "ShoppingCart" },
   Order: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
   Shipment: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
   News: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
   Banner: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
   Coupon: { name: "Khuyến mãi", icon: "Gift" },
-  Wishlist: { name: "Yêu thích", icon: "Heart" }, WishlistItem: { name: "Yêu thích", icon: "Heart" },
   InventoryTransaction: { name: "Kho & Công thức", icon: "Warehouse" },
   Recipe: { name: "Kho & Công thức", icon: "Warehouse" },
   RecipeSource: { name: "Kho & Công thức", icon: "Warehouse" },
@@ -75,10 +74,6 @@ const sidebarHiddenModels = [
 ];
 
 const hiddenModels = [
-  "Cart",
-  "CartItem",
-  "Wishlist",
-  "WishlistItem",
   "ProductImage",
 ];
 const readOnlyModels = ["UserAddress", "Feedback", "InventoryTransaction"];
@@ -182,6 +177,80 @@ const enrichComboRecords = async (response) => {
   return response;
 };
 
+const quickComboAction = (component) => ({
+  actionType: "resource",
+  icon: "Add",
+  label: "Tạo combo nhanh",
+  component,
+  handler: async (request) => {
+    const db = require("../models");
+    if (request.method === "get") {
+      const products = await db.Product.findAll({
+        where: { status: 1 },
+        attributes: ["id", "name", "price", "quantity", "unit"],
+        order: [["name", "ASC"]],
+      });
+      return { products: products.map((product) => product.get({ plain: true })) };
+    }
+
+    const payload = request.payload || {};
+    const name = String(firstValue(payload.name) || "").trim();
+    const description = String(firstValue(payload.description) || "").trim();
+    const size = ["small", "medium", "large"].includes(firstValue(payload.size))
+      ? firstValue(payload.size)
+      : "small";
+    const discountValue = Number(firstValue(payload.discount_value));
+    let items;
+    try {
+      items = JSON.parse(String(firstValue(payload.items) || "[]"));
+    } catch (_error) {
+      items = [];
+    }
+    items = Array.isArray(items)
+      ? items.filter((item) => Number.isInteger(Number(item.product_id)) && Number(item.base_quantity) > 0)
+      : [];
+
+    if (!name) return { notice: { type: "error", message: "Vui lòng nhập tên combo." } };
+    if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue >= 100) {
+      return { notice: { type: "error", message: "Phần trăm giảm giá phải lớn hơn 0 và nhỏ hơn 100." } };
+    }
+    if (!items.length) return { notice: { type: "error", message: "Vui lòng chọn ít nhất một sản phẩm và nhập số lượng." } };
+
+    const productIds = [...new Set(items.map((item) => Number(item.product_id)))];
+    const validProducts = await db.Product.count({ where: { id: productIds, status: 1 } });
+    if (validProducts !== productIds.length) {
+      return { notice: { type: "error", message: "Có sản phẩm không tồn tại hoặc đã ngừng bán." } };
+    }
+
+    const transaction = await db.sequelize.transaction();
+    try {
+      const combo = await db.Combo.create({
+        name,
+        description: description || null,
+        size,
+        quantity_multiplier: 1,
+        price_mode: "percent",
+        discount_value: discountValue,
+        status: true,
+        sort_order: 0,
+      }, { transaction });
+      await db.ComboItem.bulkCreate(items.map((item) => ({
+        combo_id: combo.id,
+        product_id: Number(item.product_id),
+        base_quantity: Number(item.base_quantity),
+      })), { transaction });
+      await transaction.commit();
+      return {
+        notice: { type: "success", message: `Đã tạo combo “${name}” cùng ${items.length} sản phẩm.` },
+        redirectUrl: `/admin/resources/combos/records/${combo.id}/show`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  },
+});
+
 const userProperties = {
   password_hash: { isVisible: false },
   password: {
@@ -220,6 +289,7 @@ const productStatus = statusProperty([
   { value: 1, label: "Đang bán" },
   { value: 2, label: "Ngừng bán" },
 ]);
+productStatus.name = { label: "Tên sản phẩm", isTitle: true };
 productStatus.quantity = {
   label: "Tổng tồn kho (tự động)",
   isVisible: { list: true, show: true, edit: false, filter: true },
@@ -324,30 +394,98 @@ const propertiesByModel = {
     error_message: { label: "Chi tiết lỗi", isVisible: { list: true, show: true, edit: false, filter: false } },
   },
   Combo: {
+    name: {
+      label: "Tên combo hiển thị cho khách",
+      description: "Ví dụ: Combo rau củ cho quán ăn 30 suất.",
+      isTitle: true,
+    },
+    description: {
+      label: "Mô tả ngắn",
+      description: "Nói ngắn gọn combo phù hợp với ai và dùng cho nhu cầu nào.",
+    },
     size: {
-      label: "Kích cỡ",
+      label: "Quy mô combo",
+      description: "Chọn quy mô gần đúng để khách dễ so sánh các combo.",
       availableValues: [
-        { value: "small", label: "Nhỏ" },
-        { value: "medium", label: "Vừa" },
-        { value: "large", label: "Lớn" },
+        { value: "small", label: "Nhỏ - quán nhỏ" },
+        { value: "medium", label: "Vừa - nhà hàng vừa" },
+        { value: "large", label: "Lớn - bếp ăn số lượng lớn" },
       ],
+    },
+    quantity_multiplier: {
+      label: "Hệ số nhân số lượng sản phẩm",
+      description: "Thông thường để 1. Nhập 2 nếu muốn gấp đôi toàn bộ số lượng sản phẩm trong combo.",
     },
     price_mode: {
-      label: "Cách tính giá",
+      label: "Cách đặt giá bán combo",
+      description: "Chọn một cách tính; hệ thống tự lấy tổng giá bán lẻ của các sản phẩm.",
       availableValues: [
-        { value: "percent", label: "Giảm theo phần trăm" },
-        { value: "fixed", label: "Giảm số tiền cố định" },
-        { value: "manual", label: "Nhập giá cuối cùng" },
+        { value: "percent", label: "Giảm theo % (dễ dùng nhất)" },
+        { value: "fixed", label: "Trừ một số tiền cố định" },
+        { value: "manual", label: "Tự nhập giá bán cuối cùng" },
       ],
     },
+    discount_value: {
+      label: "Mức giảm giá",
+      description: "Nếu chọn giảm theo %, nhập 10 nghĩa là giảm 10%. Nếu chọn giảm cố định, nhập số tiền muốn trừ.",
+    },
+    manual_price: {
+      label: "Giá bán tự nhập (đồng)",
+      description: "Chỉ điền khi đã chọn “Tự nhập giá bán cuối cùng”; các cách tính khác để trống.",
+    },
+    minimum_quantity: { isVisible: false },
+    serving_from: {
+      label: "Phục vụ từ bao nhiêu suất",
+      description: "Không bắt buộc. Ví dụ: 20.",
+    },
+    serving_to: {
+      label: "Phục vụ tối đa bao nhiêu suất",
+      description: "Không bắt buộc. Ví dụ: 30.",
+    },
+    usage_days: {
+      label: "Dùng trong khoảng bao nhiêu ngày",
+      description: "Không bắt buộc. Nhập số ngày dự kiến sử dụng hết combo.",
+    },
+    badge: {
+      label: "Nhãn nổi bật",
+      description: "Không bắt buộc. Ví dụ: Bán chạy, Tiết kiệm nhất.",
+    },
+    sort_order: {
+      label: "Thứ tự hiển thị",
+      description: "Số nhỏ xuất hiện trước. Có thể để 0.",
+    },
     status: {
-      label: "Trạng thái",
-      availableValues: [{ value: true, label: "Đang bán" }, { value: false, label: "Đang ẩn" }],
+      label: "Có hiển thị cho khách không?",
+      description: "Combo vẫn tự ẩn nếu thiếu sản phẩm hoặc giá combo không thấp hơn giá mua lẻ.",
+      availableValues: [{ value: true, label: "Có - đang bán" }, { value: false, label: "Không - tạm ẩn" }],
     },
     retail_price: { label: "Tổng giá mua lẻ", isVisible: { list: true, show: true, edit: false, filter: false } },
     calculated_price: { label: "Giá combo hiện tại", isVisible: { list: true, show: true, edit: false, filter: false } },
     savings_display: { label: "Mức tiết kiệm", isVisible: { list: true, show: true, edit: false, filter: false } },
     availability_warning: { label: "Tồn kho / tự động ẩn", isVisible: { list: true, show: true, edit: false, filter: false } },
+  },
+  ComboItem: {
+    combo_id: {
+      label: "Chọn combo cần thêm sản phẩm",
+      description: "Chọn tên combo từ danh sách, không cần nhớ mã số.",
+      reference: "combos",
+    },
+    product_id: {
+      label: "Chọn sản phẩm",
+      description: "Chọn sản phẩm có sẵn từ danh sách.",
+      reference: "products",
+    },
+    base_quantity: {
+      label: "Số lượng sản phẩm trong 1 combo",
+      description: "Nhập theo đơn vị bán của sản phẩm. Ví dụ sản phẩm tính bằng kg thì nhập 5 nghĩa là 5 kg.",
+    },
+  },
+  ComboSetting: {
+    id: { isVisible: false },
+    minimum_quantity: {
+      label: "Số combo tối thiểu khách phải mua",
+      description: "Áp dụng chung cho tất cả combo nhà hàng. Ví dụ nhập 2 thì khách phải mua ít nhất 2 combo.",
+    },
   },
 };
 
@@ -356,7 +494,8 @@ const buildResources = (
   componentLoader,
   uploadFeature,
   buildFeature,
-  imagePreviewComponent
+  imagePreviewComponent,
+  quickComboComponent
 ) => Object.keys(resourceNames)
   .filter((modelName) => !hiddenModels.includes(modelName))
   .map((modelName) => {
@@ -448,7 +587,10 @@ const buildResources = (
           [imageProperty]: {
             isVisible: { list: true, show: true, edit: false, filter: false },
           },
-          uploadImage: { label: "Ảnh từ máy tính" },
+          uploadImage: {
+            label: modelName === "Combo" ? "Chọn ảnh đại diện cho combo" : "Ảnh từ máy tính",
+            ...(modelName === "Combo" ? { description: "Không bắt buộc. Chọn ảnh rõ món ăn hoặc nguyên liệu có trong combo." } : {}),
+          },
         } : {}),
         ...(isRecipeSource ? { uploadPdf: { label: "Chọn file PDF" } } : {}),
       },
@@ -463,6 +605,7 @@ const buildResources = (
         ...(modelName === "Combo" ? {
           list: { after: enrichComboRecords },
           show: { after: enrichComboRecords },
+          quickNew: quickComboAction(quickComboComponent),
         } : {}),
         ...(isRecipeSource ? {
           new: { after: rebuildAfter }, edit: { after: rebuildAfter },

@@ -800,6 +800,29 @@ paths:
         "200":
           description: Trạng thái cấu hình, Client ID và tiền tệ
 
+  /api/payments/coupons/validate:
+    post:
+      tags: [Payments]
+      summary: Kiểm tra mã giảm giá trước khi thanh toán
+      description: Kết quả chỉ dùng để xem trước; máy chủ sẽ tính lại từ giá sản phẩm khi tạo đơn.
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, subtotal]
+              properties:
+                code: { type: string, example: SALE10 }
+                subtotal: { type: number, minimum: 0, example: 250000 }
+      responses:
+        "200": { description: Mã hợp lệ và trả về số tiền được giảm }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { description: Mã hết hạn, hết lượt, đã dùng hoặc đơn chưa đạt giá trị tối thiểu }
+
   /api/payments/paypal/orders:
     post:
       tags: [Payments]
@@ -1013,6 +1036,10 @@ components:
           type: integer
           minimum: 1
           example: 5
+        couponCode:
+          type: string
+          description: Mã giảm giá đã áp dụng (không bắt buộc)
+          example: SALE10
         items:
           type: array
           minItems: 1

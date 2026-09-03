@@ -4,6 +4,7 @@ const asyncRoute = require("../middlewares/asyncRoute");
 const signedIn = require("../middlewares/signedIn");
 
 router.get("/paypal/config", controller.getConfig);
+router.post("/coupons/validate", signedIn, asyncRoute(controller.validateCoupon));
 router.post("/paypal/orders", signedIn, asyncRoute(controller.createOrder));
 router.post("/paypal/orders/:id/capture", signedIn, asyncRoute(controller.captureOrder));
 

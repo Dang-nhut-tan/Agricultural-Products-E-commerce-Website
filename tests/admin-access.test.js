@@ -12,10 +12,10 @@ function response() {
   return res;
 }
 
-describe("Admin authorization - equivalence partitions", () => {
+describe("Phân quyền quản trị - các lớp tương đương", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("returns 401 for the unauthenticated partition", async () => {
+  it("trả về 401 khi chưa đăng nhập", async () => {
     const next = jest.fn();
     const res = response();
 
@@ -27,11 +27,11 @@ describe("Admin authorization - equivalence partitions", () => {
   });
 
   it.each([
-    ["missing user", null],
-    ["inactive admin", { id: 1, role: 1, status: 0 }],
-    ["banned admin", { id: 1, role: 1, status: 2 }],
-    ["active customer", { id: 2, role: 2, status: 1 }],
-  ])("returns 403 for %s", async (_label, user) => {
+    ["không tìm thấy người dùng", null],
+    ["quản trị viên không hoạt động", { id: 1, role: 1, status: 0 }],
+    ["quản trị viên bị cấm", { id: 1, role: 1, status: 2 }],
+    ["khách hàng đang hoạt động", { id: 2, role: 2, status: 1 }],
+  ])("trả về 403 đối với trường hợp %s", async (_label, user) => {
     User.findByPk.mockResolvedValue(user);
     const next = jest.fn();
     const res = response();
@@ -45,7 +45,7 @@ describe("Admin authorization - equivalence partitions", () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  it("allows the active-admin partition", async () => {
+  it("cho phép quản trị viên đang hoạt động truy cập", async () => {
     User.findByPk.mockResolvedValue({ id: 1, role: 1, status: 1 });
     const next = jest.fn();
     const res = response();
@@ -56,7 +56,7 @@ describe("Admin authorization - equivalence partitions", () => {
     expect(res.status).not.toHaveBeenCalled();
   });
 
-  it("accepts numeric role and status stored as strings", async () => {
+  it("chấp nhận vai trò và trạng thái dạng số được lưu dưới dạng chuỗi", async () => {
     User.findByPk.mockResolvedValue({ id: 1, role: "1", status: "1" });
     const next = jest.fn();
 

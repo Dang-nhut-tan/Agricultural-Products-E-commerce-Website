@@ -214,18 +214,6 @@ const Feedback = sequelize.define("Feedback", {
   ...modelOptions("feedback"),
 });
 
-const Cart = sequelize.define("Cart", {
-  user_id: DataTypes.INTEGER,
-}, modelOptions("carts"));
-
-const CartItem = sequelize.define("CartItem", {
-  cart_id: DataTypes.INTEGER,
-  product_id: DataTypes.INTEGER,
-  snapshot_name: DataTypes.STRING,
-  quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
-  price_at_add: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
-}, modelOptions("cart_items"));
-
 const Order = sequelize.define("Order", {
   user_id: DataTypes.INTEGER,
   address_id: DataTypes.INTEGER,
@@ -403,6 +391,11 @@ const Coupon = sequelize.define("Coupon", {
   underscored: true,
   paranoid: true,
   deletedAt: "deleted_at",
+  hooks: {
+    beforeValidate(coupon) {
+      if (coupon.code) coupon.code = String(coupon.code).trim().toUpperCase();
+    },
+  },
 });
 
 const OrderCoupon = sequelize.define("OrderCoupon", {
@@ -416,15 +409,6 @@ const CouponUser = sequelize.define("CouponUser", {
   user_id: DataTypes.INTEGER,
   used_at: DataTypes.DATE,
 }, modelOptions("coupon_users"));
-
-const Wishlist = sequelize.define("Wishlist", {
-  user_id: DataTypes.INTEGER,
-}, modelOptions("wishlists"));
-
-const WishlistItem = sequelize.define("WishlistItem", {
-  wishlist_id: DataTypes.INTEGER,
-  product_id: DataTypes.INTEGER,
-}, modelOptions("wishlist_items"));
 
 const InventoryTransaction = sequelize.define("InventoryTransaction", {
   batch_id: DataTypes.INTEGER,
@@ -526,13 +510,6 @@ Feedback.belongsTo(Product, { foreignKey: "product_id" });
 User.hasMany(Feedback, { foreignKey: "user_id" });
 Feedback.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasOne(Cart, { foreignKey: "user_id" });
-Cart.belongsTo(User, { foreignKey: "user_id" });
-Cart.hasMany(CartItem, { foreignKey: "cart_id" });
-CartItem.belongsTo(Cart, { foreignKey: "cart_id" });
-Product.hasMany(CartItem, { foreignKey: "product_id" });
-CartItem.belongsTo(Product, { foreignKey: "product_id" });
-
 User.hasMany(Order, { foreignKey: "user_id" });
 Order.belongsTo(User, { foreignKey: "user_id" });
 Order.hasMany(OrderDetail, { foreignKey: "order_id" });
@@ -572,13 +549,6 @@ CouponUser.belongsTo(Coupon, { foreignKey: "coupon_id" });
 User.hasMany(CouponUser, { foreignKey: "user_id" });
 CouponUser.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasOne(Wishlist, { foreignKey: "user_id" });
-Wishlist.belongsTo(User, { foreignKey: "user_id" });
-Wishlist.hasMany(WishlistItem, { foreignKey: "wishlist_id" });
-WishlistItem.belongsTo(Wishlist, { foreignKey: "wishlist_id" });
-Product.hasMany(WishlistItem, { foreignKey: "product_id" });
-WishlistItem.belongsTo(Product, { foreignKey: "product_id" });
-
 Recipe.hasMany(RecipeProductLink, { foreignKey: "recipe_id" });
 RecipeProductLink.belongsTo(Recipe, { foreignKey: "recipe_id" });
 Product.hasMany(RecipeProductLink, { foreignKey: "product_id" });
@@ -600,8 +570,6 @@ module.exports = {
   ProductBatch,
   ProductImage,
   Feedback,
-  Cart,
-  CartItem,
   Order,
   OrderDetail,
   OrderHistory,
@@ -614,8 +582,6 @@ module.exports = {
   Coupon,
   OrderCoupon,
   CouponUser,
-  Wishlist,
-  WishlistItem,
   InventoryTransaction,
   Recipe,
   RecipeSource,

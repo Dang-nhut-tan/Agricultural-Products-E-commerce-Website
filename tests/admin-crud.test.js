@@ -95,7 +95,7 @@ const resources = [
 describe.each(resources)("Admin CRUD - $name", (resource) => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("adds a record from the valid input partition", async () => {
+  it("thêm bản ghi từ dữ liệu đầu vào hợp lệ", async () => {
     const record = { id: 1, ...resource.body };
     resource.model.create.mockResolvedValue(record);
     const res = response();
@@ -108,7 +108,7 @@ describe.each(resources)("Admin CRUD - $name", (resource) => {
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
-  it("updates the existing-id partition", async () => {
+  it("cập nhật bản ghi có mã tồn tại", async () => {
     const record = {
       id: 1,
       ...resource.body,
@@ -130,7 +130,7 @@ describe.each(resources)("Admin CRUD - $name", (resource) => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it("returns 404 when updating the missing-id partition", async () => {
+  it("trả về 404 khi cập nhật mã không tồn tại", async () => {
     resource.model.findByPk.mockResolvedValue(null);
     const res = response();
 
@@ -142,7 +142,7 @@ describe.each(resources)("Admin CRUD - $name", (resource) => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
-  it("deletes the existing-id partition", async () => {
+  it("xóa bản ghi có mã tồn tại", async () => {
     const record = { destroy: jest.fn().mockResolvedValue(undefined) };
     resource.model.findByPk.mockResolvedValue(record);
     const res = response();
@@ -153,7 +153,7 @@ describe.each(resources)("Admin CRUD - $name", (resource) => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it("returns 404 and does not delete for the missing-id partition", async () => {
+  it("trả về 404 và không xóa khi mã không tồn tại", async () => {
     resource.model.findByPk.mockResolvedValue(null);
     const res = response();
 

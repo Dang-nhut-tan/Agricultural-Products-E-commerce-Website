@@ -74,8 +74,14 @@ function renderRoute() {
         </div>
         <div class="panel checkout-panel">
           <div class="checkout-heading"><span>2</span><div><h2>Đơn hàng của bạn</h2><p>Kiểm tra sản phẩm trước khi thanh toán</p></div></div>
-          <div id="checkoutItems"></div>
-          <div class="checkout-total"><span>Tổng cộng</span><strong id="checkoutTotal">0 ₫</strong></div>
+           <div id="checkoutItems"></div>
+           <div class="checkout-coupon">
+             <label for="checkoutCoupon"><b>Mã giảm giá</b></label>
+             <div><input id="checkoutCoupon" maxlength="50" autocomplete="off" placeholder="Nhập mã giảm giá"><button id="applyCoupon" type="button">Áp dụng</button></div>
+             <small id="couponMessage"></small>
+           </div>
+           <div class="checkout-total checkout-discount" id="checkoutDiscountRow" hidden><span>Giảm giá</span><strong id="checkoutDiscount">−0 ₫</strong></div>
+           <div class="checkout-total"><span>Tổng cộng</span><strong id="checkoutTotal">0 ₫</strong></div>
           <div class="payment-title"><b>Phương thức thanh toán</b><small>Giao dịch được xử lý an toàn</small></div>
           <div class="payment-methods paypal-only" aria-label="Phương thức thanh toán">
             <div class="payment-method active">
@@ -85,7 +91,6 @@ function renderRoute() {
           </div>
           ${state.cart.some((item) => item.type === "combo") ? '<p class="checkout-rate-note"><b>✓ Miễn phí giao hàng</b> vì đơn có Combo nhà hàng.</p>' : ""}
           <div id="paypalPaymentPanel" class="payment-panel active">
-            <p class="checkout-rate-note">Số tiền được quy đổi sang USD theo tỷ giá của cửa hàng.</p>
             <div id="paypalButtons"></div>
           </div>
           <p id="checkoutMessage" class="checkout-message" role="status"></p>
@@ -108,6 +113,10 @@ function renderRoute() {
       `<section class="page-shell orders-page"><div class="container"><div id="ordersContent"><div class="panel orders-loading">Đang tải đơn hàng…</div></div></div></section>`;
     loadOrders(orderId);
     return "orders";
+  }
+  if (path === "/khuyen-mai" || /^\/khuyen-mai\/\d+$/.test(path)) {
+    main.innerHTML = '<section class="promotion-page container"><div class="loading">Đang tải chương trình khuyến mãi…</div></section>';
+    return "promotion";
   }
   const pages = {
     "/tai-khoan": [
@@ -160,7 +169,7 @@ function renderOrderDetail(order,box){
       localStorage.setItem("nong-san-cart",JSON.stringify(cart));button.textContent="Đã thêm lại ✓";
     }));
   });
-  box.innerHTML=`<div class="order-detail-grid"><div class="panel order-detail-main"><div class="order-detail-head"><div><a href="/don-hang">← Lịch sử mua hàng</a><h2>Đơn hàng #${order.id}</h2><small>${orderDate(order.createdAt)}</small></div><span class="order-status ${status[1]}">${status[0]}</span></div><div class="order-products">${(order.OrderDetails||[]).map(item=>`<div class="order-product"><div class="order-product-image"${item.Product?.image?` style="background-image:url('${safe(item.Product.image)}')"`:""}></div><div><b>${safe(item.product_name)}</b><small>${item.quantity} × ${money(item.price)}</small></div><strong>${money(Number(item.price)*Number(item.quantity))}</strong></div>`).join("")}</div><div class="order-totals"><span>Tạm tính <b>${money(order.subtotal)}</b></span><span>Phí giao hàng <b>${money(order.shipping_fee)}</b></span><span class="grand">Tổng cộng <b>${money(order.total)}</b></span></div></div><aside class="panel order-timeline"><h3>Trạng thái đơn hàng</h3><div class="timeline"><div class="timeline-item active"><i></i><div><b>Đã tạo đơn</b><small>${orderDate(order.createdAt)}</small></div></div>${histories.map(item=>`<div class="timeline-item active"><i></i><div><b>${orderStatus(item.to_status)[0]}</b><small>${orderDate(item.createdAt)}${item.reason?` · ${safe(item.reason)}`:""}</small></div></div>`).join("")}</div><div class="payment-summary"><span>Thanh toán</span><b>${safe(order.Payment?.method||"Chưa thanh toán")}</b></div>${[0,1].includes(Number(order.status))?`<button class="cancel-order" data-cancel-order="${order.id}">Hủy đơn hàng</button>`:""}</aside></div>`;
+  box.innerHTML=`<div class="order-detail-grid"><div class="panel order-detail-main"><div class="order-detail-head"><div><a href="/don-hang">← Lịch sử mua hàng</a><h2>Đơn hàng #${order.id}</h2><small>${orderDate(order.createdAt)}</small></div><span class="order-status ${status[1]}">${status[0]}</span></div><div class="order-products">${(order.OrderDetails||[]).map(item=>`<div class="order-product"><div class="order-product-image"${item.Product?.image?` style="background-image:url('${safe(item.Product.image)}')"`:""}></div><div><b>${safe(item.product_name)}</b><small>${item.quantity} × ${money(item.price)}</small></div><strong>${money(Number(item.price)*Number(item.quantity))}</strong></div>`).join("")}</div><div class="order-totals"><span>Tạm tính <b>${money(order.subtotal)}</b></span>${Number(order.discount)>0?`<span>Giảm giá <b>−${money(order.discount)}</b></span>`:""}<span>Phí giao hàng <b>${money(order.shipping_fee)}</b></span><span class="grand">Tổng cộng <b>${money(order.total)}</b></span></div></div><aside class="panel order-timeline"><h3>Trạng thái đơn hàng</h3><div class="timeline"><div class="timeline-item active"><i></i><div><b>Đã tạo đơn</b><small>${orderDate(order.createdAt)}</small></div></div>${histories.map(item=>`<div class="timeline-item active"><i></i><div><b>${orderStatus(item.to_status)[0]}</b><small>${orderDate(item.createdAt)}${item.reason?` · ${safe(item.reason)}`:""}</small></div></div>`).join("")}</div><div class="payment-summary"><span>Thanh toán</span><b>${safe(order.Payment?.method||"Chưa thanh toán")}</b></div>${[0,1].includes(Number(order.status))?`<button class="cancel-order" data-cancel-order="${order.id}">Hủy đơn hàng</button>`:""}</aside></div>`;
   if(shipment) box.querySelector(".payment-summary")?.insertAdjacentHTML("afterend",`<div class="shipment-summary"><h4>Thông tin vận chuyển</h4><p><b>${safe(shipment.receiver_name)}</b> · ${safe(shipment.phone)}</p><p>${safe([shipment.address,shipment.ward,shipment.district,shipment.province].filter(Boolean).join(", "))}</p>${shipment.tracking_code?`<p>Mã vận đơn: <strong>${safe(shipment.tracking_code)}</strong></p>`:""}${shipment.delivery_time?`<p>Giao lúc: ${orderDate(shipment.delivery_time)}</p>`:""}</div>`);
   box.querySelector("[data-cancel-order]")?.addEventListener("click",async(event)=>{if(!confirm("Bạn chắc chắn muốn hủy đơn hàng này?"))return;event.currentTarget.disabled=true;const response=await fetch(`/api/orders/${order.id}/cancel`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({reason:"Khách hàng hủy từ lịch sử mua hàng"})}),result=await response.json();if(!response.ok){alert(result.message||"Không thể hủy đơn hàng.");event.currentTarget.disabled=false;return}loadOrders(order.id)});
 }
@@ -170,15 +179,28 @@ async function setupPaypalCheckout() {
   const messageBox = document.querySelector("#checkoutMessage");
   const paypalBox = document.querySelector("#paypalButtons");
   const totalBox = document.querySelector("#checkoutTotal");
+  const couponInput = document.querySelector("#checkoutCoupon");
+  const couponButton = document.querySelector("#applyCoupon");
+  const couponMessage = document.querySelector("#couponMessage");
+  const discountRow = document.querySelector("#checkoutDiscountRow");
+  const discountBox = document.querySelector("#checkoutDiscount");
   if (!itemsBox || !addressesBox || !messageBox || !paypalBox || !totalBox) return;
-  const total = state.cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+  const subtotal = state.cart.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+  let shippingFee = 0;
+  let discount = 0;
+  let appliedCouponCode = "";
+  const renderCheckoutTotal = () => {
+    totalBox.textContent = money(Math.max(0, subtotal - discount + shippingFee));
+    discountRow.hidden = discount <= 0;
+    discountBox.textContent = `−${money(discount)}`;
+  };
 
   itemsBox.innerHTML = state.cart.length
     ? state.cart.map((item) =>
       `<div class="checkout-item"><span>${safe(item.name)} × ${Number(item.qty)}</span><b>${money(Number(item.price) * Number(item.qty))}</b></div>`
     ).join("")
     : "<p>Giỏ hàng đang trống.</p>";
-  totalBox.textContent = money(total);
+  renderCheckoutTotal();
   if (!state.cart.length) return;
 
   try {
@@ -187,16 +209,16 @@ async function setupPaypalCheckout() {
       fetch("/api/auth/addresses"),
       fetch("/api/payments/paypal/config"),
     ]);
-    if (!meResponse.ok) {
-      addressesBox.innerHTML = '<p>Bạn cần đăng nhập trước khi thanh toán.</p><a class="primary" href="/dang-nhap">Đăng nhập</a>';
+    const me = meResponse.ok ? await meResponse.json() : { authenticated: false };
+    if (!me.authenticated) {
+      addressesBox.innerHTML = '<p>Bạn cần đăng nhập trước khi thanh toán.</p><a class="primary" href="/dang-nhap?returnTo=%2Fthanh-toan">Đăng nhập để thanh toán</a>';
       return;
     }
     if (!addressesResponse.ok || !configResponse.ok) throw new Error("Không thể tải thông tin thanh toán.");
     const addresses = (await addressesResponse.json()).data || [];
     const config = await configResponse.json();
-    const shippingFee = state.cart.some((item) => item.type === "combo") ? 0 : Number(config.standardShippingFee || 0);
-    total += shippingFee;
-    totalBox.textContent = money(total);
+    shippingFee = state.cart.some((item) => item.type === "combo") ? 0 : Number(config.standardShippingFee || 0);
+    renderCheckoutTotal();
     if (!addresses.length) {
       addressesBox.innerHTML = '<p>Bạn chưa có địa chỉ nhận hàng. Hãy thêm địa chỉ trong trang tài khoản.</p><a class="primary" href="/tai-khoan">Thêm địa chỉ</a>';
       return;
@@ -207,6 +229,43 @@ async function setupPaypalCheckout() {
         <span><b>${safe(address.receiver_name)}</b> · ${safe(address.phone)}<small>${safe([address.address, address.ward, address.district, address.province].filter(Boolean).join(", "))}</small></span>
       </label>`
     ).join("");
+    couponButton.addEventListener("click", async () => {
+      const code = couponInput.value.trim().toUpperCase();
+      discount = 0;
+      appliedCouponCode = "";
+      couponMessage.textContent = "";
+      renderCheckoutTotal();
+      if (!code) {
+        couponMessage.textContent = "Vui lòng nhập mã giảm giá.";
+        return;
+      }
+      couponButton.disabled = true;
+      try {
+        const response = await fetch("/api/payments/coupons/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, subtotal }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || "Mã giảm giá không hợp lệ.");
+        discount = Number(result.data.discount || 0);
+        appliedCouponCode = result.data.code;
+        couponInput.value = appliedCouponCode;
+        couponMessage.textContent = `Đã áp dụng ${appliedCouponCode}, giảm ${money(discount)}.`;
+        renderCheckoutTotal();
+      } catch (error) {
+        couponMessage.textContent = error.message;
+      } finally {
+        couponButton.disabled = false;
+      }
+    });
+    couponInput.addEventListener("input", () => {
+      if (!appliedCouponCode || couponInput.value.trim().toUpperCase() === appliedCouponCode) return;
+      discount = 0;
+      appliedCouponCode = "";
+      couponMessage.textContent = "Mã đã thay đổi, vui lòng áp dụng lại.";
+      renderCheckoutTotal();
+    });
     if (!config.enabled || !config.clientId) {
       paypalBox.innerHTML = "<p>PayPal chưa được cấu hình trên máy chủ.</p>";
       return;
@@ -221,9 +280,10 @@ async function setupPaypalCheckout() {
         const response = await fetch("/api/payments/paypal/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            addressId,
-            items: state.cart.map((item) => item.type === "combo"
+           body: JSON.stringify({
+             addressId,
+             couponCode: appliedCouponCode || undefined,
+             items: state.cart.map((item) => item.type === "combo"
               ? { type: "combo", comboId: item.comboId, quantity: item.qty }
               : { type: "product", id: item.id, quantity: item.qty }),
           }),

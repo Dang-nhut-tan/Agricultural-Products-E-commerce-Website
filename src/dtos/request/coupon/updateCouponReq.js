@@ -15,15 +15,15 @@ class UpdateCouponReq {
 
   static validate(data) {
     const schema = Joi.object({
-      code: Joi.string().optional(),
-      discount_type: Joi.number().integer().optional(),
+      code: Joi.string().trim().uppercase().max(50).optional(),
+      discount_type: Joi.number().integer().valid(1, 2).optional(),
       discount_value: Joi.number().min(0).optional(),
       min_order_value: Joi.number().min(0).optional(),
       start_date: Joi.date().optional(),
       end_date: Joi.date().optional(),
       quantity: Joi.number().integer().min(0).optional(),
       used_quantity: Joi.number().integer().min(0).optional(),
-      status: Joi.number().integer().optional(),
+      status: Joi.number().integer().valid(0, 1).optional(),
     }).min(1);
 
     return schema.validate(data);

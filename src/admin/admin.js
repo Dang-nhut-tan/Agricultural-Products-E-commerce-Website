@@ -30,6 +30,10 @@ async function createAdmin() {
     "ImagePreview",
     path.join(__dirname, "components", "image-preview.jsx")
   );
+  const quickComboComponent = componentLoader.add(
+    "QuickCombo",
+    path.join(__dirname, "components", "quick-combo.jsx")
+  );
 
   const admin = new AdminJS({
     rootPath: "/admin",
@@ -38,7 +42,8 @@ async function createAdmin() {
       componentLoader,
       AdminJSUpload.default,
       buildFeature,
-      imagePreviewComponent
+      imagePreviewComponent,
+      quickComboComponent
     ),
     componentLoader,
     dashboard: {
@@ -61,13 +66,14 @@ async function createAdmin() {
     locale: locale(resourceLabels),
   });
 
-  // Theo dõi và bundle lại component dashboard khi sửa code ở môi trường dev.
-  // The AdminJS component bundler is expensive, so enable it only while
-  // actively editing AdminJS React components.
-  if (process.env.ADMIN_WATCH?.trim().toLowerCase() === "true") {
+  // Component tùy chỉnh phải được bundle ở môi trường phát triển; nếu không,
+  // AdminJS chỉ thấy tên component và hiển thị lỗi noActionComponent.
+  if (process.env.NODE_ENV !== "production") {
     admin.watch().catch((error) => {
-      console.error("Không thể bundle dashboard AdminJS:", error);
+      console.error("Không thể bundle component AdminJS:", error);
     });
+  } else {
+    await admin.initialize();
   }
 
   // Tài khoản mặc định chỉ dùng để phát triển; hãy đổi biến môi trường khi deploy.

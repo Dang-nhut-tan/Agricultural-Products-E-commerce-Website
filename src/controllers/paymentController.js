@@ -1,5 +1,6 @@
 const db = require("../models");
 const orderInventory = require("../services/orderInventory");
+const { normalizeCode, validateCouponRecord, calculateDiscount } = require("../services/couponService");
 
 const PAYPAL_API = process.env.PAYPAL_MODE === "live"
   ? "https://api-m.paypal.com"
@@ -57,9 +58,27 @@ function getConfig(req, res) {
   });
 }
 
+async function validateCoupon(req, res) {
+  const code = normalizeCode(req.body.code);
+  const subtotal = Number(req.body.subtotal);
+  if (!code || !Number.isFinite(subtotal) || subtotal < 0) {
+    return res.status(400).json({ message: "Mã giảm giá hoặc giá trị đơn hàng không hợp lệ." });
+  }
+  const coupon = await db.Coupon.findOne({ where: { code } });
+  const error = validateCouponRecord(coupon, subtotal);
+  if (error) return res.status(409).json({ message: error });
+  const alreadyUsed = await db.CouponUser.count({
+    where: { coupon_id: coupon.id, user_id: req.session.userId },
+  });
+  if (alreadyUsed) return res.status(409).json({ message: "Bạn đã sử dụng mã giảm giá này." });
+  const discount = calculateDiscount(coupon, subtotal);
+  return res.json({ data: { code: coupon.code, discount, totalAfterDiscount: subtotal - discount } });
+}
+
 async function createOrder(req, res) {
   const items = Array.isArray(req.body.items) ? req.body.items : [];
   const addressId = Number(req.body.addressId);
+  const couponCode = normalizeCode(req.body.couponCode);
   if (!items.length) return res.status(400).json({ message: "Giỏ hàng đang trống." });
 
   const quantities = new Map();
@@ -135,18 +154,41 @@ async function createOrder(req, res) {
   const shippingFee = comboQuantities.size
     ? 0
     : Math.max(0, Number(process.env.STANDARD_SHIPPING_FEE || 0));
-  const total = subtotal + shippingFee;
+  let discount = 0;
+  let appliedCoupon = null;
+  let total = subtotal + shippingFee;
   const transaction = await db.sequelize.transaction();
   let order;
   let payment;
   try {
+    if (couponCode) {
+      appliedCoupon = await db.Coupon.findOne({
+        where: { code: couponCode }, transaction, lock: transaction.LOCK.UPDATE,
+      });
+      const couponError = validateCouponRecord(appliedCoupon, subtotal);
+      if (couponError) {
+        const error = new Error(couponError);
+        error.status = 409;
+        throw error;
+      }
+      const alreadyUsed = await db.CouponUser.count({
+        where: { coupon_id: appliedCoupon.id, user_id: req.session.userId }, transaction,
+      });
+      if (alreadyUsed) {
+        const error = new Error("Bạn đã sử dụng mã giảm giá này.");
+        error.status = 409;
+        throw error;
+      }
+      discount = calculateDiscount(appliedCoupon, subtotal);
+      total = subtotal - discount + shippingFee;
+    }
     order = await db.Order.create({
       user_id: req.session.userId,
       address_id: address.id,
       status: 0,
       subtotal,
       shipping_fee: shippingFee,
-      discount: 0,
+      discount,
       total,
     }, { transaction });
     await db.OrderDetail.bulkCreate(details.map(({ product, quantity, price, comboId, comboName, comboQuantity }) => ({
@@ -177,6 +219,15 @@ async function createOrder(req, res) {
       status: 0,
       amount: total,
     }, { transaction });
+    if (appliedCoupon) {
+      await db.OrderCoupon.create({
+        order_id: order.id, coupon_id: appliedCoupon.id, discount_amount: discount,
+      }, { transaction });
+      await db.CouponUser.create({
+        coupon_id: appliedCoupon.id, user_id: req.session.userId, used_at: new Date(),
+      }, { transaction });
+      await appliedCoupon.increment("used_quantity", { by: 1, transaction });
+    }
     await transaction.commit();
   } catch (error) {
     await transaction.rollback();
@@ -248,4 +299,4 @@ async function captureOrder(req, res) {
   return res.json({ message: "Thanh toán PayPal thành công.", orderId: payment.order_id });
 }
 
-module.exports = { getConfig, createOrder, captureOrder };
+module.exports = { getConfig, validateCoupon, createOrder, captureOrder };

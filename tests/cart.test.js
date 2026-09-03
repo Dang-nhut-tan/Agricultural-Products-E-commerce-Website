@@ -22,7 +22,7 @@ function response() {
   return res;
 }
 
-describe("Cart checkout - equivalence partitions and quantity boundaries", () => {
+describe("Thanh toán giỏ hàng - các lớp tương đương và giới hạn số lượng", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -36,29 +36,29 @@ describe("Cart checkout - equivalence partitions and quantity boundaries", () =>
     return res;
   }
 
-  it("rejects the empty-cart partition", async () => {
+  it("từ chối trường hợp giỏ hàng trống", async () => {
     const res = await execute([]);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(db.UserAddress.findOne).not.toHaveBeenCalled();
   });
 
   it.each([
-    ["min - 1", 0],
-    ["max + 1", 100],
-    ["non-integer", 1.5],
-    ["not numeric", "abc"],
-  ])("rejects quantity at %s", async (_label, quantity) => {
+    ["tối thiểu trừ một", 0],
+    ["tối đa cộng một", 100],
+    ["không phải số nguyên", 1.5],
+    ["không phải dạng số", "abc"],
+  ])("từ chối số lượng tại trường hợp %s", async (_label, quantity) => {
     const res = await execute([{ id: 10, quantity }]);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(db.UserAddress.findOne).not.toHaveBeenCalled();
   });
 
   it.each([
-    ["min", 1],
-    ["min + 1", 2],
-    ["max - 1", 98],
-    ["max", 99],
-  ])("accepts quantity at %s when stock is sufficient", async (_label, quantity) => {
+    ["tối thiểu", 1],
+    ["tối thiểu cộng một", 2],
+    ["tối đa trừ một", 98],
+    ["tối đa", 99],
+  ])("chấp nhận số lượng tại trường hợp %s khi tồn kho đủ", async (_label, quantity) => {
     const transaction = {
       commit: jest.fn(),
       rollback: jest.fn(),
@@ -95,7 +95,7 @@ describe("Cart checkout - equivalence partitions and quantity boundaries", () =>
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
-  it("rejects the invalid-address partition", async () => {
+  it("từ chối trường hợp địa chỉ không hợp lệ", async () => {
     db.UserAddress.findOne.mockResolvedValue(null);
     db.Product.findAll.mockResolvedValue([{ id: 10 }]);
     const res = await execute([{ id: 10, quantity: 1 }], 999);
@@ -103,7 +103,7 @@ describe("Cart checkout - equivalence partitions and quantity boundaries", () =>
     expect(db.Order.create).not.toHaveBeenCalled();
   });
 
-  it("rejects quantity at stock + 1", async () => {
+  it("từ chối số lượng lớn hơn tồn kho một đơn vị", async () => {
     db.UserAddress.findOne.mockResolvedValue({ id: 1 });
     db.Product.findAll.mockResolvedValue([
       { id: 10, name: "Rau", price: 1_000, quantity: 5 },

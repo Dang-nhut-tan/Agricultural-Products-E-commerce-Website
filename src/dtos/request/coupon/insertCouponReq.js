@@ -15,15 +15,15 @@ class InsertCouponReq {
 
   static validate(data) {
     const schema = Joi.object({
-      code: Joi.string().required(),
-      discount_type: Joi.number().integer().required(),
+      code: Joi.string().trim().uppercase().max(50).required(),
+      discount_type: Joi.number().integer().valid(1, 2).required(),
       discount_value: Joi.number().min(0).optional(),
       min_order_value: Joi.number().min(0).optional(),
       start_date: Joi.date().optional(),
       end_date: Joi.date().optional(),
       quantity: Joi.number().integer().min(0).optional(),
       used_quantity: Joi.number().integer().min(0).optional(),
-      status: Joi.number().integer().optional(),
+      status: Joi.number().integer().valid(0, 1).optional(),
     });
 
     return schema.validate(data);

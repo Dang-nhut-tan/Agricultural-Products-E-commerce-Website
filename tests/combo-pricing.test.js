@@ -15,8 +15,8 @@ const combo = (overrides = {}) => ({
   ...overrides,
 });
 
-describe("Combo pricing and availability", () => {
-  it("multiplies component quantities and calculates percentage savings", () => {
+describe("Giá và khả năng bán của combo", () => {
+  it("nhân số lượng thành phần và tính mức tiết kiệm theo phần trăm", () => {
     const result = calculateCombo(combo());
     expect(result.items.map((item) => item.quantity)).toEqual([10, 4]);
     expect(result.retailPrice).toBe(1080000);
@@ -27,13 +27,13 @@ describe("Combo pricing and availability", () => {
     expect(result.isAvailable).toBe(true);
   });
 
-  it("automatically hides a combo when a component is out of stock", () => {
+  it("tự động ẩn combo khi một thành phần hết hàng", () => {
     const data = combo();
     data.ComboItems[0].Product.quantity = 9;
     expect(calculateCombo(data).isAvailable).toBe(false);
   });
 
-  it("does not publish a manual price that is not cheaper than retail", () => {
+  it("không công bố giá nhập thủ công nếu không rẻ hơn giá bán lẻ", () => {
     const result = calculateCombo(combo({ price_mode: "manual", manual_price: 1080000 }));
     expect(result.isAvailable).toBe(false);
     expect(result.savings).toBe(0);
