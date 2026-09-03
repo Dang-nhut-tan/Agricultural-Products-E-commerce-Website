@@ -22,18 +22,4 @@ const uploadImage = async (file, folder = process.env.CLOUDINARY_FOLDER) => {
   };
 };
 
-// Xóa ảnh bằng publicId mà Cloudinary trả về lúc upload.
-const deleteImage = async (publicId) => {
-  ensureCloudinaryConfigured();
-
-  if (!publicId) {
-    throw new Error("Thiếu publicId của ảnh cần xóa");
-  }
-
-  return cloudinary.uploader.destroy(publicId, {
-    resource_type: "image",
-    invalidate: true,
-  });
-};
-
-module.exports = { uploadImage, deleteImage };
+module.exports = { uploadImage };

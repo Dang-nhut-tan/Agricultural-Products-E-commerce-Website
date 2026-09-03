@@ -1,0 +1,541 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for src/services/recipeSearch.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/services</a> recipeSearch.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">25.64% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>20/78</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">21.95% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>9/41</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">20.83% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>5/24</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">28.12% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>18/64</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const path = require("path");
+const { spawn } = require("child_process");
+const db = require("../models");
+const { embedText, generateJson } = require("./geminiService");
+&nbsp;
+const RECIPE_QUERY_STOP_WORDS = new Set([
+  "nau", "lam", "cach", "cong", "thuc", "mon", "nhu", "nao", "the", "gi", "cho", "toi", "minh",
+]);
+&nbsp;
+const normalize = (value) =&gt; String(value || <span class="branch-1 cbranch-no" title="branch not covered" >"")</span>.normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+&nbsp;
+function isRecipeRelevant(query, recipeName) {
+  const requestedWords = normalize(query).split(/[^a-z0-9]+/)
+    .filter((word) =&gt; word.length &gt;= 2 &amp;&amp; !RECIPE_QUERY_STOP_WORDS.has(word));
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!requestedWords.length) <span class="cstat-no" title="statement not covered" >return true;</span>
+  const normalizedName = normalize(recipeName);
+  return requestedWords.some((word) =&gt; normalizedName.includes(word));
+}
+&nbsp;
+function localRecipe(query, products) {
+  const text = normalize(query);
+  const isBeefHotpot = text.includes("lau bo");
+  const isNoodle = text.includes("mi xao") || text.includes("mì xào");
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!isNoodle &amp;&amp; !isBeefHotpot) {
+    throw Object.assign(new Error("Tôi không biết món này."), { status: 404, code: "RECIPE_NOT_FOUND" });
+  }
+  const definitions = <span class="cstat-no" title="statement not covered" >isNoodle ? {</span>
+    name: "Mì xào bò",
+    ingredients: [
+      ["Thịt bò", "300 g", ["thit bo"]], ["Mì trứng", "300 g", ["mi"]],
+      ["Hành tây", "1 củ", ["hanh tay"]], ["Rau cần", "200 g", ["rau can"]],
+      ["Tỏi", "3 tép", ["toi"]], ["Dầu ăn, nước tương, tiêu", "vừa đủ", []],
+    ],
+    steps: [
+      "Thái mỏng thịt bò, ướp với nước tương, tỏi và tiêu khoảng 15 phút.",
+      "Trụng mì vừa chín, xả nhanh với nước mát rồi để ráo.",
+      "Phi thơm tỏi, xào thịt bò trên lửa lớn đến vừa chín rồi trút ra đĩa.",
+      "Xào hành tây và rau cần, cho mì vào đảo cùng gia vị.",
+      "Cho thịt bò trở lại chảo, đảo nhanh 1-2 phút rồi dùng nóng.",
+    ],
+  } : {
+    name: "Lẩu bò",
+    ingredients: [
+      ["Thịt bò ba chỉ", "500 g", ["thit bo ba chi"]], ["Xương ống bò", "1 kg", ["xuong ong bo"]],
+      ["Cải thảo", "500 g", ["cai thao"]], ["Nấm hương", "300 g", ["nam huong"]],
+      ["Nấm kim châm", "2 gói", ["nam kim cham"]], ["Hành tây", "1 củ", ["hanh tay"]],
+      ["Gừng, sả, tỏi và gia vị", "vừa đủ", []],
+    ],
+    steps: [
+      "Chần xương bò 3-5 phút, rửa sạch rồi ninh với gừng và hành tây khoảng 60-90 phút.",
+      "Vớt bọt thường xuyên, nêm nước mắm, muối và một ít đường cho nước dùng đậm vị.",
+      "Rửa sạch rau nấm; thái thịt bò mỏng và giữ lạnh đến khi ăn.",
+      "Đun sôi nước dùng trên bếp lẩu, cho nấm và cải thảo vào trước.",
+      "Nhúng thịt bò từng phần đến khi chín, dùng nóng cùng rau và nước chấm.",
+    ],
+  };
+&nbsp;
+  const usedIds = <span class="cstat-no" title="statement not covered" >new Set();</span>
+  const ingredients = <span class="cstat-no" title="statement not covered" >definitions.ingredients.map(<span class="fstat-no" title="function not covered" >([</span>name, amount, aliases]) =&gt; {</span>
+    const product = <span class="cstat-no" title="statement not covered" >products.find(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >!usedIds.has(item.id) &amp;&amp; aliases.some(<span class="fstat-no" title="function not covered" >(a</span>lias) =&gt; <span class="cstat-no" title="statement not covered" >normalize(item.name).includes(alias))</span>)</span>;</span>
+<span class="cstat-no" title="statement not covered" >    if (product) <span class="cstat-no" title="statement not covered" >usedIds.add(product.id);</span></span>
+<span class="cstat-no" title="statement not covered" >    return { name, amount, productId: product?.id || null };</span>
+  });
+  const byId = <span class="cstat-no" title="statement not covered" >new Map(products.map(<span class="fstat-no" title="function not covered" >(p</span>roduct) =&gt; <span class="cstat-no" title="statement not covered" >[Number(product.id), product])</span>);</span>
+  const matchedProducts = <span class="cstat-no" title="statement not covered" >ingredients.map(<span class="fstat-no" title="function not covered" >(i</span>ngredient) =&gt; {</span>
+    const product = <span class="cstat-no" title="statement not covered" >byId.get(Number(ingredient.productId));</span>
+<span class="cstat-no" title="statement not covered" >    return product ? { ...product, ingredientName: ingredient.name, suggestedAmount: ingredient.amount } : null;</span>
+  }).filter(Boolean);
+<span class="cstat-no" title="statement not covered" >  return {</span>
+    name: definitions.name,
+    summary: "Công thức dự phòng từ dữ liệu cửa hàng khi trợ lý AI đang giới hạn lượt dùng.",
+    ingredients,
+    steps: definitions.steps,
+    safetyNotes: ["Rửa sạch rau nấm và nấu chín thịt bò phù hợp trước khi dùng.", "Kiểm tra thành phần nếu bạn có tiền sử dị ứng thực phẩm."],
+    missingIngredients: ingredients.filter(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >!item.productId)</span>.map(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >item.name)</span>,
+    products: matchedProducts,
+    image: "",
+  };
+}
+&nbsp;
+const recipeSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    summary: { type: "string" },
+    ingredients: { type: "array", items: { type: "object", properties: {
+      name: { type: "string" }, amount: { type: "string" }, productId: { type: "integer", nullable: true },
+    }, required: ["name", "amount", "productId"] } },
+    steps: { type: "array", items: { type: "string" } },
+    safetyNotes: { type: "array", items: { type: "string" } },
+    missingIngredients: { type: "array", items: { type: "string" } },
+  }, required: ["name", "summary", "ingredients", "steps", "safetyNotes", "missingIngredients"],
+};
+&nbsp;
+function <span class="fstat-no" title="function not covered" >queryFaiss(</span>vector, limit = <span class="branch-0 cbranch-no" title="branch not covered" >5)</span> {
+<span class="cstat-no" title="statement not covered" >  return new Promise(<span class="fstat-no" title="function not covered" >(r</span>esolve, reject) =&gt; {</span>
+    const script = <span class="cstat-no" title="statement not covered" >path.join(__dirname, "..", "scripts", "query_recipe_index.py");</span>
+    const child = <span class="cstat-no" title="statement not covered" >spawn(process.env.PYTHON_BIN || "python", [script, String(limit)], { cwd: path.join(__dirname, "..", "..") });</span>
+    let output = <span class="cstat-no" title="statement not covered" >"",</span> error = <span class="cstat-no" title="statement not covered" >"";</span>
+<span class="cstat-no" title="statement not covered" >    child.stdout.on("data", <span class="fstat-no" title="function not covered" >(c</span>hunk) =&gt; { <span class="cstat-no" title="statement not covered" >output += chunk; </span>});</span>
+<span class="cstat-no" title="statement not covered" >    child.stderr.on("data", <span class="fstat-no" title="function not covered" >(c</span>hunk) =&gt; { <span class="cstat-no" title="statement not covered" >error += chunk; </span>});</span>
+<span class="cstat-no" title="statement not covered" >    child.on("error", reject);</span>
+<span class="cstat-no" title="statement not covered" >    child.on("close", <span class="fstat-no" title="function not covered" >(c</span>ode) =&gt; <span class="cstat-no" title="statement not covered" >code === 0 ? resolve(JSON.parse(output || "[]")) : reject(Object.assign(new Error(error || "Chưa có chỉ mục công thức."), { status: 503 })))</span>;</span>
+<span class="cstat-no" title="statement not covered" >    child.stdin.end(JSON.stringify(vector));</span>
+  });
+}
+&nbsp;
+async function <span class="fstat-no" title="function not covered" >suggestRecipe(</span>query, filters = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> {
+  let references = <span class="cstat-no" title="statement not covered" >[];</span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const vector = <span class="cstat-no" title="statement not covered" >await embedText(query);</span>
+<span class="cstat-no" title="statement not covered" >    references = await queryFaiss(vector);</span>
+  } catch (error) {
+<span class="cstat-no" title="statement not covered" >    console.warn("Không dùng được FAISS embedding, chuyển sang công thức cục bộ:", error.message);</span>
+  }
+  const products = <span class="cstat-no" title="statement not covered" >await db.Product.findAll({</span>
+    where: { status: 1, quantity: { [db.Sequelize.Op.gt]: 0 } },
+    include: [{ model: db.Category }, { model: db.ProductImage, required: false }],
+    order: [["quantity", "DESC"]],
+  });
+  const plainProducts = <span class="cstat-no" title="statement not covered" >products.map(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >item.get({ plain: true }))</span>;</span>
+  const links = <span class="cstat-no" title="statement not covered" >await db.RecipeProductLink.findAll({ include: [db.Product], order: [["priority", "DESC"]] });</span>
+  const prompt = <span class="cstat-no" title="statement not covered" >`Bạn là bếp trưởng Việt Nam cho website nông sản. Hãy trả về đúng một công thức phù hợp yêu cầu.</span>
+Yêu cầu: ${query}
+Bộ lọc: ${JSON.stringify(filters)}
+Tư liệu tìm từ FAISS: ${JSON.stringify(references)}
+Sản phẩm đang còn hàng (chỉ được dùng id trong danh sách này cho productId): ${JSON.stringify(plainProducts.map(<span class="fstat-no" title="function not covered" >(p</span>) =&gt; (<span class="cstat-no" title="statement not covered" >{ id: p.id, name: p.name, unit: p.unit, quantity: p.quantity })</span>))}
+Liên kết do quản trị viên đặt: ${JSON.stringify(links.map(<span class="fstat-no" title="function not covered" >(l</span>) =&gt; (<span class="cstat-no" title="statement not covered" >{ ingredient: l.ingredient_name, aliases: l.aliases, productId: l.product_id })</span>))}
+Ưu tiên tư liệu, nhưng được bổ sung kiến thức phổ biến. Không tiết lộ tên file PDF, đường dẫn, số trang, tên nguồn hoặc dữ liệu kỹ thuật cho người dùng. Ghép tên gần nghĩa. Nguyên liệu không có hàng phải có productId=null và xuất hiện trong missingIngredients. Chỉ viết nguyên liệu và các bước nấu, kèm cảnh báo dị ứng/vệ sinh/an toàn nhiệt độ. Không đưa thông tin y tế tuyệt đối.`;
+  let recipe;
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    recipe = await generateJson(prompt, recipeSchema);</span>
+  } catch (error) {
+<span class="cstat-no" title="statement not covered" >    console.warn("Không dùng được Gemini recipe, chuyển sang công thức cục bộ:", error.message);</span>
+<span class="cstat-no" title="statement not covered" >    return localRecipe(query, plainProducts);</span>
+  }
+<span class="cstat-no" title="statement not covered" >  if (!isRecipeRelevant(query, recipe.name)) {</span>
+<span class="cstat-no" title="statement not covered" >    throw Object.assign(new Error("Tôi không biết món này."), { status: 404, code: "RECIPE_NOT_FOUND" });</span>
+  }
+  const byId = <span class="cstat-no" title="statement not covered" >new Map(plainProducts.map(<span class="fstat-no" title="function not covered" >(p</span>roduct) =&gt; <span class="cstat-no" title="statement not covered" >[Number(product.id), product])</span>);</span>
+<span class="cstat-no" title="statement not covered" >  recipe.products = recipe.ingredients.map(<span class="fstat-no" title="function not covered" >(i</span>ngredient) =&gt; {</span>
+    const product = <span class="cstat-no" title="statement not covered" >byId.get(Number(ingredient.productId));</span>
+<span class="cstat-no" title="statement not covered" >    return product ? { ...product, ingredientName: ingredient.name, suggestedAmount: ingredient.amount } : null;</span>
+  }).filter(Boolean);
+  const managedRecipe = <span class="cstat-no" title="statement not covered" >await db.Recipe.findOne({ where: { name: recipe.name, active: true }, attributes: ["image"] });</span>
+<span class="cstat-no" title="statement not covered" >  recipe.image = managedRecipe?.image</span>
+    || recipe.products.map(<span class="fstat-no" title="function not covered" >(p</span>roduct) =&gt; <span class="cstat-no" title="statement not covered" >product.image || product.ProductImages?.[0]?.image)</span>.find(Boolean) || "";
+<span class="cstat-no" title="statement not covered" >  return recipe;</span>
+}
+&nbsp;
+module.exports = { suggestRecipe, localRecipe, isRecipeRelevant };
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-08-29T15:35:15.820Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

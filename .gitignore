@@ -15,3 +15,6 @@ test-results/
 api-testing-project/reports/*
 !api-testing-project/reports/.gitkeep
 /data/recipes/
+/docs/
+__pycache__/
+*.py[cod]

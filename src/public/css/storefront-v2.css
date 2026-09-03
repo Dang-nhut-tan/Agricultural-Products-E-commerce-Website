@@ -41,7 +41,8 @@ header {
 .modern-logo { min-width: 214px !important; }
 .modern-logo-mark {
   width: 44px !important; height: 44px !important; border-radius: 12px !important;
-  background: var(--sx-green) !important; box-shadow: none !important;
+  object-fit: contain !important; display: block !important;
+  background: transparent !important; box-shadow: none !important;
 }
 .modern-logo b { color: var(--sx-green-dark) !important; font-size: 1rem !important; }
 .modern-logo small { color: var(--sx-muted) !important; font-size: .6875rem !important; letter-spacing: .04em; }

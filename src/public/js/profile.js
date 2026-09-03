@@ -87,18 +87,19 @@ if (location.pathname === "/tai-khoan")
     };
     document.querySelector("#addressForm").onsubmit = async (event) => {
       event.preventDefault();
+      const form = event.currentTarget;
       const response = await fetch("/api/auth/addresses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          Object.fromEntries(new FormData(event.currentTarget)),
+          Object.fromEntries(new FormData(form)),
         ),
       });
       const result = await response.json();
       document.querySelector("#addressMessage").textContent = result.message;
       if (response.ok) {
-        event.currentTarget.reset();
-        event.currentTarget.hidden = true;
+        form.reset();
+        form.hidden = true;
         document.querySelector("#showAddressForm").hidden = false;
         refreshAddresses();
       }

@@ -30,6 +30,10 @@ async function createAdmin() {
     "ImagePreview",
     path.join(__dirname, "components", "image-preview.jsx")
   );
+  const quickComboComponent = componentLoader.add(
+    "QuickCombo",
+    path.join(__dirname, "components", "quick-combo.jsx")
+  );
 
   const admin = new AdminJS({
     rootPath: "/admin",
@@ -38,7 +42,8 @@ async function createAdmin() {
       componentLoader,
       AdminJSUpload.default,
       buildFeature,
-      imagePreviewComponent
+      imagePreviewComponent,
+      quickComboComponent
     ),
     componentLoader,
     dashboard: {
@@ -48,15 +53,27 @@ async function createAdmin() {
     branding: {
       companyName: "Quản trị Nông Sản Xanh",
       withMadeWithLove: false,
+      theme: {
+        colors: {
+          primary100: "#168554",
+          primary80: "#2f9669",
+          primary60: "#68b18a",
+          primary20: "#d9f0e4",
+          filterBg: "#f5f8f6",
+        },
+      },
     },
     locale: locale(resourceLabels),
   });
 
-  // Theo dõi và bundle lại component dashboard khi sửa code ở môi trường dev.
+  // Component tùy chỉnh phải được bundle ở môi trường phát triển; nếu không,
+  // AdminJS chỉ thấy tên component và hiển thị lỗi noActionComponent.
   if (process.env.NODE_ENV !== "production") {
     admin.watch().catch((error) => {
-      console.error("Không thể bundle dashboard AdminJS:", error);
+      console.error("Không thể bundle component AdminJS:", error);
     });
+  } else {
+    await admin.initialize();
   }
 
   // Tài khoản mặc định chỉ dùng để phát triển; hãy đổi biến môi trường khi deploy.

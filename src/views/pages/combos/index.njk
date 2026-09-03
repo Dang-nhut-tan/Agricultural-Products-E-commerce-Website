@@ -1,0 +1,50 @@
+{% extends "base.njk" %}
+
+{% block styles %}<link rel="stylesheet" href="/css/combos.css">{% endblock %}
+
+{% block content %}
+<section class="combo-hero">
+  <div class="container">
+    <span>GIẢI PHÁP NHẬP HÀNG SỐ LƯỢNG LỚN</span>
+    <h1>Combo dành cho nhà hàng</h1>
+    <p>Nguồn hàng ổn định, giá tốt hơn mua lẻ và miễn phí giao hàng cho toàn bộ đơn.</p>
+    <div class="combo-benefits"><b>✓ Giá sỉ minh bạch</b><b>✓ Tồn kho thực tế</b><b>✓ Miễn phí giao hàng</b></div>
+  </div>
+</section>
+<section class="page-shell combo-section">
+  <div class="container">
+    <div class="combo-heading"><div><span>COMBO ĐANG CÓ</span><h2>Chọn quy mô phù hợp</h2></div><a href="/san-pham">Mua sản phẩm lẻ →</a></div>
+    <div class="combo-grid">
+      {% for combo in combos %}
+      <article class="combo-card">
+        <div class="combo-image" {% if combo.image %}style="background-image:url('{{ combo.image }}')"{% endif %}>
+          {% if not combo.image %}<span>📦</span>{% endif %}
+          {% if combo.badge %}<b class="combo-badge">{{ combo.badge }}</b>{% endif %}
+          <b class="combo-stock">Chỉ còn {{ combo.availableQuantity }} combo</b>
+        </div>
+        <div class="combo-body">
+          <span class="combo-size">Cỡ {{ combo.sizeLabel }}</span>
+          <h3>{{ combo.name }}</h3>
+          <p>{{ combo.description or "Nguồn nguyên liệu số lượng lớn dành cho hoạt động kinh doanh." }}</p>
+          {% if combo.serving_from or combo.usage_days %}<div class="combo-fit">Phù hợp {% if combo.serving_from %}{{ combo.serving_from }}–{{ combo.serving_to or combo.serving_from }} suất{% endif %}{% if combo.usage_days %} · {{ combo.usage_days }} ngày{% endif %}</div>{% endif %}
+          <ul>{% for item in combo.items %}<li><span>{{ item.name }}</span><b>{{ item.quantity }} {{ item.unit }}</b></li>{% endfor %}</ul>
+          <div class="combo-pricing">
+            <span>Mua lẻ <del>{{ combo.displayRetailPrice }}</del></span>
+            <strong>{{ combo.displayComboPrice }}</strong>
+            <mark>Tiết kiệm {{ combo.displaySavings }} ({{ combo.savingsPercent }}%)</mark>
+          </div>
+          <div class="combo-unit-price">Giá đã quy đổi theo tổng giá trị thành phần</div>
+          <label>Số lượng tối thiểu: <b>{{ combo.minimum_quantity }} combo</b></label>
+          <button class="combo-add" type="button" data-combo-add data-combo-id="{{ combo.id }}" data-combo-name="{{ combo.name }}" data-combo-price="{{ combo.comboPrice }}" data-combo-image="{{ combo.image }}" data-combo-minimum="{{ combo.minimum_quantity }}">Thêm {{ combo.minimum_quantity }} combo vào giỏ</button>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty-state"><h3>Combo đang được chuẩn bị</h3><p>Quản trị viên chưa công bố combo đủ hàng.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<div class="toast" id="pageToast"></div>
+{% endblock %}
+
+{% block scripts %}<script src="/js/combo-cart.js" defer></script>{% endblock %}

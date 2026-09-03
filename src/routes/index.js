@@ -12,6 +12,7 @@ const paymentRoutes = require("./paymentRoutes");
 const orderRoutes = require("./orderRoutes");
 const recipeRoutes = require("./recipeRoutes");
 const chatRoutes = require("./chatRoutes");
+const comboRoutes = require("./comboRoutes");
 
 function configRoutes(app) {
   app.use("/api/auth", authRoutes);
@@ -27,6 +28,7 @@ function configRoutes(app) {
   app.use("/api/orders", orderRoutes);
   app.use("/api/recipes", recipeRoutes);
   app.use("/api/chat", chatRoutes);
+  app.use("/api/combos", comboRoutes);
   app.use(viewRoutes);
 
   app.use((error, req, res, next) => {

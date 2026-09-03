@@ -53,7 +53,6 @@ const UserAddress = sequelize.define("UserAddress", {
 
 const Category = sequelize.define("Category", {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
-  image: DataTypes.TEXT,
   deleted_at: DataTypes.DATE,
 }, {
   tableName: "categories",
@@ -215,18 +214,6 @@ const Feedback = sequelize.define("Feedback", {
   ...modelOptions("feedback"),
 });
 
-const Cart = sequelize.define("Cart", {
-  user_id: DataTypes.INTEGER,
-}, modelOptions("carts"));
-
-const CartItem = sequelize.define("CartItem", {
-  cart_id: DataTypes.INTEGER,
-  product_id: DataTypes.INTEGER,
-  snapshot_name: DataTypes.STRING,
-  quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
-  price_at_add: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
-}, modelOptions("cart_items"));
-
 const Order = sequelize.define("Order", {
   user_id: DataTypes.INTEGER,
   address_id: DataTypes.INTEGER,
@@ -278,6 +265,9 @@ const OrderDetail = sequelize.define("OrderDetail", {
   cost_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
   quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
   unit: DataTypes.STRING,
+  combo_id: DataTypes.INTEGER,
+  combo_name: DataTypes.STRING,
+  combo_quantity: DataTypes.INTEGER,
 }, modelOptions("order_details"));
 
 const OrderHistory = sequelize.define("OrderHistory", {
@@ -364,7 +354,11 @@ const NewsDetail = sequelize.define("NewsDetail", {
 }, modelOptions("news_details"));
 
 const Banner = sequelize.define("Banner", {
-  name: DataTypes.STRING,
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: { notEmpty: true },
+  },
   image: DataTypes.TEXT,
   status: { type: DataTypes.INTEGER, defaultValue: 1 },
   sort_order: { type: DataTypes.INTEGER, defaultValue: 0 },
@@ -397,6 +391,11 @@ const Coupon = sequelize.define("Coupon", {
   underscored: true,
   paranoid: true,
   deletedAt: "deleted_at",
+  hooks: {
+    beforeValidate(coupon) {
+      if (coupon.code) coupon.code = String(coupon.code).trim().toUpperCase();
+    },
+  },
 });
 
 const OrderCoupon = sequelize.define("OrderCoupon", {
@@ -410,15 +409,6 @@ const CouponUser = sequelize.define("CouponUser", {
   user_id: DataTypes.INTEGER,
   used_at: DataTypes.DATE,
 }, modelOptions("coupon_users"));
-
-const Wishlist = sequelize.define("Wishlist", {
-  user_id: DataTypes.INTEGER,
-}, modelOptions("wishlists"));
-
-const WishlistItem = sequelize.define("WishlistItem", {
-  wishlist_id: DataTypes.INTEGER,
-  product_id: DataTypes.INTEGER,
-}, modelOptions("wishlist_items"));
 
 const InventoryTransaction = sequelize.define("InventoryTransaction", {
   batch_id: DataTypes.INTEGER,
@@ -456,6 +446,16 @@ const Recipe = sequelize.define("Recipe", {
   active: { type: DataTypes.BOOLEAN, defaultValue: true },
 }, modelOptions("recipes"));
 
+const RecipeSource = sequelize.define("RecipeSource", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  file_path: { type: DataTypes.TEXT, allowNull: false },
+  file_name: DataTypes.STRING,
+  mime_type: DataTypes.STRING,
+  file_size: DataTypes.INTEGER,
+  status: { type: DataTypes.STRING, defaultValue: "processing" },
+  error_message: DataTypes.TEXT,
+}, modelOptions("recipe_sources"));
+
 const RecipeProductLink = sequelize.define("RecipeProductLink", {
   recipe_id: DataTypes.INTEGER,
   ingredient_name: { type: DataTypes.STRING, allowNull: false },
@@ -463,6 +463,35 @@ const RecipeProductLink = sequelize.define("RecipeProductLink", {
   product_id: { type: DataTypes.INTEGER, allowNull: false },
   priority: { type: DataTypes.INTEGER, defaultValue: 0 },
 }, modelOptions("recipe_product_links"));
+
+const Combo = sequelize.define("Combo", {
+  name: { type: DataTypes.STRING, allowNull: false },
+  description: DataTypes.TEXT,
+  image: DataTypes.TEXT,
+  size: { type: DataTypes.ENUM("small", "medium", "large"), defaultValue: "small" },
+  quantity_multiplier: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 1 },
+  price_mode: { type: DataTypes.ENUM("percent", "fixed", "manual"), defaultValue: "percent" },
+  discount_value: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 10 },
+  manual_price: DataTypes.DECIMAL(12, 2),
+  minimum_quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+  serving_from: DataTypes.INTEGER,
+  serving_to: DataTypes.INTEGER,
+  usage_days: DataTypes.INTEGER,
+  badge: DataTypes.STRING,
+  status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+  sort_order: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+}, modelOptions("combos"));
+
+const ComboItem = sequelize.define("ComboItem", {
+  combo_id: { type: DataTypes.INTEGER, allowNull: false },
+  product_id: { type: DataTypes.INTEGER, allowNull: false },
+  base_quantity: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 1 },
+}, modelOptions("combo_items"));
+
+const ComboSetting = sequelize.define("ComboSetting", {
+  id: { type: DataTypes.INTEGER, primaryKey: true },
+  minimum_quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+}, modelOptions("combo_settings"));
 
 User.hasMany(UserAddress, { foreignKey: "user_id" });
 UserAddress.belongsTo(User, { foreignKey: "user_id" });
@@ -480,13 +509,6 @@ Product.hasMany(Feedback, { foreignKey: "product_id" });
 Feedback.belongsTo(Product, { foreignKey: "product_id" });
 User.hasMany(Feedback, { foreignKey: "user_id" });
 Feedback.belongsTo(User, { foreignKey: "user_id" });
-
-User.hasOne(Cart, { foreignKey: "user_id" });
-Cart.belongsTo(User, { foreignKey: "user_id" });
-Cart.hasMany(CartItem, { foreignKey: "cart_id" });
-CartItem.belongsTo(Cart, { foreignKey: "cart_id" });
-Product.hasMany(CartItem, { foreignKey: "product_id" });
-CartItem.belongsTo(Product, { foreignKey: "product_id" });
 
 User.hasMany(Order, { foreignKey: "user_id" });
 Order.belongsTo(User, { foreignKey: "user_id" });
@@ -527,17 +549,15 @@ CouponUser.belongsTo(Coupon, { foreignKey: "coupon_id" });
 User.hasMany(CouponUser, { foreignKey: "user_id" });
 CouponUser.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasOne(Wishlist, { foreignKey: "user_id" });
-Wishlist.belongsTo(User, { foreignKey: "user_id" });
-Wishlist.hasMany(WishlistItem, { foreignKey: "wishlist_id" });
-WishlistItem.belongsTo(Wishlist, { foreignKey: "wishlist_id" });
-Product.hasMany(WishlistItem, { foreignKey: "product_id" });
-WishlistItem.belongsTo(Product, { foreignKey: "product_id" });
-
 Recipe.hasMany(RecipeProductLink, { foreignKey: "recipe_id" });
 RecipeProductLink.belongsTo(Recipe, { foreignKey: "recipe_id" });
 Product.hasMany(RecipeProductLink, { foreignKey: "product_id" });
 RecipeProductLink.belongsTo(Product, { foreignKey: "product_id" });
+
+Combo.hasMany(ComboItem, { foreignKey: "combo_id" });
+ComboItem.belongsTo(Combo, { foreignKey: "combo_id" });
+Product.hasMany(ComboItem, { foreignKey: "product_id" });
+ComboItem.belongsTo(Product, { foreignKey: "product_id" });
 
 module.exports = {
   sequelize,
@@ -550,8 +570,6 @@ module.exports = {
   ProductBatch,
   ProductImage,
   Feedback,
-  Cart,
-  CartItem,
   Order,
   OrderDetail,
   OrderHistory,
@@ -564,9 +582,11 @@ module.exports = {
   Coupon,
   OrderCoupon,
   CouponUser,
-  Wishlist,
-  WishlistItem,
   InventoryTransaction,
   Recipe,
+  RecipeSource,
   RecipeProductLink,
+  Combo,
+  ComboItem,
+  ComboSetting,
 };
