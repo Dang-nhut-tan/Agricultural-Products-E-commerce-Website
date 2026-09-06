@@ -3,12 +3,28 @@ const { spawn } = require("child_process");
 const db = require("../models");
 const { embedText, generateJson } = require("./geminiService");
 
+const RECIPE_QUERY_STOP_WORDS = new Set([
+  "nau", "lam", "cach", "cong", "thuc", "mon", "nhu", "nao", "the", "gi", "cho", "toi", "minh",
+]);
+
 const normalize = (value) => String(value || "").normalize("NFD")
   .replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
 
+function isRecipeRelevant(query, recipeName) {
+  const requestedWords = normalize(query).split(/[^a-z0-9]+/)
+    .filter((word) => word.length >= 2 && !RECIPE_QUERY_STOP_WORDS.has(word));
+  if (!requestedWords.length) return true;
+  const normalizedName = normalize(recipeName);
+  return requestedWords.some((word) => normalizedName.includes(word));
+}
+
 function localRecipe(query, products) {
   const text = normalize(query);
+  const isBeefHotpot = text.includes("lau bo");
   const isNoodle = text.includes("mi xao") || text.includes("mì xào");
+  if (!isNoodle && !isBeefHotpot) {
+    throw Object.assign(new Error("Tôi không biết món này."), { status: 404, code: "RECIPE_NOT_FOUND" });
+  }
   const definitions = isNoodle ? {
     name: "Mì xào bò",
     ingredients: [
@@ -111,13 +127,16 @@ Bộ lọc: ${JSON.stringify(filters)}
 Tư liệu tìm từ FAISS: ${JSON.stringify(references)}
 Sản phẩm đang còn hàng (chỉ được dùng id trong danh sách này cho productId): ${JSON.stringify(plainProducts.map((p) => ({ id: p.id, name: p.name, unit: p.unit, quantity: p.quantity })))}
 Liên kết do quản trị viên đặt: ${JSON.stringify(links.map((l) => ({ ingredient: l.ingredient_name, aliases: l.aliases, productId: l.product_id })))}
-Ưu tiên tư liệu, nhưng được bổ sung kiến thức phổ biến. Ghép tên gần nghĩa. Nguyên liệu không có hàng phải có productId=null và xuất hiện trong missingIngredients. Chỉ viết nguyên liệu và các bước nấu, kèm cảnh báo dị ứng/vệ sinh/an toàn nhiệt độ. Không đưa thông tin y tế tuyệt đối.`;
+Ưu tiên tư liệu, nhưng được bổ sung kiến thức phổ biến. Không tiết lộ tên file PDF, đường dẫn, số trang, tên nguồn hoặc dữ liệu kỹ thuật cho người dùng. Ghép tên gần nghĩa. Nguyên liệu không có hàng phải có productId=null và xuất hiện trong missingIngredients. Chỉ viết nguyên liệu và các bước nấu, kèm cảnh báo dị ứng/vệ sinh/an toàn nhiệt độ. Không đưa thông tin y tế tuyệt đối.`;
   let recipe;
   try {
     recipe = await generateJson(prompt, recipeSchema);
   } catch (error) {
     console.warn("Không dùng được Gemini recipe, chuyển sang công thức cục bộ:", error.message);
     return localRecipe(query, plainProducts);
+  }
+  if (!isRecipeRelevant(query, recipe.name)) {
+    throw Object.assign(new Error("Tôi không biết món này."), { status: 404, code: "RECIPE_NOT_FOUND" });
   }
   const byId = new Map(plainProducts.map((product) => [Number(product.id), product]));
   recipe.products = recipe.ingredients.map((ingredient) => {
@@ -130,4 +149,4 @@ Liên kết do quản trị viên đặt: ${JSON.stringify(links.map((l) => ({ i
   return recipe;
 }
 
-module.exports = { suggestRecipe, localRecipe };
+module.exports = { suggestRecipe, localRecipe, isRecipeRelevant };

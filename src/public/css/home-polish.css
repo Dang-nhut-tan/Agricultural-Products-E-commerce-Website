@@ -1,4 +1,3 @@
-/* Trang chủ gọn và gần với một cửa hàng thực tế hơn. */
 body[data-page="home"] { background: #fffdf9; }
 body[data-page="home"] header {
   border-top-color: #17603f;

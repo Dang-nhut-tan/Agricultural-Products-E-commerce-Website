@@ -1,67 +1,75 @@
 const resourceNames = {
   User: "Người dùng", UserAddress: "Địa chỉ người dùng", Category: "Danh mục",
   Brand: "Thương hiệu", Product: "Sản phẩm", ProductBatch: "Lô sản phẩm",
-  ProductImage: "Ảnh sản phẩm", Feedback: "Đánh giá", Cart: "Giỏ hàng",
-  CartItem: "Sản phẩm trong giỏ", Order: "Đơn hàng", OrderDetail: "Chi tiết đơn hàng",
+  ProductImage: "Ảnh sản phẩm", Feedback: "Đánh giá", Order: "Đơn hàng", OrderDetail: "Chi tiết đơn hàng",
   OrderHistory: "Lịch sử đơn hàng", Payment: "Thanh toán", Shipment: "Vận chuyển",
   News: "Tin tức", NewsDetail: "Sản phẩm trong tin", Banner: "Banner",
   BannerDetail: "Sản phẩm trong banner", Coupon: "Mã giảm giá",
   OrderCoupon: "Mã giảm giá của đơn", CouponUser: "Mã giảm giá của khách",
-  Wishlist: "Danh sách yêu thích", WishlistItem: "Sản phẩm yêu thích",
-  InventoryTransaction: "Giao dịch kho",
+  InventoryTransaction: "Giao dịch kho", RecipeSource: "Nguồn PDF công thức",
   Recipe: "Công thức món ăn", RecipeProductLink: "Liên kết nguyên liệu - sản phẩm",
+  Combo: "Combo nhà hàng", ComboItem: "Sản phẩm trong combo",
+  ComboSetting: "Cấu hình combo",
 };
 
 const { cloudinaryProvider, createUploadPath } = require("./cloudinary-provider");
 
-// Model và cột sẽ nhận URL ảnh sau khi admin chọn file từ máy tính.
 const imagePropertyByModel = {
   User: "avatar",
-  Category: "image",
   Brand: "image",
   Product: "image",
   ProductImage: "image",
   News: "image",
   Banner: "image",
   Recipe: "image",
+  Combo: "image",
 };
 
-// Chỉ giữ các cột hữu ích để bảng không bị dài và rối.
 const listPropertiesByModel = {
   User: ["id", "avatar", "name", "email", "phone", "status", "role"],
-  Category: ["id", "image", "name", "createdAt"],
+  Category: ["id", "name", "createdAt"],
   Brand: ["id", "image", "name", "createdAt"],
   Product: ["id", "image", "name", "price", "quantity", "status"],
   ProductImage: ["id", "image", "product_id", "sort_order"],
   News: ["id", "image", "title", "createdAt"],
   Banner: ["id", "image", "name", "status", "sort_order"],
   Recipe: ["id", "image", "name", "source", "active", "updatedAt"],
+  RecipeSource: ["id", "name", "file_name", "status", "error_message", "updatedAt"],
+  Combo: ["id", "image", "name", "size", "calculated_price", "savings_display", "status", "availability_warning"],
+  ComboItem: ["id", "combo_id", "product_id", "base_quantity"],
+  ComboSetting: ["minimum_quantity", "updatedAt"],
 };
 
 const navigationByModel = {
   User: { name: "Người dùng", icon: "Users" }, UserAddress: { name: "Người dùng", icon: "Users" },
   Category: { name: "Sản phẩm", icon: "Package" }, Brand: { name: "Sản phẩm", icon: "Package" },
   Product: { name: "Sản phẩm", icon: "Package" }, ProductBatch: { name: "Sản phẩm", icon: "Package" },
-  ProductImage: { name: "Sản phẩm", icon: "Package" }, Feedback: { name: "Đánh giá", icon: "MessageSquare" },
-  Cart: { name: "Giỏ hàng", icon: "ShoppingCart" }, CartItem: { name: "Giỏ hàng", icon: "ShoppingCart" },
-  Order: { name: "Đơn hàng", icon: "ClipboardList" }, OrderDetail: { name: "Đơn hàng", icon: "ClipboardList" },
-  OrderHistory: { name: "Đơn hàng", icon: "ClipboardList" }, Payment: { name: "Thanh toán", icon: "CreditCard" },
-  Shipment: { name: "Vận chuyển", icon: "Truck" }, News: { name: "Nội dung", icon: "Newspaper" },
-  NewsDetail: { name: "Nội dung", icon: "Newspaper" }, Banner: { name: "Nội dung", icon: "Newspaper" },
-  BannerDetail: { name: "Nội dung", icon: "Newspaper" }, Coupon: { name: "Khuyến mãi", icon: "Gift" },
-  OrderCoupon: { name: "Khuyến mãi", icon: "Gift" }, CouponUser: { name: "Khuyến mãi", icon: "Gift" },
-  Wishlist: { name: "Yêu thích", icon: "Heart" }, WishlistItem: { name: "Yêu thích", icon: "Heart" },
-  InventoryTransaction: { name: "Giao dịch kho", icon: "Warehouse" },
-  Recipe: { name: "Món ăn thông minh", icon: "Restaurant" },
-  RecipeProductLink: { name: "Món ăn thông minh", icon: "Link" },
+  ProductImage: { name: "Sản phẩm", icon: "Package" }, Feedback: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
+  Order: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
+  Shipment: { name: "Đơn hàng & Vận chuyển", icon: "ClipboardList" },
+  News: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
+  Banner: { name: "Nội dung & Đánh giá", icon: "Newspaper" },
+  Coupon: { name: "Khuyến mãi", icon: "Gift" },
+  InventoryTransaction: { name: "Kho & Công thức", icon: "Warehouse" },
+  Recipe: { name: "Kho & Công thức", icon: "Warehouse" },
+  RecipeSource: { name: "Kho & Công thức", icon: "Warehouse" },
+  RecipeProductLink: { name: "Kho & Công thức", icon: "Warehouse" },
+  Combo: { name: "Combo nhà hàng", icon: "ShoppingBag" },
+  ComboSetting: { name: "Combo nhà hàng", icon: "ShoppingBag" },
 };
 
-const hiddenModels = [
-  "Cart",
-  "CartItem",
-  "Wishlist",
-  "WishlistItem",
+const sidebarHiddenModels = [
+  "OrderDetail",
+  "OrderHistory",
   "Payment",
+  "NewsDetail",
+  "BannerDetail",
+  "OrderCoupon",
+  "CouponUser",
+  "ComboItem",
+];
+
+const hiddenModels = [
   "ProductImage",
 ];
 const readOnlyModels = ["UserAddress", "Feedback", "InventoryTransaction"];
@@ -89,8 +97,12 @@ const normalizeNewUser = async (request) => {
   };
   return request;
 };
+const singletonSettingActions = {
+  new: { isAccessible: false, isVisible: false },
+  delete: { isAccessible: false, isVisible: false },
+  bulkDelete: { isAccessible: false, isVisible: false },
+};
 
-// AdminJS gửi ô ngày trống thành chuỗi rỗng, Sequelize sẽ đổi thành "Invalid date".
 const normalizeShipment = async (request) => {
   if (request.method !== "post") return request;
   const payload = request.payload || {};
@@ -104,6 +116,135 @@ const normalizeShipment = async (request) => {
   };
   return request;
 };
+
+const relatedListAction = (label, resourceId, foreignKey) => ({
+  actionType: "record",
+  label,
+  icon: "View",
+  component: false,
+  handler: async (_request, _response, context) => ({
+    record: context.record.toJSON(context.currentAdmin),
+    redirectUrl: `/admin/resources/${resourceId}?filters.${foreignKey}=${encodeURIComponent(context.record.id())}`,
+  }),
+});
+
+const relatedActionsByModel = {
+  User: {
+    addresses: relatedListAction("Địa chỉ người dùng", "user_addresses", "user_id"),
+    assignedCoupons: relatedListAction("Mã giảm giá của khách", "coupon_users", "user_id"),
+  },
+  Order: {
+    orderDetails: relatedListAction("Chi tiết đơn hàng", "order_details", "order_id"),
+    orderHistory: relatedListAction("Lịch sử đơn hàng", "order_histories", "order_id"),
+    payments: relatedListAction("Thanh toán", "payments", "order_id"),
+    appliedCoupons: relatedListAction("Mã giảm giá đã dùng", "order_coupons", "order_id"),
+  },
+  News: {
+    newsProducts: relatedListAction("Sản phẩm trong tin", "news_details", "news_id"),
+  },
+  Banner: {
+    bannerProducts: relatedListAction("Sản phẩm trong banner", "banner_details", "banner_id"),
+  },
+  Coupon: {
+    couponOrders: relatedListAction("Đơn hàng đã áp dụng", "order_coupons", "coupon_id"),
+    couponUsers: relatedListAction("Khách hàng được nhận", "coupon_users", "coupon_id"),
+  },
+  Combo: {
+    comboItems: relatedListAction("Sản phẩm trong combo", "combo_items", "combo_id"),
+  },
+};
+
+const enrichComboRecords = async (response) => {
+  const combos = await require("../services/comboService").findCombos({ includeUnavailable: true });
+  const byId = new Map(combos.map((combo) => [String(combo.id), combo]));
+  for (const record of response.records || (response.record ? [response.record] : [])) {
+    const combo = byId.get(String(record.id));
+    if (!combo) continue;
+    record.params.retail_price = combo.retailPrice;
+    record.params.calculated_price = combo.comboPrice;
+    record.params.savings_display = `${combo.savings.toLocaleString("vi-VN")} ₫ (${combo.savingsPercent}%)`;
+    record.params.availability_warning = combo.isAvailable
+      ? `Đủ hàng: có thể bán ${combo.availableQuantity} combo`
+      : combo.items.length
+        ? `Đang tự ẩn: ${combo.items.filter((item) => item.availableSets < 1).map((item) => `thiếu ${item.name}`).join(", ") || "giá combo chưa thấp hơn giá lẻ"}`
+        : "Đang tự ẩn: chưa có sản phẩm trong combo";
+  }
+  return response;
+};
+
+const quickComboAction = (component) => ({
+  actionType: "resource",
+  icon: "Add",
+  label: "Tạo combo nhanh",
+  component,
+  handler: async (request) => {
+    const db = require("../models");
+    if (request.method === "get") {
+      const products = await db.Product.findAll({
+        where: { status: 1 },
+        attributes: ["id", "name", "price", "quantity", "unit"],
+        order: [["name", "ASC"]],
+      });
+      return { products: products.map((product) => product.get({ plain: true })) };
+    }
+
+    const payload = request.payload || {};
+    const name = String(firstValue(payload.name) || "").trim();
+    const description = String(firstValue(payload.description) || "").trim();
+    const size = ["small", "medium", "large"].includes(firstValue(payload.size))
+      ? firstValue(payload.size)
+      : "small";
+    const discountValue = Number(firstValue(payload.discount_value));
+    let items;
+    try {
+      items = JSON.parse(String(firstValue(payload.items) || "[]"));
+    } catch (_error) {
+      items = [];
+    }
+    items = Array.isArray(items)
+      ? items.filter((item) => Number.isInteger(Number(item.product_id)) && Number(item.base_quantity) > 0)
+      : [];
+
+    if (!name) return { notice: { type: "error", message: "Vui lòng nhập tên combo." } };
+    if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue >= 100) {
+      return { notice: { type: "error", message: "Phần trăm giảm giá phải lớn hơn 0 và nhỏ hơn 100." } };
+    }
+    if (!items.length) return { notice: { type: "error", message: "Vui lòng chọn ít nhất một sản phẩm và nhập số lượng." } };
+
+    const productIds = [...new Set(items.map((item) => Number(item.product_id)))];
+    const validProducts = await db.Product.count({ where: { id: productIds, status: 1 } });
+    if (validProducts !== productIds.length) {
+      return { notice: { type: "error", message: "Có sản phẩm không tồn tại hoặc đã ngừng bán." } };
+    }
+
+    const transaction = await db.sequelize.transaction();
+    try {
+      const combo = await db.Combo.create({
+        name,
+        description: description || null,
+        size,
+        quantity_multiplier: 1,
+        price_mode: "percent",
+        discount_value: discountValue,
+        status: true,
+        sort_order: 0,
+      }, { transaction });
+      await db.ComboItem.bulkCreate(items.map((item) => ({
+        combo_id: combo.id,
+        product_id: Number(item.product_id),
+        base_quantity: Number(item.base_quantity),
+      })), { transaction });
+      await transaction.commit();
+      return {
+        notice: { type: "success", message: `Đã tạo combo “${name}” cùng ${items.length} sản phẩm.` },
+        redirectUrl: `/admin/resources/combos/records/${combo.id}/show`,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  },
+});
 
 const userProperties = {
   password_hash: { isVisible: false },
@@ -143,6 +284,7 @@ const productStatus = statusProperty([
   { value: 1, label: "Đang bán" },
   { value: 2, label: "Ngừng bán" },
 ]);
+productStatus.name = { label: "Tên sản phẩm", isTitle: true };
 productStatus.quantity = {
   label: "Tổng tồn kho (tự động)",
   isVisible: { list: true, show: true, edit: false, filter: true },
@@ -180,7 +322,6 @@ const shipmentStatus = {
   },
 };
 const productBatchProperties = {
-  // Mã lô được model tự sinh từ ID, admin không cần nhập hoặc sửa tay.
   batch_code: {
     isVisible: { list: true, show: true, edit: false, filter: true },
   },
@@ -229,6 +370,117 @@ const propertiesByModel = {
       ],
     },
   },
+  RecipeSource: {
+    name: { label: "Tên nguồn / tài liệu" },
+    file_path: { isVisible: false },
+    file_name: { label: "Tên file", isVisible: { list: true, show: true, edit: false, filter: false } },
+    mime_type: { isVisible: false },
+    file_size: { label: "Dung lượng", isVisible: { list: false, show: true, edit: false, filter: false } },
+    status: {
+      label: "Trạng thái",
+      isVisible: { list: true, show: true, edit: false, filter: true },
+      availableValues: [
+        { value: "processing", label: "Đang xử lý" },
+        { value: "ready", label: "Hoàn tất" },
+        { value: "error", label: "Có lỗi" },
+      ],
+    },
+    error_message: { label: "Chi tiết lỗi", isVisible: { list: true, show: true, edit: false, filter: false } },
+  },
+  Combo: {
+    name: {
+      label: "Tên combo hiển thị cho khách",
+      description: "Ví dụ: Combo rau củ cho quán ăn 30 suất.",
+      isTitle: true,
+    },
+    description: {
+      label: "Mô tả ngắn",
+      description: "Nói ngắn gọn combo phù hợp với ai và dùng cho nhu cầu nào.",
+    },
+    size: {
+      label: "Quy mô combo",
+      description: "Chọn quy mô gần đúng để khách dễ so sánh các combo.",
+      availableValues: [
+        { value: "small", label: "Nhỏ - quán nhỏ" },
+        { value: "medium", label: "Vừa - nhà hàng vừa" },
+        { value: "large", label: "Lớn - bếp ăn số lượng lớn" },
+      ],
+    },
+    quantity_multiplier: {
+      label: "Hệ số nhân số lượng sản phẩm",
+      description: "Thông thường để 1. Nhập 2 nếu muốn gấp đôi toàn bộ số lượng sản phẩm trong combo.",
+    },
+    price_mode: {
+      label: "Cách đặt giá bán combo",
+      description: "Chọn một cách tính; hệ thống tự lấy tổng giá bán lẻ của các sản phẩm.",
+      availableValues: [
+        { value: "percent", label: "Giảm theo % (dễ dùng nhất)" },
+        { value: "fixed", label: "Trừ một số tiền cố định" },
+        { value: "manual", label: "Tự nhập giá bán cuối cùng" },
+      ],
+    },
+    discount_value: {
+      label: "Mức giảm giá",
+      description: "Nếu chọn giảm theo %, nhập 10 nghĩa là giảm 10%. Nếu chọn giảm cố định, nhập số tiền muốn trừ.",
+    },
+    manual_price: {
+      label: "Giá bán tự nhập (đồng)",
+      description: "Chỉ điền khi đã chọn “Tự nhập giá bán cuối cùng”; các cách tính khác để trống.",
+    },
+    minimum_quantity: { isVisible: false },
+    serving_from: {
+      label: "Phục vụ từ bao nhiêu suất",
+      description: "Không bắt buộc. Ví dụ: 20.",
+    },
+    serving_to: {
+      label: "Phục vụ tối đa bao nhiêu suất",
+      description: "Không bắt buộc. Ví dụ: 30.",
+    },
+    usage_days: {
+      label: "Dùng trong khoảng bao nhiêu ngày",
+      description: "Không bắt buộc. Nhập số ngày dự kiến sử dụng hết combo.",
+    },
+    badge: {
+      label: "Nhãn nổi bật",
+      description: "Không bắt buộc. Ví dụ: Bán chạy, Tiết kiệm nhất.",
+    },
+    sort_order: {
+      label: "Thứ tự hiển thị",
+      description: "Số nhỏ xuất hiện trước. Có thể để 0.",
+    },
+    status: {
+      label: "Có hiển thị cho khách không?",
+      description: "Combo vẫn tự ẩn nếu thiếu sản phẩm hoặc giá combo không thấp hơn giá mua lẻ.",
+      availableValues: [{ value: true, label: "Có - đang bán" }, { value: false, label: "Không - tạm ẩn" }],
+    },
+    retail_price: { label: "Tổng giá mua lẻ", isVisible: { list: true, show: true, edit: false, filter: false } },
+    calculated_price: { label: "Giá combo hiện tại", isVisible: { list: true, show: true, edit: false, filter: false } },
+    savings_display: { label: "Mức tiết kiệm", isVisible: { list: true, show: true, edit: false, filter: false } },
+    availability_warning: { label: "Tồn kho / tự động ẩn", isVisible: { list: true, show: true, edit: false, filter: false } },
+  },
+  ComboItem: {
+    combo_id: {
+      label: "Chọn combo cần thêm sản phẩm",
+      description: "Chọn tên combo từ danh sách, không cần nhớ mã số.",
+      reference: "combos",
+    },
+    product_id: {
+      label: "Chọn sản phẩm",
+      description: "Chọn sản phẩm có sẵn từ danh sách.",
+      reference: "products",
+    },
+    base_quantity: {
+      label: "Số lượng sản phẩm trong 1 combo",
+      description: "Nhập theo đơn vị bán của sản phẩm. Ví dụ sản phẩm tính bằng kg thì nhập 5 nghĩa là 5 kg.",
+    },
+  },
+  ComboSetting: {
+    id: { isVisible: false },
+    minimum_quantity: {
+      label: "Số combo tối thiểu khách phải mua",
+      description: "Áp dụng chung cho tất cả combo nhà hàng. Ví dụ nhập 2 thì khách phải mua ít nhất 2 combo.",
+    },
+  },
 };
 
 const buildResources = (
@@ -236,12 +488,13 @@ const buildResources = (
   componentLoader,
   uploadFeature,
   buildFeature,
-  imagePreviewComponent
+  imagePreviewComponent,
+  quickComboComponent
 ) => Object.keys(resourceNames)
   .filter((modelName) => !hiddenModels.includes(modelName))
   .map((modelName) => {
+    const isRecipeSource = modelName === "RecipeSource";
     const imageProperty = imagePropertyByModel[modelName];
-    // Trang chi tiết của resource có ảnh luôn đặt ảnh lên đầu.
     const showProperties = imageProperty ? [
       imageProperty,
       ...Object.keys(models[modelName].rawAttributes).filter((property) =>
@@ -261,11 +514,9 @@ const buildResources = (
         uploadPath: createUploadPath(modelName.toLowerCase()),
         validation: {
           mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-          // Cho phép ảnh từ máy/điện thoại tối đa 10 MB.
           maxSize: 10 * 1024 * 1024,
         },
       }),
-      // Feature chạy sau upload để thay URL dài bằng thumbnail trong bảng.
       buildFeature({
         properties: {
           uploadImage: {
@@ -281,13 +532,40 @@ const buildResources = (
           },
         },
       }),
+    ] : isRecipeSource ? [
+      uploadFeature({
+        componentLoader,
+        provider: {
+          local: {
+            bucket: require("path").join(__dirname, "..", "pdf"),
+            opts: {},
+          },
+        },
+        properties: {
+          key: "file_path",
+          file: "uploadPdf",
+          filename: "file_name",
+          mimeType: "mime_type",
+          size: "file_size",
+        },
+        uploadPath: (record, filename) => `${record.id()}-${Date.now()}-${filename}`,
+        validation: { mimeTypes: ["application/pdf"], maxSize: 30 * 1024 * 1024 },
+      }),
     ] : [];
+
+    const rebuildAfter = async (response) => {
+      const { rebuildRecipeIndex } = require("../services/recipeIndex");
+      setTimeout(rebuildRecipeIndex, 500);
+      return response;
+    };
 
     return {
       resource: models[modelName],
       features,
       options: {
-      navigation: navigationByModel[modelName],
+      navigation: sidebarHiddenModels.includes(modelName)
+        ? false
+        : navigationByModel[modelName],
       ...(listPropertiesByModel[modelName] ? {
         listProperties: listPropertiesByModel[modelName],
       } : {}),
@@ -296,28 +574,39 @@ const buildResources = (
         ...hiddenTechnicalProperties,
         ...(propertiesByModel[modelName] || {}),
         ...(imageProperty ? {
-          // Hiện ảnh ở danh sách/chi tiết nhưng ẩn ô nhập URL trong form.
           [imageProperty]: {
             isVisible: { list: true, show: true, edit: false, filter: false },
           },
-          uploadImage: { label: "Ảnh từ máy tính" },
+          uploadImage: {
+            label: modelName === "Combo" ? "Chọn ảnh đại diện cho combo" : "Ảnh từ máy tính",
+            ...(modelName === "Combo" ? { description: "Không bắt buộc. Chọn ảnh rõ món ăn hoặc nguyên liệu có trong combo." } : {}),
+          },
         } : {}),
+        ...(isRecipeSource ? { uploadPdf: { label: "Chọn file PDF" } } : {}),
       },
-      actions: readOnlyModels.includes(modelName)
-        ? readOnlyActions
-        : modelName === "User"
-          ? { new: { before: normalizeNewUser } }
-          : modelName === "Shipment"
-            ? {
-              new: { before: normalizeShipment },
-              edit: { before: normalizeShipment },
-            }
-            : undefined,
+      actions: {
+        ...(readOnlyModels.includes(modelName) ? readOnlyActions : {}),
+        ...(modelName === "User" ? { new: { before: normalizeNewUser } } : {}),
+        ...(modelName === "Shipment" ? {
+          new: { before: normalizeShipment },
+          edit: { before: normalizeShipment },
+        } : {}),
+        ...(modelName === "ComboSetting" ? singletonSettingActions : {}),
+        ...(modelName === "Combo" ? {
+          list: { after: enrichComboRecords },
+          show: { after: enrichComboRecords },
+          quickNew: quickComboAction(quickComboComponent),
+        } : {}),
+        ...(isRecipeSource ? {
+          new: { after: rebuildAfter }, edit: { after: rebuildAfter },
+          delete: { after: rebuildAfter }, bulkDelete: { after: rebuildAfter },
+        } : {}),
+        ...(relatedActionsByModel[modelName] || {}),
+      },
       },
     };
   });
 
-// AdminJS dùng tên bảng làm resource id.
 const models = require("../models");
 const resourceLabels = Object.fromEntries(
   Object.entries(resourceNames).map(([name, label]) => [models[name].getTableName(), label])

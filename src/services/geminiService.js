@@ -43,16 +43,4 @@ async function generateJson(prompt, schema) {
   return JSON.parse(text);
 }
 
-async function generateText(contents, systemInstruction) {
-  const model = process.env.GEMINI_TEXT_MODEL || "gemini-3.5-flash";
-  const data = await request(`models/${model}:generateContent`, {
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    contents,
-    generationConfig: { temperature: 0.35, maxOutputTokens: 700 },
-  });
-  const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
-  if (!text) throw Object.assign(new Error("Gemini không trả lời được câu hỏi này."), { status: 502 });
-  return text;
-}
-
-module.exports = { embedText, generateJson, generateText };
+module.exports = { embedText, generateJson };

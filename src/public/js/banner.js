@@ -19,7 +19,6 @@ if (location.pathname === "/") {
           .filter((item) => item && item.status === 1);
         const product = products[0];
         const productImage = product?.image || product?.ProductImages?.[0]?.image || "";
-        // Poster là nội dung chính khi có sẵn; không phủ thêm lớp chữ HTML lên poster.
         const image = banner.image || productImage;
         const imageClass = banner.image
           ? "uses-banner-art"

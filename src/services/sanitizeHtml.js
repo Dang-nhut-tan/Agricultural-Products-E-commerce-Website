@@ -1,6 +1,5 @@
 const sanitizeHtml = require("sanitize-html");
 
-// Chỉ giữ các thẻ định dạng cần thiết cho nội dung bài viết.
 const sanitizeRichText = (html = "") => sanitizeHtml(String(html), {
   allowedTags: [
     "p", "br", "strong", "b", "em", "i", "u", "s",

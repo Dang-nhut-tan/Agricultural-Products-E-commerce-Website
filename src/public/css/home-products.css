@@ -1,4 +1,3 @@
-/* Trang chủ chỉ hiển thị sản phẩm và phân trang, không hiển thị danh mục ảnh. */
 body[data-page="home"] .section.container:has(#categories) {
   display: none !important;
 }
@@ -42,7 +41,6 @@ body[data-page="home"] #products .product-image {
     height: 155px;
   }
 }
-/* Trang sản phẩm có danh mục chữ để lọc và tìm kiếm, không dùng thẻ danh mục ảnh. */
 body[data-page="products"] #categories {
   display: none !important;
 }

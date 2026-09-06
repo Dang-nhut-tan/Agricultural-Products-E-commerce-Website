@@ -24,13 +24,16 @@
 .promotion-grid {
   grid-template-columns: repeat(4, 1fr);
 }
+.promotion-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.promotion-card{display:block;overflow:hidden;border:1px solid #dfe9e3;border-radius:18px;background:#fff;color:#17352b;box-shadow:0 10px 28px rgba(15,81,58,.08)}.promotion-card-image{height:190px;background:#e9f5ee center/cover no-repeat;display:grid;place-items:center;color:#087548;font-weight:900;letter-spacing:.12em}.promotion-card>div:last-child{padding:20px}.promotion-card small{color:#ef7d24;font-weight:800}.promotion-card h2{margin:8px 0;font-size:21px}.promotion-card p{margin:0;color:#62746c;font-weight:700}
 @media (max-width: 900px) {
   .promotion-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  .promotion-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width: 650px) {
   .promotion-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .promotion-list{grid-template-columns:1fr}
 }

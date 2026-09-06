@@ -18,7 +18,6 @@ const formatBatch = (batch) => ({
   expiryDate: batch.expiry_date,
 });
 
-// Lấy số liệu thật cho dashboard; nếu database lỗi vẫn trả giao diện an toàn.
 module.exports = async () => {
   try {
     const now = new Date();

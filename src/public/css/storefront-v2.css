@@ -41,7 +41,8 @@ header {
 .modern-logo { min-width: 214px !important; }
 .modern-logo-mark {
   width: 44px !important; height: 44px !important; border-radius: 12px !important;
-  background: var(--sx-green) !important; box-shadow: none !important;
+  object-fit: contain !important; display: block !important;
+  background: transparent !important; box-shadow: none !important;
 }
 .modern-logo b { color: var(--sx-green-dark) !important; font-size: 1rem !important; }
 .modern-logo small { color: var(--sx-muted) !important; font-size: .6875rem !important; letter-spacing: .04em; }
@@ -321,7 +322,6 @@ footer { padding-top: 48px !important; background: var(--sx-green-dark) !importa
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
-/* Hero chia đôi: giữ poster nhưng không để poster lấn át nhận diện cửa hàng. */
 body[data-page="home"] .store-banner,
 body[data-page="home"] .store-banner.uses-banner-art,
 body[data-page="home"] .store-banner.has-product-image,
@@ -503,7 +503,6 @@ body[data-page="home"] .store-banner.no-product-image .banner-art {
   object-position: center !important;
   transform: none !important;
 }
-/* Khóa cách render legacy dùng background-image để cache cũ cũng không crop logo. */
 .supplier-card .supplier-image {
   width: 100% !important;
   height: auto !important;

@@ -20,8 +20,6 @@ tags:
   - name: Brands
   - name: Banners
   - name: News
-  - name: Coupons
-  - name: Users
   - name: My Orders
   - name: Payments
   - name: Admin Orders
@@ -314,23 +312,6 @@ paths:
       responses:
         "200": { description: Danh sách danh mục }
         "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [Categories]
-      summary: Tạo danh mục
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NamedImageCreateRequest" }
-      responses:
-        "201": { description: Tạo danh mục thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "500": { $ref: "#/components/responses/ServerError" }
 
   /api/categories/{id}:
     get:
@@ -342,40 +323,6 @@ paths:
         "200": { description: Chi tiết danh mục }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [Categories]
-      summary: Cập nhật danh mục
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NamedImageUpdateRequest" }
-      responses:
-        "200": { description: Cập nhật danh mục thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [Categories]
-      summary: Xóa danh mục
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa danh mục thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
 
   /api/brands:
     get:
@@ -383,23 +330,6 @@ paths:
       summary: Lấy danh sách thương hiệu
       responses:
         "200": { description: Danh sách thương hiệu }
-        "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [Brands]
-      summary: Tạo thương hiệu
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NamedImageCreateRequest" }
-      responses:
-        "201": { description: Tạo thương hiệu thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
         "500": { $ref: "#/components/responses/ServerError" }
 
   /api/brands/{id}:
@@ -412,40 +342,6 @@ paths:
         "200": { description: Chi tiết thương hiệu }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [Brands]
-      summary: Cập nhật thương hiệu
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NamedImageUpdateRequest" }
-      responses:
-        "200": { description: Cập nhật thương hiệu thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [Brands]
-      summary: Xóa thương hiệu
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa thương hiệu thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
 
   /api/banners:
     get:
@@ -453,23 +349,6 @@ paths:
       summary: Lấy danh sách banner
       responses:
         "200": { description: Danh sách banner }
-        "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [Banners]
-      summary: Tạo banner
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/BannerRequest" }
-      responses:
-        "201": { description: Tạo banner thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
         "500": { $ref: "#/components/responses/ServerError" }
 
   /api/banners/{id}:
@@ -482,40 +361,6 @@ paths:
         "200": { description: Chi tiết banner }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [Banners]
-      summary: Cập nhật banner
-      description: Yêu cầu tài khoản admin và ít nhất một trường trong body.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/BannerRequest" }
-      responses:
-        "200": { description: Cập nhật banner thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [Banners]
-      summary: Xóa banner
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa banner thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
 
   /api/news:
     get:
@@ -523,23 +368,6 @@ paths:
       summary: Lấy danh sách tin tức
       responses:
         "200": { description: Danh sách tin tức }
-        "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [News]
-      summary: Tạo tin tức
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NewsCreateRequest" }
-      responses:
-        "201": { description: Tạo tin tức thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
         "500": { $ref: "#/components/responses/ServerError" }
 
   /api/news/{id}:
@@ -550,200 +378,6 @@ paths:
         - $ref: "#/components/parameters/Id"
       responses:
         "200": { description: Chi tiết tin tức }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [News]
-      summary: Cập nhật tin tức
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/NewsUpdateRequest" }
-      responses:
-        "200": { description: Cập nhật tin tức thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [News]
-      summary: Xóa tin tức
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa tin tức thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-  /api/coupons:
-    get:
-      tags: [Coupons]
-      summary: Lấy danh sách mã giảm giá
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      responses:
-        "200": { description: Danh sách mã giảm giá }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [Coupons]
-      summary: Tạo mã giảm giá
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/CouponCreateRequest" }
-      responses:
-        "201": { description: Tạo mã giảm giá thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-  /api/coupons/{id}:
-    get:
-      tags: [Coupons]
-      summary: Lấy mã giảm giá theo ID
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Chi tiết mã giảm giá }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [Coupons]
-      summary: Cập nhật mã giảm giá
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/CouponUpdateRequest" }
-      responses:
-        "200": { description: Cập nhật mã giảm giá thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [Coupons]
-      summary: Xóa mã giảm giá
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa mã giảm giá thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-  /api/users:
-    get:
-      tags: [Users]
-      summary: Lấy danh sách người dùng
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      responses:
-        "200": { description: Danh sách người dùng }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    post:
-      tags: [Users]
-      summary: Tạo người dùng
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/UserCreateRequest" }
-      responses:
-        "201": { description: Tạo người dùng thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-  /api/users/{id}:
-    get:
-      tags: [Users]
-      summary: Lấy người dùng theo ID
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Chi tiết người dùng }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    put:
-      tags: [Users]
-      summary: Cập nhật người dùng
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/UserUpdateRequest" }
-      responses:
-        "200": { description: Cập nhật người dùng thành công }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/ServerError" }
-    delete:
-      tags: [Users]
-      summary: Xóa người dùng
-      description: Yêu cầu tài khoản admin.
-      security:
-        - sessionCookie: []
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200": { description: Xóa người dùng thành công }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/ServerError" }
 
@@ -799,6 +433,29 @@ paths:
       responses:
         "200":
           description: Trạng thái cấu hình, Client ID và tiền tệ
+
+  /api/payments/coupons/validate:
+    post:
+      tags: [Payments]
+      summary: Kiểm tra mã giảm giá trước khi thanh toán
+      description: Kết quả chỉ dùng để xem trước; máy chủ sẽ tính lại từ giá sản phẩm khi tạo đơn.
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, subtotal]
+              properties:
+                code: { type: string, example: SALE10 }
+                subtotal: { type: number, minimum: 0, example: 250000 }
+      responses:
+        "200": { description: Mã hợp lệ và trả về số tiền được giảm }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { description: Mã hết hạn, hết lượt, đã dùng hoặc đơn chưa đạt giá trị tối thiểu }
 
   /api/payments/paypal/orders:
     post:
@@ -1013,6 +670,10 @@ components:
           type: integer
           minimum: 1
           example: 5
+        couponCode:
+          type: string
+          description: Mã giảm giá đã áp dụng (không bắt buộc)
+          example: SALE10
         items:
           type: array
           minItems: 1
@@ -1130,106 +791,3 @@ components:
         star: { type: integer, minimum: 1, maximum: 5, example: 4 }
         content: { type: string, minLength: 2, maxLength: 1000, example: Sản phẩm tốt }
 
-    NamedImageCreateRequest:
-      type: object
-      required: [name]
-      properties:
-        name: { type: string, example: Trái cây }
-        image: { type: string, example: https://example.com/image.jpg }
-
-    NamedImageUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        name: { type: string, example: Rau củ sạch }
-        image: { type: string, example: https://example.com/image.jpg }
-
-    BannerRequest:
-      type: object
-      properties:
-        name: { type: string, example: Khuyến mãi mùa hè }
-        image: { type: string, example: https://example.com/banner.jpg }
-        status: { type: integer, example: 1 }
-        sort_order: { type: integer, example: 1 }
-
-    NewsCreateRequest:
-      type: object
-      required: [title]
-      properties:
-        title: { type: string, example: Bí quyết chọn nông sản sạch }
-        image: { type: string, example: https://example.com/news.jpg }
-        content: { type: string, example: Nội dung bài viết }
-
-    NewsUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        title: { type: string, example: Bí quyết chọn rau củ sạch }
-        image: { type: string, example: https://example.com/news.jpg }
-        content: { type: string, example: Nội dung bài viết đã cập nhật }
-
-    CouponCreateRequest:
-      type: object
-      required: [code, discount_type]
-      properties:
-        code: { type: string, example: SALE10 }
-        discount_type:
-          type: integer
-          description: "1: phần trăm, 2: số tiền cố định"
-          example: 1
-        discount_value: { type: number, minimum: 0, example: 10 }
-        min_order_value: { type: number, minimum: 0, example: 100000 }
-        start_date: { type: string, format: date-time, example: "2026-07-22T00:00:00Z" }
-        end_date: { type: string, format: date-time, example: "2026-08-22T23:59:59Z" }
-        quantity: { type: integer, minimum: 0, example: 100 }
-        used_quantity: { type: integer, minimum: 0, example: 0 }
-        status: { type: integer, example: 1 }
-
-    CouponUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        code: { type: string, example: SALE20 }
-        discount_type:
-          type: integer
-          description: "1: phần trăm, 2: số tiền cố định"
-          example: 1
-        discount_value: { type: number, minimum: 0, example: 20 }
-        min_order_value: { type: number, minimum: 0, example: 100000 }
-        start_date: { type: string, format: date-time, example: "2026-07-22T00:00:00Z" }
-        end_date: { type: string, format: date-time, example: "2026-08-22T23:59:59Z" }
-        quantity: { type: integer, minimum: 0, example: 100 }
-        used_quantity: { type: integer, minimum: 0, example: 0 }
-        status: { type: integer, example: 1 }
-
-    UserCreateRequest:
-      type: object
-      required: [email, password]
-      properties:
-        email: { type: string, format: email, example: customer@example.com }
-        password: { type: string, format: password, minLength: 6, example: "123456" }
-        name: { type: string, example: Nguyễn Văn A }
-        role:
-          type: integer
-          enum: [1, 2]
-          description: "1: admin, 2: customer"
-          example: 2
-        status:
-          type: integer
-          enum: [0, 1, 2]
-          description: "0: inactive, 1: active, 2: banned"
-          example: 1
-        avatar: { type: string, example: https://example.com/avatar.jpg }
-        phone: { type: string, example: "0901234567" }
-
-    UserUpdateRequest:
-      type: object
-      minProperties: 1
-      properties:
-        email: { type: string, format: email, example: customer@example.com }
-        password: { type: string, format: password, minLength: 6, example: "123456" }
-        name: { type: string, example: Nguyễn Văn A }
-        role: { type: integer, enum: [1, 2], example: 2 }
-        status: { type: integer, enum: [0, 1, 2], example: 1 }
-        avatar: { type: string, example: https://example.com/avatar.jpg }
-        phone: { type: string, example: "0901234567" }

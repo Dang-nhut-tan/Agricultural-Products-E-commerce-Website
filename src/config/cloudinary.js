@@ -9,8 +9,6 @@ const cloudinaryConfig = {
   secure: true,
 };
 
-// Chỉ cấu hình SDK khi đã điền đủ biến môi trường.
-// Nhờ vậy backend vẫn khởi động được khi chưa sử dụng chức năng upload ảnh.
 const isCloudinaryConfigured = Boolean(
   cloudinaryConfig.cloud_name &&
   cloudinaryConfig.api_key &&
@@ -21,7 +19,6 @@ if (isCloudinaryConfigured) {
   cloudinary.config(cloudinaryConfig);
 }
 
-// Gọi trước khi upload/xóa để nhận thông báo dễ hiểu thay vì lỗi SDK khó đọc.
 const ensureCloudinaryConfigured = () => {
   if (!isCloudinaryConfigured) {
     throw new Error(

@@ -1,5 +1,9 @@
 const authPath = location.pathname;
 const authMain = document.querySelector("main");
+const requestedReturnTo = new URLSearchParams(location.search).get("returnTo");
+const safeReturnTo = requestedReturnTo?.startsWith("/") && !requestedReturnTo.startsWith("//")
+  ? requestedReturnTo
+  : "/tai-khoan";
 
 if (authPath === "/dang-nhap" || authPath === "/dang-ky") {
   const isLogin = authPath === "/dang-nhap";
@@ -31,7 +35,7 @@ if (authPath === "/dang-nhap" || authPath === "/dang-ky") {
         const result = await response.json();
         if (!response.ok)
           throw new Error(result.message || "Không thể xác thực.");
-        location.href = "/tai-khoan";
+        location.href = safeReturnTo;
       } catch (error) {
         errorBox.textContent = error.message;
       } finally {

@@ -32,7 +32,6 @@ Ref: users.id < user_addresses.user_id
 Table categories {
   id int [pk]
   name varchar [unique]
-  image text
   deleted_at datetime
   created_at datetime
   updated_at datetime
@@ -76,6 +75,7 @@ Table product_batches {
   batch_code varchar [unique]
   initial_quantity int
   remaining_quantity int
+  import_price decimal
   harvest_date datetime
   expiry_date datetime
   origin varchar
@@ -111,34 +111,11 @@ Ref: products.id < feedback.product_id
 Ref: users.id < feedback.user_id
 Ref: order_details.id < feedback.order_detail_id
 
-Table carts {
-  id int [pk]
-  user_id int
-  created_at datetime
-  updated_at datetime
-}
-
-Ref: users.id < carts.user_id
-
-Table cart_items {
-  id int [pk]
-  cart_id int
-  product_id int
-  snapshot_name varchar
-  quantity int
-  price_at_add decimal
-  created_at datetime
-  updated_at datetime
-}
-
-Ref: carts.id < cart_items.cart_id
-Ref: products.id < cart_items.product_id
-
 Table orders {
   id int [pk]
   user_id int
   address_id int
-  status int // 0: pending, 1: confirmed, 2: shipping, 3: completed, 4: cancelled
+  status int // 0: received, 1: preparing, 2: handed_to_carrier, 3: delivering, 4: completed, 5: cancelled
   note text
   subtotal decimal
   shipping_fee decimal
@@ -158,8 +135,12 @@ Table order_details {
   batch_id int
   product_name varchar
   price decimal
+  cost_price decimal
   quantity int
   unit varchar
+  combo_id int
+  combo_name varchar
+  combo_quantity int
   created_at datetime
   updated_at datetime
 }
@@ -205,7 +186,7 @@ Table shipments {
   ward varchar
   district varchar
   province varchar
-  shipping_status int // 0: preparing, 1: delivering, 2: delivered, 3: failed
+  shipping_status int // 0: preparing, 1: handed_to_carrier, 2: delivering, 3: delivered, 4: failed, 5: returned
   shipping_fee decimal
   delivery_time datetime
   tracking_code varchar
@@ -281,6 +262,10 @@ Table order_coupons {
   discount_amount decimal
   created_at datetime
   updated_at datetime
+
+  indexes {
+    order_id [unique]
+  }
 }
 
 Ref: orders.id < order_coupons.order_id
@@ -293,34 +278,18 @@ Table coupon_users {
   used_at datetime
   created_at datetime
   updated_at datetime
+
+  indexes {
+    (coupon_id, user_id) [unique]
+  }
 }
 
 Ref: coupons.id < coupon_users.coupon_id
 Ref: users.id < coupon_users.user_id
 
-Table wishlists {
-  id int [pk]
-  user_id int
-  created_at datetime
-  updated_at datetime
-}
-
-Ref: users.id < wishlists.user_id
-
-Table wishlist_items {
-  id int [pk]
-  wishlist_id int
-  product_id int
-  created_at datetime
-  updated_at datetime
-}
-
-Ref: wishlists.id < wishlist_items.wishlist_id
-Ref: products.id < wishlist_items.product_id
-
 Table inventory_transactions {
   id int [pk]
-  batch_id int
+  batch_id int // nullable; giữ lịch sử khi lô hàng bị xóa
   type varchar // IN, OUT, ADJUST
   quantity int
   reference_type varchar // order, purchase, adjust
@@ -330,3 +299,88 @@ Table inventory_transactions {
 }
 
 Ref: product_batches.id < inventory_transactions.batch_id
+
+Table recipes {
+  id int [pk]
+  name varchar
+  aliases text
+  ingredients longtext
+  steps longtext
+  safety_notes text
+  image text
+  source varchar
+  active boolean
+  created_at datetime
+  updated_at datetime
+}
+
+Table recipe_sources {
+  id int [pk]
+  name varchar
+  file_path text
+  file_name varchar
+  mime_type varchar
+  file_size int
+  status varchar
+  error_message text
+  created_at datetime
+  updated_at datetime
+}
+
+Table recipe_product_links {
+  id int [pk]
+  recipe_id int
+  ingredient_name varchar
+  aliases text
+  product_id int
+  priority int
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: recipes.id < recipe_product_links.recipe_id
+Ref: products.id < recipe_product_links.product_id
+
+Table combos {
+  id int [pk]
+  name varchar
+  description text
+  image text
+  size varchar // small, medium, large
+  quantity_multiplier decimal
+  price_mode varchar // percent, fixed, manual
+  discount_value decimal
+  manual_price decimal
+  minimum_quantity int
+  serving_from int
+  serving_to int
+  usage_days int
+  badge varchar
+  status boolean
+  sort_order int
+  created_at datetime
+  updated_at datetime
+}
+
+Table combo_items {
+  id int [pk]
+  combo_id int
+  product_id int
+  base_quantity decimal
+  created_at datetime
+  updated_at datetime
+
+  indexes {
+    (combo_id, product_id) [unique]
+  }
+}
+
+Ref: combos.id < combo_items.combo_id
+Ref: products.id < combo_items.product_id
+
+Table combo_settings {
+  id int [pk]
+  minimum_quantity int
+  created_at datetime
+  updated_at datetime
+}
