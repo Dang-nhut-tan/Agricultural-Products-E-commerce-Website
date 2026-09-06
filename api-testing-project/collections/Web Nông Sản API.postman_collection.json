@@ -1245,6 +1245,43 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Logout admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200)",
+                  "})",
+                  "",
+                  "pm.test(\"Admin login page is returned\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.contain(\"text/html\")",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "logout"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
