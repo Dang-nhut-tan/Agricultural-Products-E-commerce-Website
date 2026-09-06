@@ -42,11 +42,20 @@ const products = [
 module.exports = {
   async up(queryInterface) {
     const now = new Date();
-    const [categories] = await queryInterface.sequelize.query(
+    let [categories] = await queryInterface.sequelize.query(
       "SELECT id, name FROM categories WHERE name IN ('Rau', 'Thịt') AND deleted_at IS NULL",
     );
+    const existingNames = new Set(categories.map((item) => item.name));
+    const missingCategories = ["Rau", "Thịt"]
+      .filter((name) => !existingNames.has(name))
+      .map((name) => ({ name, created_at: now, updated_at: now }));
+    if (missingCategories.length) {
+      await queryInterface.bulkInsert("categories", missingCategories);
+      [categories] = await queryInterface.sequelize.query(
+        "SELECT id, name FROM categories WHERE name IN ('Rau', 'Thịt') AND deleted_at IS NULL",
+      );
+    }
     const categoryIds = Object.fromEntries(categories.map((item) => [item.name, item.id]));
-    if (!categoryIds.Rau || !categoryIds["Thịt"]) throw new Error("Thiếu danh mục Rau hoặc Thịt.");
 
     for (const [index, product] of products.entries()) {
       const [existing] = await queryInterface.sequelize.query(

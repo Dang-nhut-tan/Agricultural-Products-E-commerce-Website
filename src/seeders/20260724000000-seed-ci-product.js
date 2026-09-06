@@ -7,7 +7,6 @@ module.exports = {
     await queryInterface.bulkInsert("categories", [
       {
         name: "CI Test Category",
-        image: "https://example.com/category.jpg",
         created_at: now,
         updated_at: now,
       },

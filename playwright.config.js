@@ -43,17 +43,17 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'Trình duyệt Chromium',
+      name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
-      name: 'Trình duyệt Firefox',
+      name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
-      name: 'Trình duyệt WebKit',
+      name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
 

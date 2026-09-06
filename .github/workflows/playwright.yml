@@ -79,7 +79,7 @@ jobs:
 
       # Chạy Playwright smoke test
       - name: Run one Playwright smoke test
-        run: yarn playwright test tests/smoke.spec.js --project=chromium
+        run: yarn playwright test tests/playwright/client/api-smoke.spec.js --project=chromium
 
       - name: Start backend for API tests
         run: |
