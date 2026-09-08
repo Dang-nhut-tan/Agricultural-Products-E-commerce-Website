@@ -1,6 +1,8 @@
-class ProfilePage {
+const TestClientBase = require("../base/TestClientBase");
+
+class ProfilePage extends TestClientBase {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.profileView = page.locator("#profileView");
     this.profileForm = page.locator("#profileForm");
     this.addressForm = page.locator("#addressForm");

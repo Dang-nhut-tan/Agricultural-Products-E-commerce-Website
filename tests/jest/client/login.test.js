@@ -1,14 +1,14 @@
 jest.mock("bcryptjs", () => ({ compare: jest.fn() }));
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   sequelize: {},
   User: { findOne: jest.fn() },
   UserAddress: {},
 }));
-jest.mock("../../src/services/cloudinaryService", () => ({ uploadImage: jest.fn() }));
+jest.mock("../../../src/services/cloudinaryService", () => ({ uploadImage: jest.fn() }));
 
 const bcrypt = require("bcryptjs");
-const { User } = require("../../src/models");
-const { login } = require("../../src/controllers/authController");
+const { User } = require("../../../src/models");
+const { login } = require("../../../src/controllers/authController");
 
 function response() {
   const res = { set: jest.fn() };
@@ -18,7 +18,7 @@ function response() {
 }
 
 function activeUser(overrides = {}) {
-  return {
+  return Object.assign({
     id: 7,
     email: "user@example.com",
     name: "User",
@@ -27,8 +27,7 @@ function activeUser(overrides = {}) {
     failed_login_attempts: 0,
     locked_until: null,
     update: jest.fn().mockResolvedValue(undefined),
-    ...overrides,
-  };
+  }, overrides);
 }
 
 describe("Đăng nhập - các lớp tương đương và giá trị biên", () => {

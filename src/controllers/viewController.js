@@ -17,7 +17,7 @@ const decorateProduct = (instance) => {
       : "";
   product.primaryImage =
     product.image ||
-    [...(product.ProductImages || [])].sort(
+    (product.ProductImages || []).slice().sort(
       (a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0),
     )[0]?.image ||
     "";
@@ -129,10 +129,10 @@ async function getProductDetailPage(req, res, next) {
     });
 
     const plainProduct = decorateProduct(product);
-    plainProduct.images = [
-      plainProduct.image,
-      ...(plainProduct.ProductImages || []).map((item) => item.image),
-    ].filter((image, index, images) => image && images.indexOf(image) === index);
+    const productImages = (plainProduct.ProductImages || []).map((item) => item.image);
+    plainProduct.images = [plainProduct.image]
+      .concat(productImages)
+      .filter((image, index, images) => image && images.indexOf(image) === index);
 
     return res.render("pages/products/detail.njk", {
       pageTitle: `${plainProduct.name} | Nông Sản Xanh`,
@@ -149,13 +149,14 @@ async function getProductDetailPage(req, res, next) {
 async function getCombosPage(req, res, next) {
   try {
     const { findCombos } = require("../services/comboService");
-    const combos = (await findCombos()).map((combo) => ({
-      ...combo,
-      displayRetailPrice: formatMoney(combo.retailPrice),
-      displayComboPrice: formatMoney(combo.comboPrice),
-      displaySavings: formatMoney(combo.savings),
-      sizeLabel: { small: "Nhỏ", medium: "Vừa", large: "Lớn" }[combo.size] || combo.size,
-    }));
+    const combos = (await findCombos()).map((combo) => {
+      const comboView = Object.assign({}, combo);
+      comboView.displayRetailPrice = formatMoney(combo.retailPrice);
+      comboView.displayComboPrice = formatMoney(combo.comboPrice);
+      comboView.displaySavings = formatMoney(combo.savings);
+      comboView.sizeLabel = { small: "Nhỏ", medium: "Vừa", large: "Lớn" }[combo.size] || combo.size;
+      return comboView;
+    });
     res.render("pages/combos/index.njk", {
       pageTitle: "Combo nhà hàng | Nông Sản Xanh",
       pageDescription: "Nguồn hàng số lượng lớn, giá tốt và miễn phí giao hàng cho quán ăn, nhà hàng và bếp công ty.",
@@ -198,10 +199,9 @@ async function getNewsDetailPage(req, res, next) {
       pageTitle: `${item.title} | Nông Sản Xanh`,
       pageDescription: item.title,
       currentPath: req.path,
-      item: {
-        ...item.get({ plain: true }),
+      item: Object.assign({}, item.get({ plain: true }), {
         publishedDate: new Date(item.createdAt).toLocaleDateString("vi-VN"),
-      },
+      }),
     });
   } catch (error) {
     return next(error);

@@ -28,15 +28,33 @@ const QuickCombo = () => {
     .filter(([, quantity]) => Number(quantity) > 0)
     .map(([productId, quantity]) => ({ product_id: Number(productId), base_quantity: Number(quantity) })), [selected]);
 
+  const updateFormField = (field, value) => {
+    setForm((current) => Object.assign({}, current, { [field]: value }));
+  };
+
+  const toggleProduct = (productId, checked) => {
+    setSelected((current) => {
+      const next = Object.assign({}, current);
+      if (checked) next[productId] = 1;
+      else delete next[productId];
+      return next;
+    });
+  };
+
+  const updateProductQuantity = (productId, quantity) => {
+    setSelected((current) => Object.assign({}, current, { [productId]: quantity }));
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     setSaving(true);
     setNotice(null);
     try {
+      const requestData = Object.assign({}, form, { items: JSON.stringify(items) });
       const { data } = await api.resourceAction({
         resourceId: "combos",
         actionName: "quickNew",
-        data: { ...form, items: JSON.stringify(items) },
+        data: requestData,
       });
       if (data.notice?.type === "error") {
         setNotice({ type: "danger", message: data.notice.message });
@@ -55,20 +73,20 @@ const QuickCombo = () => {
     <p>Điền thông tin cơ bản và chọn các sản phẩm bên dưới. Giá mua lẻ, giá combo và tồn kho sẽ được hệ thống tự tính.</p>
     {notice && <MessageBox variant={notice.type} mb="lg">{notice.message}</MessageBox>}
     <form onSubmit={submit}>
-      <Box mb="lg"><Label>Tên combo *</Label><input style={inputStyle} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ví dụ: Combo rau củ cho quán ăn 30 suất" /></Box>
-      <Box mb="lg"><Label>Mô tả ngắn</Label><textarea style={inputStyle} rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Combo phù hợp với loại quán hoặc nhu cầu nào?" /></Box>
+      <Box mb="lg"><Label>Tên combo *</Label><input style={inputStyle} value={form.name} onChange={(e) => updateFormField("name", e.target.value)} placeholder="Ví dụ: Combo rau củ cho quán ăn 30 suất" /></Box>
+      <Box mb="lg"><Label>Mô tả ngắn</Label><textarea style={inputStyle} rows={3} value={form.description} onChange={(e) => updateFormField("description", e.target.value)} placeholder="Combo phù hợp với loại quán hoặc nhu cầu nào?" /></Box>
       <Box display="grid" gridTemplateColumns={["1fr", "1fr 1fr"]} gridGap="lg" mb="xl">
-        <div><Label>Quy mô combo</Label><select style={inputStyle} value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })}><option value="small">Nhỏ - quán nhỏ</option><option value="medium">Vừa - nhà hàng vừa</option><option value="large">Lớn - bếp ăn số lượng lớn</option></select></div>
-        <div><Label>Giảm bao nhiêu % *</Label><input style={inputStyle} type="number" min="1" max="99" value={form.discount_value} onChange={(e) => setForm({ ...form, discount_value: e.target.value })} /></div>
+        <div><Label>Quy mô combo</Label><select style={inputStyle} value={form.size} onChange={(e) => updateFormField("size", e.target.value)}><option value="small">Nhỏ - quán nhỏ</option><option value="medium">Vừa - nhà hàng vừa</option><option value="large">Lớn - bếp ăn số lượng lớn</option></select></div>
+        <div><Label>Giảm bao nhiêu % *</Label><input style={inputStyle} type="number" min="1" max="99" value={form.discount_value} onChange={(e) => updateFormField("discount_value", e.target.value)} /></div>
       </Box>
       <H2>Chọn sản phẩm trong combo</H2>
       <p>Đánh dấu sản phẩm cần dùng rồi nhập số lượng cho một combo theo đúng đơn vị đang bán.</p>
       {loading ? <p>Đang tải sản phẩm…</p> : products.map((product) => {
         const checked = Object.prototype.hasOwnProperty.call(selected, product.id);
         return <Box key={product.id} display="grid" gridTemplateColumns="32px 1fr 180px" alignItems="center" gridGap="lg" py="md" borderBottom="default">
-          <input type="checkbox" checked={checked} onChange={(e) => setSelected((current) => { const next = { ...current }; if (e.target.checked) next[product.id] = 1; else delete next[product.id]; return next; })} />
+          <input type="checkbox" checked={checked} onChange={(e) => toggleProduct(product.id, e.target.checked)} />
           <div><b>{product.name}</b><div>Còn {Number(product.quantity).toLocaleString("vi-VN")} {product.unit || "sản phẩm"} · {Number(product.price).toLocaleString("vi-VN")} ₫</div></div>
-          <input style={inputStyle} type="number" min="0.01" step="0.01" disabled={!checked} value={checked ? selected[product.id] : ""} onChange={(e) => setSelected({ ...selected, [product.id]: e.target.value })} placeholder={`Số ${product.unit || "lượng"}`} />
+          <input style={inputStyle} type="number" min="0.01" step="0.01" disabled={!checked} value={checked ? selected[product.id] : ""} onChange={(e) => updateProductQuantity(product.id, e.target.value)} placeholder={`Số ${product.unit || "lượng"}`} />
         </Box>;
       })}
       <Box mt="xl"><Button type="submit" variant="primary" disabled={saving || loading}>{saving ? "Đang tạo…" : `Tạo combo với ${items.length} sản phẩm`}</Button></Box>

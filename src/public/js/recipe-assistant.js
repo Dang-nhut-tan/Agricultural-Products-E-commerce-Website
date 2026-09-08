@@ -71,7 +71,8 @@ async function submitRecipeSearch(query) {
   panel.hidden = false;
   const result = panel.querySelector("#recipeResult");
   result.innerHTML = '<div class="recipe-loading"><span></span><h3>Đang tìm công thức và đối chiếu hàng trong kho…</h3><p>Quá trình có thể mất khoảng một phút.</p></div>';
-  const filters = Object.fromEntries([...panel.querySelectorAll("[data-recipe-filter]")].map((input) => [input.dataset.recipeFilter, input.value]));
+  const filterInputs = Array.from(panel.querySelectorAll("[data-recipe-filter]"));
+  const filters = Object.fromEntries(filterInputs.map((input) => [input.dataset.recipeFilter, input.value]));
   try {
     const response = await fetch("/api/recipes/suggest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, filters }) });
     const data = await response.json();

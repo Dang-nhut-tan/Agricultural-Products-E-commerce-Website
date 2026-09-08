@@ -59,10 +59,11 @@ async function getGroupedStorefront(req, res) {
     }
     res.json({
       categories: categories
-        .map((category) => ({
-          ...category.get({ plain: true }),
-          products: productsByCategory.get(Number(category.id)) || [],
-        }))
+        .map((category) => {
+          const categoryData = Object.assign({}, category.get({ plain: true }));
+          categoryData.products = productsByCategory.get(Number(category.id)) || [];
+          return categoryData;
+        })
         .filter((category) => category.products.length),
     });
   } catch (error) {

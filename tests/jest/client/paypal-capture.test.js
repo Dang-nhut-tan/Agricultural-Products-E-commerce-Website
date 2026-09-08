@@ -1,4 +1,4 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   Payment: { findOne: jest.fn() },
   Order: {},
   UserAddress: {},
@@ -7,14 +7,14 @@ jest.mock("../../src/models", () => ({
   Shipment: {},
   sequelize: { transaction: jest.fn() },
 }));
-jest.mock("../../src/services/orderInventory", () => ({
+jest.mock("../../../src/services/orderInventory", () => ({
   reserve: jest.fn(),
   restore: jest.fn(),
 }));
 
-const db = require("../../src/models");
-const orderInventory = require("../../src/services/orderInventory");
-const { captureOrder } = require("../../src/controllers/paymentController");
+const db = require("../../../src/models");
+const orderInventory = require("../../../src/services/orderInventory");
+const { captureOrder } = require("../../../src/controllers/paymentController");
 
 function response() {
   const res = {};
@@ -24,14 +24,13 @@ function response() {
 }
 
 function payment(overrides = {}) {
-  return {
+  return Object.assign({
     order_id: 70,
     amount: 250000,
     status: 0,
     update: jest.fn().mockResolvedValue(undefined),
     Order: { update: jest.fn().mockResolvedValue(undefined) },
-    ...overrides,
-  };
+  }, overrides);
 }
 
 function paypalFetch(capture) {

@@ -1,19 +1,24 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   UserAddress: { findOne: jest.fn() },
-  Product: { findAll: jest.fn() },
+  Product: { findAll: jest.fn(), findAndCountAll: jest.fn() },
+  Category: {},
+  Brand: {},
+  ProductImage: {},
+  Sequelize: { Op: { like: Symbol("like") } },
   Order: { create: jest.fn() },
   OrderDetail: { bulkCreate: jest.fn() },
   Shipment: { create: jest.fn() },
   Payment: { create: jest.fn(), findOne: jest.fn() },
   sequelize: { transaction: jest.fn() },
 }));
-jest.mock("../../src/services/orderInventory", () => ({
+jest.mock("../../../src/services/orderInventory", () => ({
   reserve: jest.fn(),
   restore: jest.fn(),
 }));
 
-const db = require("../../src/models");
-const { createOrder } = require("../../src/controllers/paymentController");
+const db = require("../../../src/models");
+const { createOrder } = require("../../../src/controllers/paymentController");
+const { getProducts } = require("../../../src/controllers/productController");
 
 function response() {
   const res = {};
@@ -113,5 +118,65 @@ describe("Thanh toán giỏ hàng - các lớp tương đương và giới hạn
       status: 409,
     });
     expect(db.Order.create).not.toHaveBeenCalled();
+  });
+});
+
+describe("Truy vấn sản phẩm - biên phân trang và phân vùng tìm kiếm", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    db.Product.findAndCountAll.mockResolvedValue({ rows: [], count: 0 });
+  });
+
+  async function executeProductQuery(query) {
+    const res = response();
+    await getProducts({ query }, res);
+    return {
+      responseBody: res.json.mock.calls[0][0],
+      queryOptions: db.Product.findAndCountAll.mock.calls[0][0],
+    };
+  }
+
+  it.each([
+    ["trang dưới biên", "0", 1, 0],
+    ["trang nhỏ nhất", "1", 1, 0],
+    ["trang nhỏ nhất cộng một", "2", 2, 8],
+    ["trang không phải số", "abc", 1, 0],
+  ])("chuẩn hóa %s", async (_label, page, expectedPage, expectedOffset) => {
+    const result = await executeProductQuery({ page });
+
+    expect(result.responseBody.pagination.page).toBe(expectedPage);
+    expect(result.queryOptions.offset).toBe(expectedOffset);
+  });
+
+  it.each([
+    ["âm một", "-1", 1],
+    ["bằng không nên dùng mặc định", "0", 8],
+    ["nhỏ nhất", "1", 1],
+    ["nhỏ nhất cộng một", "2", 2],
+    ["lớn nhất trừ một", "23", 23],
+    ["lớn nhất", "24", 24],
+    ["trên biên lớn nhất", "25", 24],
+    ["không phải số", "abc", 8],
+  ])("chuẩn hóa limit tại biên %s", async (_label, limit, expectedLimit) => {
+    const result = await executeProductQuery({ limit });
+
+    expect(result.responseBody.pagination.limit).toBe(expectedLimit);
+    expect(result.queryOptions.limit).toBe(expectedLimit);
+  });
+
+  it("thêm category và từ khóa đã cắt khoảng trắng vào phân vùng có bộ lọc", async () => {
+    const result = await executeProductQuery({
+      category: "4",
+      search: "  rau xanh  ",
+    });
+    const likeOperator = db.Sequelize.Op.like;
+
+    expect(result.queryOptions.where.category_id).toBe("4");
+    expect(result.queryOptions.where.name[likeOperator]).toBe("%rau xanh%");
+  });
+
+  it("không thêm điều kiện tùy chọn vào phân vùng không có bộ lọc", async () => {
+    const result = await executeProductQuery({});
+    expect(result.queryOptions.where).toEqual({ status: 1 });
   });
 });

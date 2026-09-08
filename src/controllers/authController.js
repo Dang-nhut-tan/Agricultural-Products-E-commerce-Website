@@ -131,11 +131,10 @@ async function addAddress(req, res) {
   const count = await UserAddress.count({
     where: { user_id: req.session.userId },
   });
-  const address = await UserAddress.create({
-    ...data,
-    user_id: req.session.userId,
-    is_default: count === 0 || Boolean(req.body.is_default),
-  });
+  const addressData = Object.assign({}, data);
+  addressData.user_id = req.session.userId;
+  addressData.is_default = count === 0 || Boolean(req.body.is_default);
+  const address = await UserAddress.create(addressData);
   if (address.is_default)
     await UserAddress.update(
       { is_default: false },

@@ -32,14 +32,16 @@ async function paypalRequest(path, options = {}) {
   const tokenData = await tokenResponse.json();
   if (!tokenResponse.ok) throw new Error(tokenData.error_description || "Không thể kết nối PayPal.");
 
-  const response = await fetch(`${PAYPAL_API}${path}`, {
-    ...options,
-    headers: {
+  const requestHeaders = Object.assign(
+    {
       Authorization: `Bearer ${tokenData.access_token}`,
       "Content-Type": "application/json",
-      ...(options.headers || {}),
     },
-  });
+    options.headers || {},
+  );
+  const requestOptions = Object.assign({}, options);
+  requestOptions.headers = requestHeaders;
+  const response = await fetch(`${PAYPAL_API}${path}`, requestOptions);
   const data = await response.json();
   if (!response.ok) {
     const error = new Error(data.message || data.details?.[0]?.description || "PayPal từ chối giao dịch.");
@@ -96,7 +98,7 @@ async function createOrder(req, res) {
 
   const [address, products, availableCombos] = await Promise.all([
     db.UserAddress.findOne({ where: { id: addressId, user_id: req.session.userId } }),
-    db.Product.findAll({ where: { id: [...quantities.keys()], status: 1 } }),
+    db.Product.findAll({ where: { id: Array.from(quantities.keys()), status: 1 } }),
     comboQuantities.size
       ? require("../services/comboService").findCombos()
       : Promise.resolve([]),

@@ -11,14 +11,19 @@ const sanitizeRichText = (html = "") => sanitizeHtml(String(html), {
   },
   allowedSchemes: ["http", "https", "mailto"],
   transformTags: {
-    a: (tagName, attributes) => ({
-      tagName,
-      attribs: {
-        ...attributes,
-        rel: "noopener noreferrer",
-        ...(attributes.target === "_blank" ? { target: "_blank" } : {}),
-      },
-    }),
+    a: (tagName, attributes) => {
+      const safeAttributes = Object.assign({}, attributes);
+      safeAttributes.rel = "noopener noreferrer";
+
+      if (attributes.target === "_blank") {
+        safeAttributes.target = "_blank";
+      }
+
+      return {
+        tagName: tagName,
+        attribs: safeAttributes,
+      };
+    },
   },
   disallowedTagsMode: "discard",
 });

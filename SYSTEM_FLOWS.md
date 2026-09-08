@@ -937,6 +937,8 @@ Hiển thị combo, thành phần, giá mua lẻ/giá combo/tiết kiệm, số 
 GET /combo-nha-hang → viewController.getCombosPage()
 → comboService.findCombos() → Combo.findAll(include ComboItem → Product)
   + ComboSetting.findByPk(1) → calculateCombo()
+  → calculateItem() → calculateRetailPrice()/calculateComboPrice()
+  → calculateAvailableQuantity()/checkAvailability()
 → combos/combo_items/products/combo_settings → res.render(combos/index.njk)
 → click [data-combo-add] → combo-cart.js → localStorage nong-san-cart
 → checkout POST gửi {type:"combo", comboId, quantity}
@@ -989,12 +991,13 @@ Functions: list(), detail()
 ```
 
 ```javascript
-const combos = (await findCombos()).map((combo) => ({
-  ...combo,
-  displayRetailPrice: formatMoney(combo.retailPrice),
-  displayComboPrice: formatMoney(combo.comboPrice),
-  displaySavings: formatMoney(combo.savings),
-}));
+const combos = (await findCombos()).map((combo) => {
+  const comboView = Object.assign({}, combo);
+  comboView.displayRetailPrice = formatMoney(combo.retailPrice);
+  comboView.displayComboPrice = formatMoney(combo.comboPrice);
+  comboView.displaySavings = formatMoney(combo.savings);
+  return comboView;
+});
 res.render("pages/combos/index.njk", { /* ... */ combos });
 ```
 
@@ -1002,18 +1005,31 @@ res.render("pages/combos/index.njk", { /* ... */ combos });
 
 ```text
 File: src/services/comboService.js
-Functions: findCombos(), calculateCombo()
+Hàm chính: findCombos(), calculateCombo()
+Hàm hỗ trợ: getPlainCombo(), calculateItem(), calculateRetailPrice(),
+calculateComboPrice(), calculateAvailableQuantity(), calculateSavingsPercent(),
+checkAvailability(), addMinimumQuantity(), roundMoney()
 Models: Combo, ComboItem, Product, ComboSetting
 ```
 
 ```javascript
-const quantity = Number(item.base_quantity) * multiplier;
-const retailPrice = roundMoney(items.reduce((sum, item) => sum + item.retailTotal, 0));
-if (plain.price_mode === "fixed") comboPrice = retailPrice - Number(plain.discount_value || 0);
-else if (plain.price_mode === "manual") comboPrice = Number(plain.manual_price || 0);
-else comboPrice = retailPrice * (1 - Number(plain.discount_value || 0) / 100);
+const plainCombo = getPlainCombo(combo);
+const items = comboItems.map(function (comboItem) {
+  return calculateItem(comboItem, quantityMultiplier);
+});
+
+const retailPrice = calculateRetailPrice(items);
+const comboPrice = calculateComboPrice(plainCombo, retailPrice);
 const savings = Math.max(0, retailPrice - comboPrice);
-const availableQuantity = items.length ? Math.min(...items.map((item) => item.availableSets)) : 0;
+const availableQuantity = calculateAvailableQuantity(items);
+
+result.isAvailable = checkAvailability(
+  plainCombo,
+  items,
+  availableQuantity,
+  comboPrice,
+  retailPrice
+);
 ```
 
 Công thức thật:
@@ -1032,21 +1048,39 @@ Công thức thật:
 
 - Tạo điều kiện query: có `id` thì lọc một combo; mặc định thêm `status:true`.
 - Một query lấy Combo cùng ComboItems và Product; query còn lại lấy cấu hình minimum tại ID 1. Hai query chạy đồng thời.
-- Sau khi có dữ liệu, mỗi combo được đưa qua `calculateCombo()`.
+- Sau khi có dữ liệu, mỗi combo được đưa qua `addMinimumQuantity()`; hàm này gọi `calculateCombo()` rồi gắn `minimum_quantity`.
 - Mặc định loại tiếp combo mà `isAvailable=false`; option `includeUnavailable=true` mới giữ các combo không bán được.
 
 **`calculateCombo(combo)`**
 
-- `.get({plain:true})` loại bỏ lớp Sequelize để tính toán trên object bình thường.
-- Với từng ComboItem, hàm tính lượng thật cần dùng, giá lẻ của dòng và số bộ tối đa mà product đó đáp ứng.
-- Product khan hiếm nhất quyết định `availableQuantity`. Ví dụ item A đủ 10 bộ, B đủ 4 bộ thì combo chỉ bán được 4.
-- Nhánh `price_mode` quyết định cách tính giá: giảm số tiền cố định, giá manual, hoặc giảm phần trăm.
-- `roundMoney()` làm tròn đến đồng và không cho kết quả âm.
-- `isAvailable` không chỉ kiểm tra tồn kho: giá combo phải dương và phải thấp hơn tổng giá mua lẻ.
+- Gọi `getPlainCombo()` để chuyển Sequelize instance thành object bình thường nếu cần.
+- Gọi `calculateItem()` cho từng ComboItem để tính lượng cần dùng, thành tiền và số bộ sản phẩm có thể đáp ứng.
+- Gọi lần lượt các hàm có tên đúng nhiệm vụ: `calculateRetailPrice()`, `calculateComboPrice()`, `calculateAvailableQuantity()` và `calculateSavingsPercent()`.
+- `calculateAvailableQuantity()` duyệt các item và lấy số lượng nhỏ nhất. Ví dụ item A đủ 10 bộ, B đủ 4 bộ thì combo chỉ bán được 4.
+- `calculateComboPrice()` dùng `if/else` cho ba kiểu giá: giảm số tiền cố định (`fixed`), nhập giá trực tiếp (`manual`) hoặc giảm phần trăm.
+- `checkAvailability()` tách các điều kiện thành `isActive`, `hasItems`, `hasEnoughStock` và `hasValidPrice`, sau đó yêu cầu tất cả đều đúng.
+- Cuối cùng hàm sao chép dữ liệu combo bằng `Object.assign({}, plainCombo)`, gắn các giá trị vừa tính và trả về `result`.
+
+**Các hàm hỗ trợ tính toán**
+
+- `roundMoney(value)`: đổi về Number, làm tròn đến đồng và không cho kết quả âm.
+- `calculateAvailableSets(stock, quantity)`: trả 0 nếu lượng cần dùng không hợp lệ; ngược lại trả `floor(stock / quantity)`.
+- `calculateItem(comboItem, quantityMultiplier)`: tạo dữ liệu hiển thị cho một thành phần combo.
+- `calculateRetailPrice(items)`: cộng `retailTotal` của tất cả thành phần.
+- `calculateComboPrice(combo, retailPrice)`: chọn công thức giá dựa trên `price_mode`.
+- `calculateAvailableQuantity(items)`: tìm thành phần đáp ứng được ít bộ nhất.
+- `calculateSavingsPercent(savings, retailPrice)`: trả 0 nếu retail không dương, nếu không thì tính phần trăm tiết kiệm.
+- `addMinimumQuantity(combo, minimumQuantity)`: tính combo rồi gắn số lượng mua tối thiểu từ cấu hình chung.
+
+**`comboController.list(req, res)`**
+
+- Chờ `comboService.findCombos()` trả danh sách combo bán được.
+- Trả JSON dạng `{data: combos}`.
 
 **`comboController.detail(req, res)`**
 
 - Ép URL ID thành Number rồi gọi `findCombos({id})`.
+- Lấy phần tử đầu tiên bằng `combos[0]`; không dùng cú pháp destructuring để luồng dễ theo dõi.
 - Vì `findCombos()` mặc định loại combo unavailable, combo hết hàng cũng nhận response 404 giống combo không tồn tại.
 
 **Handler trong `combo-cart.js`**
@@ -1143,12 +1177,161 @@ Cart không “giữ chỗ” tồn kho. `availableQuantity` có thể thay đ�
 | ComboSetting | combo_settings | SELECT PK=1 | minimum quantity toàn cục |
 | ProductBatch | product_batches | gián tiếp | nguồn đồng bộ cho Product.quantity |
 
+### 8.1. Quan hệ giữa các bảng
+
+```text
+combos (1)
+   │
+   │ combo_items.combo_id → combos.id
+   │ ON DELETE CASCADE
+   ▼
+combo_items (N)
+   │
+   │ combo_items.product_id → products.id
+   │ ON DELETE RESTRICT
+   ▼
+products (1 cho mỗi dòng thành phần)
+   │
+   └── products.quantity được đồng bộ gián tiếp từ product_batches
+
+combo_settings (record độc lập id=1)
+   └── minimum_quantity áp dụng chung cho mọi combo
+
+order_details
+   └── combo_id/combo_name/combo_quantity lưu dấu vết sau khi combo được bung thành sản phẩm
+```
+
+- Một `Combo` có nhiều `ComboItem`; một `ComboItem` thuộc đúng một `Combo`.
+- Một `Product` có thể xuất hiện trong nhiều combo; mỗi dòng `ComboItem` tham chiếu một Product.
+- Cặp `(combo_id, product_id)` có unique constraint `combo_items_combo_product_unique`, nên cùng một sản phẩm không thể xuất hiện hai dòng trong cùng một combo.
+- Xóa vật lý một Combo sẽ xóa các ComboItem của nó do `ON DELETE CASCADE`.
+- Không thể xóa vật lý Product đang được ComboItem tham chiếu do `ON DELETE RESTRICT`. Product hiện có thể được xóa mềm nên thao tác xóa mềm chỉ đổi `deleted_at`, không kích hoạt RESTRICT.
+- `combo_settings` không có khóa ngoại tới `combos`; service chủ động đọc record ID 1 và áp dụng cho toàn bộ combo.
+- `order_details.combo_id` chỉ là cột lưu dấu vết, migration hiện không tạo foreign key tới `combos`. Nhờ có thêm `combo_name`, lịch sử vẫn giữ được tên tại thời điểm đặt hàng.
+
+### 8.2. Bảng `combos` — thông tin và quy tắc của một combo
+
+Model Sequelize: `Combo` trong `src/models/index.js`. Bảng được tạo bởi migration `src/migration/20260827090000-add-restaurant-combos.js`.
+
+| Cột database | Kiểu/giá trị mặc định | Ý nghĩa và nơi sử dụng |
+|---|---|---|
+| `id` | INTEGER, PK, AUTO_INCREMENT | Mã combo; dùng trong URL API, cart và `combo_items.combo_id`. |
+| `name` | STRING, NOT NULL | Tên hiển thị của combo; được copy sang `order_details.combo_name` khi checkout. |
+| `description` | TEXT, nullable | Mô tả đối tượng hoặc nhu cầu phù hợp với combo. |
+| `image` | TEXT, nullable | URL ảnh đại diện hiển thị ở trang combo và local cart. |
+| `size` | ENUM `small`, `medium`, `large`; mặc định `small` | Quy mô hiển thị: nhỏ, vừa hoặc lớn. Không tham gia tính giá/tồn kho. |
+| `quantity_multiplier` | DECIMAL(10,2), NOT NULL, mặc định 1 | Hệ số nhân toàn bộ thành phần. Lượng thật của item = `base_quantity × quantity_multiplier`. |
+| `price_mode` | ENUM `percent`, `fixed`, `manual`; mặc định `percent` | Chọn công thức tính `comboPrice`. |
+| `discount_value` | DECIMAL(12,2), NOT NULL, mặc định 10 | Với `percent`: phần trăm giảm. Với `fixed`: số tiền trừ khỏi retail. Không dùng để tính giá khi mode là `manual`. |
+| `manual_price` | DECIMAL(12,2), nullable | Giá bán cuối cùng khi `price_mode='manual'`. Mode khác bỏ qua cột này. |
+| `minimum_quantity` | INTEGER, NOT NULL, mặc định 1 | Cột cấu hình theo từng combo. Trong luồng hiện tại không được dùng làm kết quả cuối vì bị `combo_settings.minimum_quantity` ghi đè. AdminJS cũng ẩn field này. |
+| `serving_from` | INTEGER, nullable | Số suất ăn tối thiểu để mô tả combo; không tham gia tính giá hay tồn kho. |
+| `serving_to` | INTEGER, nullable | Số suất ăn tối đa để mô tả combo; không tham gia tính giá hay tồn kho. |
+| `usage_days` | INTEGER, nullable | Số ngày dự kiến sử dụng; chỉ là thông tin hiển thị. |
+| `badge` | STRING, nullable | Nhãn marketing như “Bán chạy”; không ảnh hưởng nghiệp vụ. |
+| `status` | BOOLEAN, NOT NULL, mặc định true | Bật/tắt combo. `findCombos()` mặc định query `status=true`, sau đó vẫn kiểm tra tồn kho và giá. |
+| `sort_order` | INTEGER, NOT NULL, mặc định 0 | Thứ tự hiển thị tăng dần; nếu bằng nhau thì combo mới hơn đứng trước. |
+| `created_at` | DATE, mặc định CURRENT_TIMESTAMP | Thời điểm tạo; dùng làm tiêu chí phụ `createdAt DESC`. Sequelize map sang thuộc tính `createdAt`. |
+| `updated_at` | DATE, mặc định CURRENT_TIMESTAMP | Thời điểm cập nhật; Sequelize map sang thuộc tính `updatedAt`. |
+
+Ba cách tính giá từ các cột trên:
+
+```text
+percent: comboPrice = retailPrice × (1 − discount_value / 100)
+fixed:   comboPrice = retailPrice − discount_value
+manual:  comboPrice = manual_price
+```
+
+Sau đó `roundMoney()` làm tròn và chặn giá âm về 0. Một cấu hình vẫn bị xem là không bán được nếu `comboPrice <= 0` hoặc `comboPrice >= retailPrice`.
+
+### 8.3. Bảng `combo_items` — các sản phẩm nằm trong combo
+
+Model Sequelize: `ComboItem`. Đây là bảng nối giữa `combos` và `products`, đồng thời chứa định lượng.
+
+| Cột database | Kiểu/ràng buộc | Ý nghĩa và nơi sử dụng |
+|---|---|---|
+| `id` | INTEGER, PK, AUTO_INCREMENT | Mã dòng thành phần. |
+| `combo_id` | INTEGER, NOT NULL, FK → `combos.id`, CASCADE | Xác định dòng này thuộc combo nào. |
+| `product_id` | INTEGER, NOT NULL, FK → `products.id`, RESTRICT | Xác định sản phẩm thật được bán và xuất kho. |
+| `base_quantity` | DECIMAL(12,2), NOT NULL, mặc định 1 | Số lượng cơ sở trong một combo trước khi nhân `quantity_multiplier`; đơn vị lấy từ `products.unit`. |
+| `created_at` | DATE | Thời điểm tạo dòng thành phần. |
+| `updated_at` | DATE | Thời điểm cập nhật dòng thành phần. |
+
+Ví dụ `base_quantity=5`, `quantity_multiplier=2` và Product có unit `kg` thì một combo cần `10 kg` sản phẩm đó. Nếu `products.quantity=35`, dòng này đáp ứng được `floor(35/10)=3` combo.
+
+### 8.4. Các thuộc tính Product được dùng khi tính combo
+
+`findCombos()` include Product với đúng các thuộc tính `id`, `name`, `price`, `quantity`, `unit`, `image`, `status`:
+
+| Thuộc tính từ `products` | Vai trò trong combo |
+|---|---|
+| `id` | Trả thành `item.productId`; dùng tạo OrderDetail và xuất kho. |
+| `name` | Tên thành phần hiển thị và tên Product trong OrderDetail. |
+| `price` | Đơn giá lẻ; `retailTotal = round(price × quantity cần)`. |
+| `quantity` | Tồn tổng hiện tại; dùng tính `availableSets`. Giá trị này được hooks đồng bộ từ các ProductBatch. |
+| `unit` | Đơn vị của `base_quantity` và `quantity`, ví dụ kg hoặc sản phẩm. |
+| `image` | Ảnh thành phần trả về cho client. |
+| `status` | Được query kèm dữ liệu nhưng `calculateCombo()` hiện chưa dùng để loại item. Đây là rủi ro: Product ngừng bán nhưng còn quantity vẫn có thể làm combo available. |
+
+### 8.5. Bảng `combo_settings` — cấu hình dùng chung
+
+| Cột database | Kiểu/ràng buộc | Ý nghĩa |
+|---|---|---|
+| `id` | INTEGER, PK | Service luôn đọc `findByPk(1)`; migration tạo sẵn record ID 1. |
+| `minimum_quantity` | INTEGER, NOT NULL, mặc định 1 | Số combo tối thiểu khách phải mua, áp dụng chung cho tất cả combo. Service chặn tối thiểu ở 1 bằng `Math.max(1, ...)`. |
+| `created_at` | DATE | Thời điểm tạo cấu hình. |
+| `updated_at` | DATE | Thời điểm sửa cấu hình. |
+
+Luồng ghi đè số lượng tối thiểu:
+
+```text
+ComboSetting.findByPk(1)
+→ không có record hoặc giá trị rỗng: dùng 1; giá trị nhỏ hơn 1 bị nâng lên 1
+→ addMinimumQuantity(combo, minimumQuantity)
+→ result.minimum_quantity = minimumQuantity
+→ checkout kiểm tra comboQuantity >= result.minimum_quantity
+```
+
+### 8.6. Thuộc tính được tính trong service, không phải cột database
+
+Các thuộc tính sau xuất hiện trong response nhưng **không tồn tại trong bảng `combos`**:
+
+| Thuộc tính response | Cách tạo |
+|---|---|
+| `items` | Danh sách `ComboItem` đã ghép dữ liệu Product và tính lại số lượng. |
+| `items[].productId` | Đổi tên từ `combo_items.product_id`. |
+| `items[].quantity` | `base_quantity × quantity_multiplier`. |
+| `items[].unitPrice` | Number của `products.price`. |
+| `items[].retailTotal` | `round(unitPrice × quantity)`. |
+| `items[].stock` | Number của `products.quantity`. |
+| `items[].availableSets` | `floor(stock / quantity)`; trả 0 nếu quantity không dương. |
+| `retailPrice` | Tổng `retailTotal` của tất cả item. |
+| `comboPrice` | Giá sau khi áp dụng `price_mode`. |
+| `savings` | `max(0, retailPrice − comboPrice)`. |
+| `savingsPercent` | `round(savings / retailPrice × 100)`; bằng 0 nếu retail không dương. |
+| `availableQuantity` | Giá trị `availableSets` nhỏ nhất trong các item; bằng 0 nếu không có item. |
+| `isAvailable` | true khi combo active, có item, còn ít nhất một bộ và giá combo dương/thấp hơn retail. |
+
+Không được dùng tên các thuộc tính tính toán này trong câu SQL như thể chúng là cột. Chúng chỉ tồn tại sau khi `calculateCombo()` xử lý dữ liệu Sequelize.
+
+### 8.7. Dấu vết combo trong bảng `order_details`
+
+Khi checkout, combo được bung thành nhiều OrderDetail — mỗi sản phẩm thật là một dòng. Ba cột bổ sung giúp nhận biết nguồn gốc:
+
+| Cột trong `order_details` | Ý nghĩa |
+|---|---|
+| `combo_id` | ID combo tại lúc tạo order; nullable và hiện không có FK. |
+| `combo_name` | Tên combo được copy tại lúc đặt để giữ snapshot lịch sử. |
+| `combo_quantity` | Số combo khách mua; lặp lại trên các dòng sản phẩm thuộc cùng combo. |
+
+Các cột `product_id`, `quantity`, `price` của OrderDetail vẫn chứa sản phẩm thật, lượng cần xuất cho toàn bộ combo và đơn giá đã phân bổ. Vì vậy `orderInventory.reserve()` không cần đọc lại bảng combo khi capture; nó xuất FEFO dựa trên các dòng sản phẩm đã được tạo.
+
 ## 9. Database Query
 
 ```text
 Function: findCombos()
 Model: Combo
-Table: combos JOIN combo_items JOIN products
+Table: combos LEFT OUTER JOIN combo_items LEFT OUTER JOIN products
 Operation: SELECT
 Điều kiện: combos.status=true; optional combos.id=id
 Dữ liệu: combo + items + Product[id,name,price,quantity,unit,image,status]
@@ -1157,11 +1340,14 @@ Order: sort_order ASC, createdAt DESC
 
 ```sql
 SELECT c.*, ci.*, p.id,p.name,p.price,p.quantity,p.unit,p.image,p.status
-FROM combos c JOIN combo_items ci ON ci.combo_id=c.id
-JOIN products p ON p.id=ci.product_id
+FROM combos c
+LEFT OUTER JOIN combo_items ci ON ci.combo_id=c.id
+LEFT OUTER JOIN products p ON p.id=ci.product_id
 WHERE c.status=TRUE ORDER BY c.sort_order ASC,c.created_at DESC;
 SELECT * FROM combo_settings WHERE id=1;
 ```
+
+`include` trong query Sequelize không đặt `required:true`, vì vậy đây là LEFT OUTER JOIN. Combo active chưa có ComboItem vẫn có thể được query, nhưng `calculateCombo()` đặt `items=[]`, `availableQuantity=0` và `isAvailable=false`; bước filter cuối sẽ loại combo đó khỏi kết quả mặc định.
 
 ## 10. Transaction
 
@@ -1175,6 +1361,8 @@ SSR `res.render("pages/combos/index.njk", {combos})`; API trả `{data}`. Add-to
 
 ```text
 GET /combo-nha-hang → getCombosPage() → findCombos() → calculateCombo()
+→ calculateItem()/calculateRetailPrice()/calculateComboPrice()
+→ calculateAvailableQuantity()/calculateSavingsPercent()/checkAvailability()
 → Combo/ComboItem/Product/ComboSetting → combos/combo_items/products/combo_settings
 → render → localStorage(comboId, qty) → createOrder() reload DB
 ```
@@ -2037,14 +2225,13 @@ Nếu resource không có custom `edit.before/after`, AdminJS Sequelize adapter 
 const normalizeShipment = async (request) => {
   if (request.method !== "post") return request;
   const payload = request.payload || {};
-  request.payload = {
-    ...payload,
+  request.payload = Object.assign({}, payload, {
     order_id: Number(firstValue(payload.order_id)),
     shipping_status: Number(firstValue(payload.shipping_status) ?? 0),
     shipping_fee: Number(firstValue(payload.shipping_fee) || 0),
     delivery_time: firstValue(payload.delivery_time) || null,
     tracking_code: String(firstValue(payload.tracking_code) || "").trim() || null,
-  };
+  });
   return request;
 };
 ```
@@ -2721,11 +2908,10 @@ Các bước:
 
 ```javascript
 const count = await UserAddress.count({ where: { user_id: req.session.userId } });
-const address = await UserAddress.create({
-  ...data,
-  user_id: req.session.userId,
-  is_default: count === 0 || Boolean(req.body.is_default),
-});
+const addressData = Object.assign({}, data);
+addressData.user_id = req.session.userId;
+addressData.is_default = count === 0 || Boolean(req.body.is_default);
+const address = await UserAddress.create(addressData);
 if (address.is_default) {
   await UserAddress.update({ is_default: false }, {
     where: {
@@ -2876,6 +3062,262 @@ Sau đó Shipment copy snapshot receiver/phone/address/ward/district/province. V
 
 ---
 
+# CƠ CHẾ XÓA DỮ LIỆU TRONG HỆ THỐNG
+
+## 1. Không phải thao tác “xóa” nào cũng giống nhau
+
+Source hiện có năm cơ chế khác nhau:
+
+| Cơ chế | Lệnh/kỹ thuật | Dữ liệu còn trong database? | Có thể khôi phục trực tiếp? |
+|---|---|---:|---:|
+| Xóa mềm | Sequelize `paranoid:true` cập nhật `deleted_at` | Có | Có, nếu gọi `restore()` hoặc đặt `deleted_at=NULL` |
+| Xóa cứng | `destroy()` trên model không paranoid hoặc SQL `DELETE` | Không | Không, trừ backup |
+| Xóa lan truyền | Foreign key `ON DELETE CASCADE` | Record con bị xóa cứng | Không, trừ backup |
+| Giữ record, bỏ liên kết | Foreign key `ON DELETE SET NULL` | Có | Record lịch sử còn nhưng FK thành NULL |
+| Chặn xóa | Foreign key `ON DELETE RESTRICT` | Có | Không cần khôi phục vì DELETE bị từ chối |
+
+Ngoài MySQL còn có xóa file Cloudinary, xóa PDF local và `dropTable/removeColumn` trong migration. Cần phân biệt vì transaction MySQL không thể khôi phục một file đã xóa ở dịch vụ ngoài.
+
+## 2. Xóa mềm với `paranoid:true`
+
+Các model dùng xóa mềm:
+
+```text
+Category → categories.deleted_at
+Brand    → brands.deleted_at
+Product  → products.deleted_at
+News     → news.deleted_at
+Banner   → banner.deleted_at
+Coupon   → coupons.deleted_at
+```
+
+Khi AdminJS gọi action delete cho các model này, Sequelize `destroy()` tương đương:
+
+```sql
+UPDATE products
+SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+WHERE id = ? AND deleted_at IS NULL;
+```
+
+Không có câu `DELETE FROM products` trong trường hợp thông thường. Những query Sequelize mặc định tự thêm điều kiện `deleted_at IS NULL`, nên record biến mất khỏi storefront và danh sách AdminJS mặc dù vẫn nằm trong bảng.
+
+Hệ quả quan trọng:
+
+- Foreign key `CASCADE`, `SET NULL` hoặc `RESTRICT` **không chạy** khi chỉ cập nhật `deleted_at`; chúng chỉ chạy với DELETE vật lý.
+- Xóa mềm Product không tự xóa `product_images`, `product_batches`, feedback hay bảng liên kết.
+- Xóa mềm Category/Brand không tự đặt `products.category_id/brand_id` thành NULL.
+- Xóa mềm Coupon không tự xóa `order_coupons` hay `coupon_users`.
+- Source hiện không cấu hình action “khôi phục” trong AdminJS. Database hỗ trợ khôi phục về mặt kỹ thuật, nhưng muốn thao tác trên UI cần bổ sung custom action hoặc cập nhật `deleted_at=NULL` có kiểm soát.
+- Unique index vẫn nhìn thấy record đã xóa mềm. Vì `categories.name`, `brands.name` và `coupons.code` là UNIQUE, có thể không tạo lại cùng giá trị cho đến khi restore/đổi giá trị/xử lý index phù hợp.
+
+## 3. Xóa cứng bằng `destroy()`
+
+Model không khai báo `paranoid:true` sẽ thực hiện DELETE vật lý. Ví dụ luồng người dùng xóa địa chỉ:
+
+```text
+DELETE /api/auth/addresses/:id
+→ signedIn
+→ UserAddress.findOne({ id, user_id: session.userId })
+→ không thấy hoặc không thuộc user: HTTP 404
+→ address.destroy()
+→ DELETE FROM user_addresses WHERE id=?
+```
+
+Điều kiện có cả `id` và `user_id` là cơ chế chống xóa địa chỉ của người khác. Controller không cho client gửi `user_id` để quyết định quyền sở hữu.
+
+Địa chỉ bị xóa cứng nhưng đơn cũ vẫn được bảo toàn theo hai lớp:
+
+1. `orders.address_id` dùng `ON DELETE SET NULL`.
+2. `shipments` đã giữ snapshot `receiver_name`, `phone`, `address`, `ward`, `district`, `province`.
+
+Vì vậy xóa địa chỉ tài khoản không làm mất địa chỉ giao hàng đã chốt trong Shipment. Tuy nhiên `deleteAddress()` không dùng transaction, không chặn xóa địa chỉ mặc định và không tự chọn địa chỉ mặc định thay thế.
+
+Các model không paranoid khác về mặt kỹ thuật cũng có thể bị xóa cứng nếu AdminJS cho phép action delete. Riêng `UserAddress`, `Feedback`, `InventoryTransaction` bị khóa `delete` và `bulkDelete` trong AdminJS; `ComboSetting` cũng bị khóa hai action này.
+
+## 4. Xóa qua AdminJS
+
+AdminJS sinh action `delete` và `bulkDelete` trực tiếp từ Sequelize resource. Project không còn controller CRUD admin trùng lặp.
+
+```text
+Admin bấm Delete
+→ AdminJS authenticated router kiểm tra phiên admin
+→ resource action delete
+→ @adminjs/sequelize gọi Model.destroy()
+→ model paranoid: UPDATE deleted_at
+→ model thường: DELETE vật lý
+→ database áp dụng foreign key nếu là DELETE vật lý
+```
+
+Quyền xóa hiện tại:
+
+| Nhóm | Delete/bulkDelete trong AdminJS |
+|---|---|
+| `UserAddress`, `Feedback`, `InventoryTransaction` | Bị ẩn và chặn bằng `isAccessible:false` |
+| `ComboSetting` | Bị chặn để giữ record cấu hình singleton |
+| `ProductImage` | Cả resource bị ẩn khỏi AdminJS |
+| `RecipeSource` | Được xóa; action `after` lên lịch rebuild recipe index |
+| Các resource còn lại | Dùng action mặc định, chịu cơ chế paranoid và foreign key của model/schema |
+
+`isVisible:false` chỉ ẩn nút; `isAccessible:false` mới là phần chặn action ở backend AdminJS. Cấu hình hiện dùng cả hai cho nhóm read-only.
+
+## 5. CASCADE — xóa cha kéo theo xóa con
+
+CASCADE chỉ xảy ra khi record cha bị DELETE vật lý. Các quan hệ chính trong migration:
+
+| Khi DELETE vật lý | Record con bị xóa theo |
+|---|---|
+| `users` | `user_addresses`, `feedback`, `coupon_users` |
+| `products` | `product_batches`, `product_images`, `feedback`, `news_details`, `banner_details`, `recipe_product_links` |
+| `orders` | `order_details`, `order_histories`, `payments`, `shipments`, `order_coupons` |
+| `news` | `news_details` |
+| `banner` | `banner_details` |
+| `coupons` | `order_coupons`, `coupon_users` |
+| `recipes` | `recipe_product_links` |
+| `combos` | `combo_items` |
+
+Ví dụ nếu Order bị xóa cứng, MySQL tự xóa các dòng detail, payment, shipment, history và coupon link. Các DELETE do database cascade không phải từng HTTP request riêng.
+
+Cần thận trọng với lịch sử kinh doanh: mặc dù schema cho phép xóa cứng Order và kéo theo toàn bộ lịch sử, nghiệp vụ thông thường nên chuyển `orders.status=5` để biểu diễn hủy đơn thay vì xóa record.
+
+## 6. SET NULL — giữ lịch sử nhưng bỏ liên kết
+
+| Record cha bị DELETE vật lý | Cột con thành NULL | Lý do |
+|---|---|---|
+| `users` | `orders.user_id` | Giữ đơn hàng cũ |
+| `users` | `order_histories.changed_by_user_id` | Giữ lịch sử đổi trạng thái dù tài khoản không còn |
+| `user_addresses` | `orders.address_id` | Giữ đơn và dùng snapshot Shipment |
+| `brands` | `products.brand_id` | Không xóa sản phẩm theo thương hiệu |
+| `categories` | `products.category_id` | Không xóa sản phẩm theo danh mục |
+| `products` | `order_details.product_id` | Giữ dòng hàng snapshot |
+| `product_batches` | `order_details.batch_id` | Giữ chi tiết đơn dù lô không còn |
+| `order_details` | `feedback.order_detail_id` | Giữ feedback nhưng bỏ chứng cứ dòng hàng |
+| `product_batches` | `inventory_transactions.batch_id` | Giữ audit kho sau khi xóa lô |
+
+`SET NULL` chỉ an toàn khi cột cho phép NULL. Migration `preserve-inventory-transaction-history` đã chủ động đổi `inventory_transactions.batch_id` thành nullable trước khi gắn constraint này.
+
+## 7. RESTRICT — chặn xóa vì còn được tham chiếu
+
+`combo_items.product_id` dùng `ON DELETE RESTRICT`:
+
+```text
+Product đang nằm trong ComboItem
+→ cố DELETE vật lý Product
+→ MySQL từ chối
+→ phải xóa/đổi ComboItem trước rồi mới DELETE Product
+```
+
+Xóa mềm Product chỉ UPDATE `deleted_at`, nên RESTRICT không chạy. Điều này có nghĩa combo item vẫn tham chiếu được record Product đã xóa mềm. Service combo phải lọc trạng thái/xóa mềm đúng cách để tránh dùng dữ liệu không còn bán.
+
+## 8. Xóa ProductBatch nhưng giữ lịch sử kho
+
+`ProductBatch` có hook `afterDestroy()`:
+
+```text
+AdminJS/Sequelize gọi batch.destroy()
+→ DELETE product_batches
+→ FK đặt inventory_transactions.batch_id = NULL
+→ afterDestroy sync lại SUM tồn kho vào products.quantity
+→ ghi InventoryTransaction type=OUT, reference_type=adjust,
+  reference_id=batch.id, batch_id=NULL
+```
+
+`batch_id=NULL` là có chủ ý: record lô đã mất nhưng audit vẫn chứa loại giao dịch, số lượng, ID tham chiếu và ghi chú.
+
+Lưu ý: Sequelize hook chỉ chắc chắn chạy khi xóa qua model instance. Nếu xóa cha trực tiếp và MySQL CASCADE xóa batch, database không tự chạy JavaScript hook `ProductBatch.afterDestroy()` cho từng dòng con. Vì vậy không nên dùng DELETE SQL tùy ý cho dữ liệu kho.
+
+## 9. Xóa ảnh trên Cloudinary
+
+MySQL chỉ lưu URL; file ảnh thật nằm trên Cloudinary. Provider admin triển khai:
+
+```javascript
+async delete(imageUrl) {
+  if (!imageUrl) return;
+  ensureCloudinaryConfigured();
+  await cloudinary.uploader.destroy(publicIdFromUrl(imageUrl), {
+    invalidate: true,
+    resource_type: "image",
+  });
+}
+```
+
+Luồng:
+
+```text
+@adminjs/upload yêu cầu xóa/thay ảnh
+→ đọc field imageToDelete
+→ cloudinaryProvider.delete(imageUrl)
+→ publicIdFromUrl() suy public ID từ URL
+→ cloudinary.uploader.destroy(publicId, invalidate=true)
+→ Cloudinary xóa asset và vô hiệu cache CDN
+→ adapter cập nhật/xóa URL trong record theo lifecycle plugin
+```
+
+Điểm cần nhớ:
+
+- Xóa URL trong MySQL không tự động xóa file Cloudinary nếu không đi qua upload feature/provider.
+- Xóa file Cloudinary không tự động xóa URL trong MySQL.
+- Hai hệ thống không dùng chung transaction; một bên thành công, bên kia lỗi có thể gây URL hỏng hoặc orphan asset.
+- Nhánh user tự đổi avatar chỉ upload ảnh mới rồi `User.update({avatar:url})`; không gọi destroy ảnh cũ, nên ảnh cũ có thể bị orphan.
+- Project không lưu `public_id` riêng; provider phải suy ra nó từ URL Cloudinary.
+- `invalidate:true` giúp URL cache cũ mất hiệu lực nhưng CDN có thể cần thời gian để cập nhật.
+
+## 10. Xóa PDF nguồn công thức
+
+`RecipeSource` dùng local upload provider với thư mục `src/pdf`, không dùng Cloudinary. Khi xóa resource/file qua lifecycle `@adminjs/upload`, file local được provider quản lý; sau action `delete` hoặc `bulkDelete`, `rebuildAfter()` chạy:
+
+```text
+Admin xóa RecipeSource
+→ AdminJS/upload feature xử lý record và file local
+→ response trả về admin
+→ setTimeout(rebuildRecipeIndex, 500 ms)
+→ xây lại recipe index từ các nguồn còn lại
+→ cập nhật recipe_sources.status: processing/ready/error
+```
+
+Việc rebuild chạy sau response và không nằm chung transaction với DELETE. Nếu rebuild thất bại, record/file có thể đã bị xóa; trạng thái lỗi được phản ánh qua `recipe_sources.status/error_message` của các nguồn còn lại nếu service cập nhật được.
+
+## 11. Xóa bảng/cột bằng migration
+
+Đây là thay đổi schema, không phải xóa record qua UI:
+
+- `20260827090000-add-restaurant-combos` dùng `removeColumn("categories", "image")` vì danh mục không còn ảnh.
+- `20260903100000-remove-unused-cart-wishlist-tables` dùng `dropTable()` để xóa `cart_items`, `carts`, `wishlist_items`, `wishlists`.
+- Hàm `down()` của migration có thể tạo lại cấu trúc bảng/cột, nhưng không thể tự phục hồi dữ liệu đã bị drop nếu không có backup/seed.
+
+Thứ tự drop phải tôn trọng foreign key: bảng con `cart_items`/`wishlist_items` được xóa trước bảng cha `carts`/`wishlists`.
+
+DDL của MySQL thường implicit commit. Không nên hiểu transaction bọc migration DDL là khả năng rollback hoàn toàn giống transaction INSERT/UPDATE/DELETE.
+
+## 12. Xóa nghiệp vụ khác với xóa dữ liệu
+
+| Thao tác người dùng thấy | Code thực tế | Có DELETE record chính? |
+|---|---|---:|
+| Hủy đơn | Đổi `orders.status=5`, hoàn tồn kho, cập nhật shipment | Không xóa Order |
+| Ẩn/ngừng bán sản phẩm | Đổi `products.status=0/2` | Không |
+| Khóa tài khoản | Đổi `users.status` hoặc đặt `locked_until` | Không |
+| Tắt coupon/banner/combo | Đổi `status` | Không |
+| Xóa Category/Product/Coupon qua AdminJS | Model paranoid cập nhật `deleted_at` | Không trong luồng mặc định |
+| Xóa địa chỉ | `UserAddress.destroy()` | Có |
+| Xóa lô | `ProductBatch.destroy()` và ghi lịch sử kho | Có |
+
+Status giữ được lịch sử và cho phép phân tích/audit; DELETE làm mất record hoặc kích hoạt cascade. Vì vậy với đơn hàng, thanh toán, vận chuyển và kho, nên ưu tiên chuyển trạng thái đúng nghiệp vụ thay vì xóa.
+
+## 13. Transaction, hook và các rủi ro khi xóa
+
+- `deleteAddress()` không mở transaction.
+- Generic AdminJS delete không có custom transaction bao toàn bộ Cloudinary/MySQL.
+- Foreign-key action chạy trong database; Sequelize hook chạy trong Node.js. Xóa cascade ở MySQL không đồng nghĩa hook model con sẽ chạy.
+- Bulk delete có thể không chạy individual hook cho từng record nếu adapter không bật `individualHooks`; không nên dựa vào hook con cho một bulk delete quan trọng.
+- Xóa mềm không kích hoạt FK delete action.
+- Không tìm thấy audit log tổng quát cho mọi thao tác AdminJS delete. `order_histories` chỉ audit thay đổi status Order; `inventory_transactions` audit biến động kho.
+- Trước khi xóa cứng dữ liệu kinh doanh, cần kiểm tra quan hệ FK, ảnh/file ngoài database và chiến lược backup.
+
+## 14. Câu trả lời ngắn khi bảo vệ
+
+> Hệ thống dùng cả xóa mềm và xóa cứng. Category, Brand, Product, News, Banner và Coupon có `paranoid:true`, nên xóa thông thường chỉ cập nhật `deleted_at`. Địa chỉ và các model thường dùng DELETE vật lý. Khi DELETE vật lý, MySQL áp dụng CASCADE để xóa con, SET NULL để giữ lịch sử, hoặc RESTRICT để chặn xóa Product đang nằm trong combo. Xóa lô giữ `inventory_transactions` bằng cách đặt `batch_id=NULL`. Ảnh Cloudinary và PDF local là tài nguyên ngoài database, được upload provider quản lý và không thể atomic chung với transaction MySQL.
+
+---
+
 # DATABASE SUMMARY
 
 | Flow | Function | Model | Table | Operation | Purpose |
@@ -2933,7 +3375,16 @@ getCombosPage()/comboController.list/detail()
 └── findCombos()
     ├── Combo.findAll(include ComboItem(include Product))
     ├── ComboSetting.findByPk(1)
-    └── calculateCombo()
+    └── addMinimumQuantity()
+        └── calculateCombo()
+            ├── getPlainCombo()
+            ├── calculateItem() [mỗi ComboItem]
+            │   └── calculateAvailableSets()
+            ├── calculateRetailPrice()
+            ├── calculateComboPrice()
+            ├── calculateAvailableQuantity()
+            ├── calculateSavingsPercent()
+            └── checkAvailability()
 
 createOrder() [PayPal create]
 ├── UserAddress.findOne()

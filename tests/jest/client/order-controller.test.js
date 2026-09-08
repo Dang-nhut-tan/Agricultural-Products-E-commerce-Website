@@ -1,4 +1,4 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   Order: { findAll: jest.fn(), findOne: jest.fn() },
   OrderDetail: {},
   Product: {},
@@ -7,13 +7,13 @@ jest.mock("../../src/models", () => ({
   OrderHistory: {},
   sequelize: { transaction: jest.fn() },
 }));
-jest.mock("../../src/services/orderInventory", () => ({
+jest.mock("../../../src/services/orderInventory", () => ({
   restore: jest.fn(),
 }));
 
-const db = require("../../src/models");
-const orderInventory = require("../../src/services/orderInventory");
-const controller = require("../../src/controllers/orderController");
+const db = require("../../../src/models");
+const orderInventory = require("../../../src/services/orderInventory");
+const controller = require("../../../src/controllers/orderController");
 
 function response() {
   const res = {};

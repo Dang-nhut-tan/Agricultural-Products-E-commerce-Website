@@ -53,7 +53,7 @@ async function updateFeedback(req, res) {
   });
   if (!feedback) return res.status(404).json({ message: "Không tìm thấy bình luận của bạn." });
 
-  const changes = { ...req.body };
+  const changes = Object.assign({}, req.body);
   if (changes.content !== undefined) changes.content = plainText(changes.content);
   await feedback.update(changes);
   await feedback.reload({ include: [includeUser] });

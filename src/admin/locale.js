@@ -4,7 +4,7 @@ module.exports = (resourceLabels) => ({
   translations: { vi: {
     actions: { new: "Thêm mới", edit: "Chỉnh sửa", show: "Xem", delete: "Xóa", bulkDelete: "Xóa mục đã chọn", list: "Danh sách" },
     buttons: { save: "Lưu", addNewItem: "Thêm mục mới", filter: "Lọc", filterActive: "Bộ lọc ({{count}})", applyChanges: "Áp dụng", resetFilter: "Đặt lại", logout: "Đăng xuất", login: "Đăng nhập", createFirstRecord: "Tạo dữ liệu đầu tiên", cancel: "Hủy", confirm: "Xác nhận" },
-    labels: {
+    labels: Object.assign({
       navigation: "Điều hướng",
       pages: "Trang",
       selectedRecords: "Đã chọn ({{selected}})",
@@ -17,8 +17,7 @@ module.exports = (resourceLabels) => ({
       "Khuyến mãi": "Khuyến mãi",
       "Kho & Công thức": "Kho & Công thức",
       "Combo nhà hàng": "Combo nhà hàng",
-      ...resourceLabels,
-    },
+    }, resourceLabels),
     properties: {
       id: "Mã",
       email: "Email",

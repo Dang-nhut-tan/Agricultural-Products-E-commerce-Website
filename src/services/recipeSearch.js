@@ -65,7 +65,11 @@ function localRecipe(query, products) {
   const byId = new Map(products.map((product) => [Number(product.id), product]));
   const matchedProducts = ingredients.map((ingredient) => {
     const product = byId.get(Number(ingredient.productId));
-    return product ? { ...product, ingredientName: ingredient.name, suggestedAmount: ingredient.amount } : null;
+    if (!product) return null;
+    const matchedProduct = Object.assign({}, product);
+    matchedProduct.ingredientName = ingredient.name;
+    matchedProduct.suggestedAmount = ingredient.amount;
+    return matchedProduct;
   }).filter(Boolean);
   return {
     name: definitions.name,
@@ -141,7 +145,11 @@ Liên kết do quản trị viên đặt: ${JSON.stringify(links.map((l) => ({ i
   const byId = new Map(plainProducts.map((product) => [Number(product.id), product]));
   recipe.products = recipe.ingredients.map((ingredient) => {
     const product = byId.get(Number(ingredient.productId));
-    return product ? { ...product, ingredientName: ingredient.name, suggestedAmount: ingredient.amount } : null;
+    if (!product) return null;
+    const matchedProduct = Object.assign({}, product);
+    matchedProduct.ingredientName = ingredient.name;
+    matchedProduct.suggestedAmount = ingredient.amount;
+    return matchedProduct;
   }).filter(Boolean);
   const managedRecipe = await db.Recipe.findOne({ where: { name: recipe.name, active: true }, attributes: ["image"] });
   recipe.image = managedRecipe?.image

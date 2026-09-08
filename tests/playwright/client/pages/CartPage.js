@@ -1,6 +1,8 @@
-class CartPage {
+const TestClientBase = require("../base/TestClientBase");
+
+class CartPage extends TestClientBase {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.items = page.locator(".cart-page-item");
     this.emptyCart = page.locator(".cart-page-empty");
   }

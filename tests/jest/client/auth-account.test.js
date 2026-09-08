@@ -1,4 +1,4 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   sequelize: {},
   User: { findByPk: jest.fn() },
   UserAddress: {
@@ -9,13 +9,13 @@ jest.mock("../../src/models", () => ({
     update: jest.fn(),
   },
 }));
-jest.mock("../../src/services/cloudinaryService", () => ({
+jest.mock("../../../src/services/cloudinaryService", () => ({
   uploadImage: jest.fn(),
 }));
 
-const db = require("../../src/models");
-const { uploadImage } = require("../../src/services/cloudinaryService");
-const controller = require("../../src/controllers/authController");
+const db = require("../../../src/models");
+const { uploadImage } = require("../../../src/services/cloudinaryService");
+const controller = require("../../../src/controllers/authController");
 
 function response() {
   const res = { clearCookie: jest.fn() };
@@ -25,7 +25,7 @@ function response() {
 }
 
 function user(overrides = {}) {
-  return {
+  return Object.assign({
     id: 42,
     name: "Nguyễn An",
     email: "an@example.com",
@@ -35,8 +35,7 @@ function user(overrides = {}) {
     update: jest.fn().mockImplementation(async function update(changes) {
       Object.assign(this, changes);
     }),
-    ...overrides,
-  };
+  }, overrides);
 }
 
 describe("Hành vi hồ sơ và địa chỉ tài khoản", () => {
@@ -120,7 +119,7 @@ describe("Hành vi hồ sơ và địa chỉ tài khoản", () => {
   it("dùng số điện thoại tài khoản khi địa chỉ mới không có số điện thoại", async () => {
     db.User.findByPk.mockResolvedValue({ phone: "0901234567" });
     db.UserAddress.count.mockResolvedValue(0);
-    db.UserAddress.create.mockImplementation(async (data) => ({ id: 8, ...data }));
+    db.UserAddress.create.mockImplementation(async (data) => Object.assign({ id: 8 }, data));
     const res = response();
 
     await controller.addAddress(

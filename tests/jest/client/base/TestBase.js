@@ -1,4 +1,4 @@
-const { sequelize, User, UserAddress } = require("../../../src/models");
+const { sequelize, User, UserAddress } = require("../../../../src/models");
 
 class TestBase {
   setup() {
@@ -10,9 +10,9 @@ class TestBase {
     };
     sequelize.transaction.mockResolvedValue(this.transaction);
     User.findOne.mockResolvedValue(null);
-    User.create.mockImplementation(async (data) => ({
+    User.create.mockImplementation(async (data) => Object.assign({
       id: 101,
-      ...data,
+    }, data, {
       password_hash: "mocked-hash",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -21,7 +21,7 @@ class TestBase {
   }
 
   getValidRegisterData(overrides = {}) {
-    return {
+    return Object.assign({
       name: "Nguyen Van An",
       email: "valid@example.com",
       password: "secret1",
@@ -31,8 +31,7 @@ class TestBase {
       ward: "Ben Thanh",
       district: "District 1",
       province: "Ho Chi Minh City",
-      ...overrides,
-    };
+    }, overrides);
   }
 
   createRequest(body = this.getValidRegisterData()) {

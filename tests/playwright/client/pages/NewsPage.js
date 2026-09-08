@@ -1,6 +1,8 @@
-class NewsPage {
+const TestClientBase = require("../base/TestClientBase");
+
+class NewsPage extends TestClientBase {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.menuLink = page
       .locator("#primaryNav")
       .getByRole("link", { name: "Tin tức", exact: true });

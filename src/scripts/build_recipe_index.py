@@ -1,8 +1,3 @@
-"""OCR the scanned cookbook with Gemini, then build a local FAISS index.
-
-The script checkpoints after every PDF batch. Re-running continues from the last
-page. Use --reset to rebuild and --max-pages for a low-cost smoke test.
-"""
 import argparse
 import base64
 import json

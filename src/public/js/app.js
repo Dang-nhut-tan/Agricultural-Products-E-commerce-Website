@@ -156,7 +156,8 @@ function renderOrderList(orders,box){
 }
 function renderOrderDetail(order,box){
   const status=orderStatus(order.status),histories=order.OrderHistories||[],shipment=order.Shipment;
-  const previousCombos=[...(order.OrderDetails||[]).reduce((map,item)=>{if(item.combo_id&&!map.has(item.combo_id))map.set(item.combo_id,{id:item.combo_id,name:item.combo_name,quantity:item.combo_quantity||1});return map},new Map()).values()];
+  const previousComboMap=(order.OrderDetails||[]).reduce((map,item)=>{if(item.combo_id&&!map.has(item.combo_id))map.set(item.combo_id,{id:item.combo_id,name:item.combo_name,quantity:item.combo_quantity||1});return map},new Map());
+  const previousCombos=Array.from(previousComboMap.values());
   if(previousCombos.length) queueMicrotask(()=>{
     const host=box.querySelector(".order-detail-main");
     host?.insertAdjacentHTML("beforeend",`<div class="order-totals"><b>Mua lại combo</b>${previousCombos.map(combo=>`<button type="button" class="primary" data-rebuy-combo="${combo.id}" data-rebuy-quantity="${combo.quantity}">${safe(combo.name)} · Mua lại</button>`).join("")}</div>`);

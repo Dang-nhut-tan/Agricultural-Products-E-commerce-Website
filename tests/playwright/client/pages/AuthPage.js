@@ -1,6 +1,8 @@
-class AuthPage {
+const TestClientBase = require("../base/TestClientBase");
+
+class AuthPage extends TestClientBase {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.form = page.locator("#authForm");
     this.error = page.locator("#authError");
   }

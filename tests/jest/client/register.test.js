@@ -1,11 +1,11 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   sequelize: { transaction: jest.fn() },
   User: { findOne: jest.fn(), create: jest.fn() },
   UserAddress: { create: jest.fn() },
 }));
 
-const { sequelize, User, UserAddress } = require("../../src/models");
-const { register } = require("../../src/controllers/authController");
+const { sequelize, User, UserAddress } = require("../../../src/models");
+const { register } = require("../../../src/controllers/authController");
 const TestBase = require("./base/TestBase");
 
 const GENERAL_VALIDATION_MESSAGE =

@@ -34,7 +34,7 @@ if (oldHeader) {
       open ? "Đóng menu" : "Mở menu",
     );
   };
-  const productLink = [...document.querySelectorAll(".modern-nav a")].find(
+  const productLink = Array.from(document.querySelectorAll(".modern-nav a")).find(
     (link) => link.textContent.trim() === "Sản phẩm",
   );
   if (productLink) {

@@ -27,8 +27,7 @@ const User = sequelize.define("User", {
   locked_until: { type: DataTypes.DATE, allowNull: true },
   avatar: DataTypes.STRING,
   phone: DataTypes.STRING,
-}, {
-  ...modelOptions("users"),
+}, Object.assign(modelOptions("users"), {
   hooks: {
     async beforeValidate(user) {
       if (user.password) {
@@ -36,7 +35,7 @@ const User = sequelize.define("User", {
       }
     },
   },
-});
+}));
 
 const UserAddress = sequelize.define("UserAddress", {
   user_id: DataTypes.INTEGER,
@@ -137,8 +136,7 @@ const ProductBatch = sequelize.define("ProductBatch", {
   harvest_date: DataTypes.DATE,
   expiry_date: DataTypes.DATE,
   origin: DataTypes.STRING,
-}, {
-  ...modelOptions("product_batches"),
+}, Object.assign(modelOptions("product_batches"), {
   hooks: {
     beforeValidate(batch) {
       if (batch.isNewRecord && !batch.changed("remaining_quantity")) {
@@ -191,7 +189,7 @@ const ProductBatch = sequelize.define("ProductBatch", {
       });
     },
   },
-});
+}));
 
 const ProductImage = sequelize.define("ProductImage", {
   product_id: DataTypes.INTEGER,
@@ -205,9 +203,7 @@ const Feedback = sequelize.define("Feedback", {
   order_detail_id: DataTypes.INTEGER,
   star: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 1, max: 5 } },
   content: { type: DataTypes.TEXT, allowNull: false },
-}, {
-  ...modelOptions("feedback"),
-});
+}, modelOptions("feedback"));
 
 const Order = sequelize.define("Order", {
   user_id: DataTypes.INTEGER,
@@ -218,8 +214,7 @@ const Order = sequelize.define("Order", {
   shipping_fee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   discount: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   total: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
-}, {
-  ...modelOptions("orders"),
+}, Object.assign(modelOptions("orders"), {
   hooks: {
     async afterUpdate(order, options) {
       if (!order.changed("status")) return;
@@ -235,11 +230,12 @@ const Order = sequelize.define("Order", {
       const shipmentStatusByOrder = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 5 };
       const shippingStatus = shipmentStatusByOrder[Number(order.status)];
       if (shippingStatus !== undefined) {
+        const shipmentChanges = { shipping_status: shippingStatus };
+        if (shippingStatus === 3) {
+          shipmentChanges.delivery_time = new Date();
+        }
         await Shipment.update(
-          {
-            shipping_status: shippingStatus,
-            ...(shippingStatus === 3 ? { delivery_time: new Date() } : {}),
-          },
+          shipmentChanges,
           {
             where: { order_id: order.id },
             transaction: options.transaction,
@@ -249,7 +245,7 @@ const Order = sequelize.define("Order", {
       }
     },
   },
-});
+}));
 
 const OrderDetail = sequelize.define("OrderDetail", {
   order_id: DataTypes.INTEGER,
@@ -299,8 +295,7 @@ const Shipment = sequelize.define("Shipment", {
   shipping_fee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
   delivery_time: DataTypes.DATE,
   tracking_code: DataTypes.STRING,
-}, {
-  ...modelOptions("shipments"),
+}, Object.assign(modelOptions("shipments"), {
   hooks: {
     async afterUpdate(shipment, options) {
       if (!shipment.changed("shipping_status")) return;
@@ -322,7 +317,7 @@ const Shipment = sequelize.define("Shipment", {
       });
     },
   },
-});
+}));
 
 const News = sequelize.define("News", {
   title: { type: DataTypes.STRING, allowNull: false },

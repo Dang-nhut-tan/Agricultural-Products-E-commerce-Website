@@ -81,7 +81,7 @@ const findJavaHome = () => {
       console.log("\n=== Khởi động server cho Newman ===");
       newmanServer = spawn(process.execPath, [path.join(root, "src", "index.js")], {
         cwd: root,
-        env: { ...process.env, NODE_ENV: "test" },
+        env: Object.assign({}, process.env, { NODE_ENV: "test" }),
         stdio: "inherit",
       });
       await waitForServer();
@@ -103,7 +103,9 @@ const findJavaHome = () => {
     if (!playwrightResult.ok) testFailures.push(playwrightResult.message);
 
     const javaHome = findJavaHome();
-    const allureEnv = javaHome ? { ...process.env, JAVA_HOME: javaHome } : process.env;
+    const allureEnv = javaHome
+      ? Object.assign({}, process.env, { JAVA_HOME: javaHome })
+      : process.env;
     run("Tạo báo cáo Allure", bin("allure"), ["generate", "allure-results", "--clean", "-o", "allure-report"], allureEnv, process.platform === "win32");
 
     console.log(`\nHoàn tất. Báo cáo Allure: ${path.join(root, "allure-report", "index.html")}`);

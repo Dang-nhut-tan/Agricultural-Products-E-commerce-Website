@@ -1,4 +1,4 @@
-jest.mock("../../src/models", () => ({
+jest.mock("../../../src/models", () => ({
   Product: { findOne: jest.fn() },
   Feedback: { findOne: jest.fn(), create: jest.fn() },
   User: { findByPk: jest.fn() },
@@ -7,8 +7,9 @@ jest.mock("sanitize-html", () => jest.fn((value) =>
   String(value).replace(/<[^>]*>/g, ""),
 ));
 
-const db = require("../../src/models");
-const controller = require("../../src/controllers/feedbackController");
+const db = require("../../../src/models");
+const controller = require("../../../src/controllers/feedbackController");
+const InsertFeedbackReq = require("../../../src/dtos/request/feedback/insertFeedbackReq");
 
 function response() {
   const res = {};
@@ -110,5 +111,47 @@ describe("Controller đánh giá - phân quyền theo chủ sở hữu", () => {
 
     expect(feedback.destroy).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({ message: "Đã xóa bình luận." });
+  });
+});
+
+describe("Validation đánh giá - giá trị biên và phân vùng tương đương", () => {
+  const validFeedback = {
+    star: 3,
+    content: "Sản phẩm tốt",
+  };
+
+  it.each([
+    ["nhỏ nhất", 1],
+    ["lớn nhất", 5],
+  ])("chấp nhận số sao tại biên %s", (_label, star) => {
+    const result = InsertFeedbackReq.validate(Object.assign({}, validFeedback, { star: star }));
+    expect(result.error).toBeUndefined();
+  });
+
+  it.each([
+    ["dưới biên dưới", 0],
+    ["trên biên trên", 6],
+    ["không phải số nguyên", 2.5],
+    ["không phải số", "tốt"],
+  ])("từ chối số sao thuộc phân vùng %s", (_label, star) => {
+    const result = InsertFeedbackReq.validate(Object.assign({}, validFeedback, { star: star }));
+    expect(result.error).toBeDefined();
+  });
+
+  it.each([
+    ["nhỏ nhất", "a".repeat(2)],
+    ["lớn nhất", "a".repeat(1000)],
+  ])("chấp nhận nội dung tại biên %s", (_label, content) => {
+    const result = InsertFeedbackReq.validate(Object.assign({}, validFeedback, { content: content }));
+    expect(result.error).toBeUndefined();
+  });
+
+  it.each([
+    ["dưới độ dài tối thiểu", "a"],
+    ["trên độ dài tối đa", "a".repeat(1001)],
+    ["chỉ chứa khoảng trắng", "   "],
+  ])("từ chối nội dung thuộc phân vùng %s", (_label, content) => {
+    const result = InsertFeedbackReq.validate(Object.assign({}, validFeedback, { content: content }));
+    expect(result.error).toBeDefined();
   });
 });

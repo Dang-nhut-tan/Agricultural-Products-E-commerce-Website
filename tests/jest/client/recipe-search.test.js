@@ -1,10 +1,10 @@
-jest.mock("../../src/models", () => ({}));
-jest.mock("../../src/services/geminiService", () => ({
+jest.mock("../../../src/models", () => ({}));
+jest.mock("../../../src/services/geminiService", () => ({
   embedText: jest.fn(),
   generateJson: jest.fn(),
 }));
 
-const { localRecipe, isRecipeRelevant } = require("../../src/services/recipeSearch");
+const { localRecipe, isRecipeRelevant } = require("../../../src/services/recipeSearch");
 
 describe("Độ liên quan của kết quả tìm kiếm công thức", () => {
   it("không thay món ăn không xác định bằng lẩu bò", () => {

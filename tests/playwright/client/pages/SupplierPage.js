@@ -1,6 +1,8 @@
-class SupplierPage {
+const TestClientBase = require("../base/TestClientBase");
+
+class SupplierPage extends TestClientBase {
   constructor(page) {
-    this.page = page;
+    super(page);
     this.menuLink = page
       .locator("#primaryNav")
       .getByRole("link", { name: "Nhà cung cấp", exact: true });

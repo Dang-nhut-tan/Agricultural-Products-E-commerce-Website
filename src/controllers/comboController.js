@@ -1,13 +1,30 @@
-const { findCombos } = require("../services/comboService");
+const comboService = require("../services/comboService");
 
 async function list(req, res) {
-  res.json({ data: await findCombos() });
+  const combos = await comboService.findCombos();
+
+  return res.json({
+    data: combos,
+  });
 }
 
 async function detail(req, res) {
-  const [combo] = await findCombos({ id: Number(req.params.id) });
-  if (!combo) return res.status(404).json({ message: "Combo không tồn tại hoặc đang tạm hết hàng." });
-  return res.json({ data: combo });
+  const comboId = Number(req.params.id);
+  const combos = await comboService.findCombos({ id: comboId });
+  const combo = combos[0];
+
+  if (!combo) {
+    return res.status(404).json({
+      message: "Combo không tồn tại hoặc đang tạm hết hàng.",
+    });
+  }
+
+  return res.json({
+    data: combo,
+  });
 }
 
-module.exports = { list, detail };
+module.exports = {
+  list: list,
+  detail: detail,
+};

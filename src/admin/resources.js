@@ -85,8 +85,7 @@ const firstValue = (value) => Array.isArray(value) ? value[0] : value;
 const normalizeNewUser = async (request) => {
   if (request.method !== "post") return request;
   const payload = request.payload || {};
-  request.payload = {
-    ...payload,
+  request.payload = Object.assign({}, payload, {
     email: String(firstValue(payload.email) || "").trim(),
     name: String(firstValue(payload.name) || "").trim(),
     phone: String(firstValue(payload.phone) || "").trim(),
@@ -94,7 +93,7 @@ const normalizeNewUser = async (request) => {
     password: String(firstValue(payload.password) || ""),
     role: Number(firstValue(payload.role) ?? 2),
     status: Number(firstValue(payload.status) ?? 1),
-  };
+  });
   return request;
 };
 const singletonSettingActions = {
@@ -106,14 +105,13 @@ const singletonSettingActions = {
 const normalizeShipment = async (request) => {
   if (request.method !== "post") return request;
   const payload = request.payload || {};
-  request.payload = {
-    ...payload,
+  request.payload = Object.assign({}, payload, {
     order_id: Number(firstValue(payload.order_id)),
     shipping_status: Number(firstValue(payload.shipping_status) ?? 0),
     shipping_fee: Number(firstValue(payload.shipping_fee) || 0),
     delivery_time: firstValue(payload.delivery_time) || null,
     tracking_code: String(firstValue(payload.tracking_code) || "").trim() || null,
-  };
+  });
   return request;
 };
 
@@ -211,7 +209,7 @@ const quickComboAction = (component) => ({
     }
     if (!items.length) return { notice: { type: "error", message: "Vui lòng chọn ít nhất một sản phẩm và nhập số lượng." } };
 
-    const productIds = [...new Set(items.map((item) => Number(item.product_id)))];
+    const productIds = Array.from(new Set(items.map((item) => Number(item.product_id))));
     const validProducts = await db.Product.count({ where: { id: productIds, status: 1 } });
     if (validProducts !== productIds.length) {
       return { notice: { type: "error", message: "Có sản phẩm không tồn tại hoặc đã ngừng bán." } };
@@ -495,12 +493,12 @@ const buildResources = (
   .map((modelName) => {
     const isRecipeSource = modelName === "RecipeSource";
     const imageProperty = imagePropertyByModel[modelName];
-    const showProperties = imageProperty ? [
-      imageProperty,
-      ...Object.keys(models[modelName].rawAttributes).filter((property) =>
-        ![imageProperty, "password_hash", "password", "deleted_at", "deletedAt"].includes(property)
-      ),
-    ] : undefined;
+    const visibleModelProperties = Object.keys(models[modelName].rawAttributes).filter((property) =>
+      ![imageProperty, "password_hash", "password", "deleted_at", "deletedAt"].includes(property)
+    );
+    const showProperties = imageProperty
+      ? [imageProperty].concat(visibleModelProperties)
+      : undefined;
     const features = imageProperty ? [
       uploadFeature({
         componentLoader,
@@ -559,51 +557,67 @@ const buildResources = (
       return response;
     };
 
-    return {
-      resource: models[modelName],
-      features,
-      options: {
+    const properties = Object.assign(
+      {},
+      hiddenTechnicalProperties,
+      propertiesByModel[modelName] || {},
+    );
+
+    if (imageProperty) {
+      properties[imageProperty] = {
+        isVisible: { list: true, show: true, edit: false, filter: false },
+      };
+      properties.uploadImage = {
+        label: modelName === "Combo" ? "Chọn ảnh đại diện cho combo" : "Ảnh từ máy tính",
+      };
+      if (modelName === "Combo") {
+        properties.uploadImage.description = "Không bắt buộc. Chọn ảnh rõ món ăn hoặc nguyên liệu có trong combo.";
+      }
+    }
+
+    if (isRecipeSource) {
+      properties.uploadPdf = { label: "Chọn file PDF" };
+    }
+
+    const actions = {};
+    if (readOnlyModels.includes(modelName)) Object.assign(actions, readOnlyActions);
+    if (modelName === "User") actions.new = { before: normalizeNewUser };
+    if (modelName === "Shipment") {
+      actions.new = { before: normalizeShipment };
+      actions.edit = { before: normalizeShipment };
+    }
+    if (modelName === "ComboSetting") Object.assign(actions, singletonSettingActions);
+    if (modelName === "Combo") {
+      actions.list = { after: enrichComboRecords };
+      actions.show = { after: enrichComboRecords };
+      actions.quickNew = quickComboAction(quickComboComponent);
+    }
+    if (isRecipeSource) {
+      actions.new = { after: rebuildAfter };
+      actions.edit = { after: rebuildAfter };
+      actions.delete = { after: rebuildAfter };
+      actions.bulkDelete = { after: rebuildAfter };
+    }
+    Object.assign(actions, relatedActionsByModel[modelName] || {});
+
+    const options = {
       navigation: sidebarHiddenModels.includes(modelName)
         ? false
         : navigationByModel[modelName],
-      ...(listPropertiesByModel[modelName] ? {
-        listProperties: listPropertiesByModel[modelName],
-      } : {}),
-      ...(showProperties ? { showProperties } : {}),
-      properties: {
-        ...hiddenTechnicalProperties,
-        ...(propertiesByModel[modelName] || {}),
-        ...(imageProperty ? {
-          [imageProperty]: {
-            isVisible: { list: true, show: true, edit: false, filter: false },
-          },
-          uploadImage: {
-            label: modelName === "Combo" ? "Chọn ảnh đại diện cho combo" : "Ảnh từ máy tính",
-            ...(modelName === "Combo" ? { description: "Không bắt buộc. Chọn ảnh rõ món ăn hoặc nguyên liệu có trong combo." } : {}),
-          },
-        } : {}),
-        ...(isRecipeSource ? { uploadPdf: { label: "Chọn file PDF" } } : {}),
-      },
-      actions: {
-        ...(readOnlyModels.includes(modelName) ? readOnlyActions : {}),
-        ...(modelName === "User" ? { new: { before: normalizeNewUser } } : {}),
-        ...(modelName === "Shipment" ? {
-          new: { before: normalizeShipment },
-          edit: { before: normalizeShipment },
-        } : {}),
-        ...(modelName === "ComboSetting" ? singletonSettingActions : {}),
-        ...(modelName === "Combo" ? {
-          list: { after: enrichComboRecords },
-          show: { after: enrichComboRecords },
-          quickNew: quickComboAction(quickComboComponent),
-        } : {}),
-        ...(isRecipeSource ? {
-          new: { after: rebuildAfter }, edit: { after: rebuildAfter },
-          delete: { after: rebuildAfter }, bulkDelete: { after: rebuildAfter },
-        } : {}),
-        ...(relatedActionsByModel[modelName] || {}),
-      },
-      },
+      properties: properties,
+      actions: actions,
+    };
+    if (listPropertiesByModel[modelName]) {
+      options.listProperties = listPropertiesByModel[modelName];
+    }
+    if (showProperties) {
+      options.showProperties = showProperties;
+    }
+
+    return {
+      resource: models[modelName],
+      features: features,
+      options: options,
     };
   });
 

@@ -6,10 +6,9 @@ const { randomUser, deleteTestUser } = require("./helpers/testData");
 
 async function registerUser(request, user) {
   return request.post("/api/auth/register", {
-    data: {
-      ...user,
+    data: Object.assign({}, user, {
       passwordConfirmation: user.password,
-    },
+    }),
   });
 }
 

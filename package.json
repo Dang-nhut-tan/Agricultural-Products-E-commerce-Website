@@ -25,8 +25,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest",
-    "test:register": "jest tests/jest/register.test.js",
+    "test": "jest tests/jest",
+    "test:unit:client": "jest tests/jest/client",
+    "test:unit:admin": "jest tests/jest/admin --passWithNoTests",
+    "test:register": "jest tests/jest/client/register.test.js",
     "test:e2e": "playwright test",
     "api:test": "newman run \"api-testing-project/collections/Web Nông Sản API.postman_collection.json\" -e \"api-testing-project/environments/web-nong-san-api.postman_environment.json\" -d \"api-testing-project/data/api-test-data.json\"",
     "test:allure": "yarn allure:clean && yarn test --runInBand && yarn test:e2e && yarn allure:generate",
