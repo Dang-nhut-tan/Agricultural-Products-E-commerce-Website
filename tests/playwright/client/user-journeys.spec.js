@@ -13,6 +13,8 @@ async function registerUser(request, user) {
 }
 
 test.describe("Các hành trình tài khoản và mua sắm của người dùng", () => {
+  test.setTimeout(60_000);
+
   let user;
 
   test.beforeEach(async ({ browserName }) => {
@@ -33,6 +35,75 @@ test.describe("Các hành trình tài khoản và mua sắm của người dùng
 
     await expect(profile.profileView).toContainText(user.name);
     await expect(profile.profileView).toContainText(user.email);
+  });
+
+  test("Người chưa đăng nhập mở trang hồ sơ sẽ được chuyển đến trang đăng nhập", async ({ page }) => {
+    await page.goto("/tai-khoan");
+
+    await expect(page).toHaveURL(/\/dang-nhap$/);
+  });
+
+  test("Người dùng hủy chỉnh sửa hồ sơ và địa chỉ thì dữ liệu không bị thay đổi", async ({ page, request }) => {
+    const auth = new AuthPage(page);
+    const profile = new ProfilePage(page);
+    const response = await registerUser(request, user);
+    expect(response.status()).toBe(201);
+    await request.post("/api/auth/logout");
+    await auth.openLogin();
+    await auth.login(user.email, user.password);
+    await profile.waitUntilReady();
+
+    await profile.openProfileForm();
+    await profile.profileForm.locator('[name="name"]').fill("Tên không được lưu");
+    await profile.cancelProfileChanges();
+    await expect(profile.profileView).toContainText(user.name);
+    await expect(profile.profileView).not.toContainText("Tên không được lưu");
+
+    await profile.openAddressForm();
+    await profile.addressForm.locator('[name="receiver_name"]').fill("Địa chỉ không được lưu");
+    await profile.cancelAddressChanges();
+    await expect(profile.addressForm).toBeHidden();
+    await expect(profile.addressList).not.toContainText("Địa chỉ không được lưu");
+  });
+
+  test("Trang hồ sơ chặn dữ liệu rỗng ở các trường bắt buộc", async ({ page, request }) => {
+    const auth = new AuthPage(page);
+    const profile = new ProfilePage(page);
+    const response = await registerUser(request, user);
+    expect(response.status()).toBe(201);
+    await request.post("/api/auth/logout");
+    await auth.openLogin();
+    await auth.login(user.email, user.password);
+    await profile.waitUntilReady();
+
+    await profile.openProfileForm();
+    const nameInput = profile.profileForm.locator('[name="name"]');
+    await nameInput.fill("");
+    await profile.profileForm.getByRole("button", { name: "Lưu thông tin" }).click();
+    expect(await nameInput.evaluate((input) => input.validity.valueMissing)).toBe(true);
+    await expect(profile.profileForm).toBeVisible();
+
+    await profile.cancelProfileChanges();
+    await profile.openAddressForm();
+    const receiverInput = profile.addressForm.locator('[name="receiver_name"]');
+    await profile.addressForm.getByRole("button", { name: "Lưu địa chỉ" }).click();
+    expect(await receiverInput.evaluate((input) => input.validity.valueMissing)).toBe(true);
+    await expect(profile.addressForm).toBeVisible();
+  });
+
+  test("Người dùng mở lịch sử mua hàng từ trang hồ sơ", async ({ page, request }) => {
+    const auth = new AuthPage(page);
+    const profile = new ProfilePage(page);
+    const response = await registerUser(request, user);
+    expect(response.status()).toBe(201);
+    await request.post("/api/auth/logout");
+    await auth.openLogin();
+    await auth.login(user.email, user.password);
+    await profile.waitUntilReady();
+
+    await expect(profile.orderHistoryLink).toBeVisible();
+    await profile.openOrderHistory();
+    await expect(page).toHaveURL(/\/don-hang$/);
   });
 
   test("Người dùng đăng nhập và cập nhật thông tin cá nhân tại trang hồ sơ", async ({ page, request }) => {

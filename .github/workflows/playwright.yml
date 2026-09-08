@@ -114,3 +114,35 @@ jobs:
       - name: Show backend log on failure
         if: failure()
         run: cat backend.log || true
+
+  deploy-allure:
+    name: Deploy Allure report to GitHub Pages
+    needs: test
+    if: ${{ always() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: read
+    concurrency:
+      group: github-pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download Allure report
+        uses: actions/download-artifact@v5
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Package Allure report for GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: allure-report
+
+      - name: Deploy Allure report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
